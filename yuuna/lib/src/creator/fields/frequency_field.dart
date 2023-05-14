@@ -14,8 +14,7 @@ class FrequencyField extends Field {
       : super(
           uniqueKey: key,
           label: 'Frequency',
-          description: 'Adds freqency of headword for sorting cards.'
-              ' See documentation for required anki plugins.',
+          description: 'Adds freqency of headword for sorting purposes.',
           icon: Icons.insert_chart,
         );
 

@@ -38,7 +38,6 @@ import 'package:yuuna/language.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/pages.dart';
-import 'package:yuuna/src/creator/fields/frequency_field.dart';
 import 'package:yuuna/utils.dart';
 
 /// Schemas used in Isar database.

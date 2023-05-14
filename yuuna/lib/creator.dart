@@ -54,3 +54,4 @@ export 'src/creator/fields/collapsed_meaning_field.dart';
 export 'src/creator/fields/expanded_meaning_field.dart';
 export 'src/creator/fields/hidden_meaning_field.dart';
 export 'src/creator/fields/tags_field.dart';
+export 'src/creator/fields/frequency_field.dart';

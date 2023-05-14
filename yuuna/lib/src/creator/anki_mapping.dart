@@ -5,8 +5,6 @@ import 'package:yuuna/language.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/utils.dart';
 
-import 'package:yuuna/src/creator/fields/frequency_field.dart';
-
 part 'anki_mapping.g.dart';
 
 /// A user-generated mapping to allow customisation of the fields exported from
