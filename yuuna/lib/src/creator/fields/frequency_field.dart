@@ -14,7 +14,7 @@ class FrequencyField extends Field {
       : super(
           uniqueKey: key,
           label: 'Frequency',
-          description: 'Adds freqency of headword for sorting purposes.',
+          description: 'Adds frequency of headword for sorting purposes.',
           icon: Icons.insert_chart,
         );
 
