@@ -14,7 +14,8 @@ class FrequencyField extends Field {
       : super(
           uniqueKey: key,
           label: 'Frequency',
-          description: 'Adds frequency of headword for sorting purposes.',
+          description: 'Adds frequency of headword for sorting purposes,'
+              ' calculated using the harmonic mean.',
           icon: Icons.insert_chart,
         );
 
@@ -67,23 +68,23 @@ class FrequencyField extends Field {
       return '';
     }
 
+    double ret;
+
     switch (sortBy) {
       case SortingMethod.harmonic:
-        return (frequencies.length /
-                frequencies.fold(0, (prev, freq) => (1 / freq) + prev))
-            .round()
-            .toString();
+        ret = frequencies.length /
+            frequencies.fold(0, (prev, freq) => (1 / freq) + prev);
+        break;
       case SortingMethod.min:
-        return frequencies
-            .reduce((f1, f2) => f1 < f2 ? f1 : f2)
-            .round()
-            .toString();
+        ret = frequencies.reduce((f1, f2) => f1 < f2 ? f1 : f2);
+        break;
       case SortingMethod.avg:
-        return (frequencies.fold(0, (prev, freq) => prev + freq.toInt()) /
-                frequencies.length)
-            .round()
-            .toString();
+        ret = frequencies.fold(0, (prev, freq) => prev + freq.toInt()) /
+            frequencies.length;
+        break;
     }
+
+    return ret.round().toString();
   }
 
   @override
