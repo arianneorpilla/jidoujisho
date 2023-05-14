@@ -264,22 +264,23 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
       child: Material(
         color: Colors.transparent,
         child: PopupMenuButton<VoidCallback>(
-            splashRadius: 20,
-            padding: EdgeInsets.zero,
-            tooltip: t.show_options,
-            child: Container(
-              height: 30,
-              width: 30,
-              alignment: Alignment.center,
-              child: Icon(
-                Icons.more_vert,
-                color: theme.iconTheme.color,
-                size: 24,
-              ),
+          splashRadius: 20,
+          padding: EdgeInsets.zero,
+          tooltip: t.show_options,
+          child: Container(
+            height: 30,
+            width: 30,
+            alignment: Alignment.center,
+            child: Icon(
+              Icons.more_vert,
+              color: theme.iconTheme.color,
+              size: 24,
             ),
-            color: Theme.of(context).popupMenuTheme.color,
-            onSelected: (value) => value(),
-            itemBuilder: (context) => getMenuItems(label)),
+          ),
+          color: Theme.of(context).popupMenuTheme.color,
+          onSelected: (value) => value(),
+          itemBuilder: (context) => getMenuItems(label),
+        ),
       ),
     );
   }
@@ -564,24 +565,40 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
                   ),
                 ),
               ),
-              JidoujishoDropdown<Field?>(
-                options: [null, ...globalFields],
-                initialOption: fields.elementAt(index),
-                generateLabel: (field) {
-                  if (field == null) {
-                    return t.field_label_empty;
-                  } else {
-                    return field.label;
-                  }
-                },
-                onChanged: (field) {
-                  if (field == null) {
-                    mappingClone.exportFieldKeys[index] = null;
-                  } else {
-                    mappingClone.exportFieldKeys[index] = field.uniqueKey;
-                  }
-                  setState(() {});
-                },
+              Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  JidoujishoDropdown<Field?>(
+                    options: [null, ...globalFields],
+                    initialOption: fields.elementAt(index),
+                    generateLabel: (field) {
+                      if (field == null) {
+                        return t.field_label_empty;
+                      } else {
+                        return field.label;
+                      }
+                    },
+                    onChanged: (field) {
+                      if (field == null) {
+                        mappingClone.exportFieldKeys[index] = null;
+                      } else {
+                        mappingClone.exportFieldKeys[index] = field.uniqueKey;
+                      }
+                      setState(() {});
+                    },
+                  ),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      border: Border.fromBorderSide(
+                        BorderSide(
+                          width: 0.5,
+                          color: Theme.of(context).unselectedWidgetColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               if (index != modelFields.length - 1) const Space.normal(),
             ],
