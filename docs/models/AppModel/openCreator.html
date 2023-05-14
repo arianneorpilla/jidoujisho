@@ -102,6 +102,7 @@ empty.</p>
   }
 
   _isCreatorOpen = true;
+  _creatorActiveController.add(true);
 
   await Navigator.push(
     _navigatorKey.currentContext!,
@@ -121,6 +122,7 @@ empty.</p>
   );
 
   _isCreatorOpen = false;
+  _creatorActiveController.add(false);
 }</code></pre>
 </section>
 
@@ -165,6 +167,7 @@ empty.</p>
           <li><a href="../../models/AppModel/browserDirectory.html">browserDirectory</a></li>
           <li><a href="../../models/AppModel/cacheManager.html">cacheManager</a></li>
           <li><a href="../../models/AppModel/closeCreatorOnExport.html">closeCreatorOnExport</a></li>
+          <li><a href="../../models/AppModel/creatorActiveStream.html">creatorActiveStream</a></li>
           <li><a href="../../models/AppModel/currentHomeTabIndex.html">currentHomeTabIndex</a></li>
           <li><a href="../../models/AppModel/currentMediaItem.html">currentMediaItem</a></li>
           <li><a href="../../models/AppModel/currentMediaPauseStream.html">currentMediaPauseStream</a></li>
@@ -421,7 +424,7 @@ empty.</p>
 <footer>
   <span class="no-break">
     yuuna
-      2.6.8+82
+      2.6.9+83
   </span>
 
   

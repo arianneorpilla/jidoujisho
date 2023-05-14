@@ -81,7 +81,7 @@
   required InAppWebViewController controller,
 }) async {
   String title = await controller.getTitle() ?? &#39;&#39;;
-  Uri url = (await controller.getUrl())!.removeFragment();
+  Uri url = (await controller.getUrl())!..removeFragment();
 
   MediaItem? item = appModel
       .getMediaTypeHistory(mediaType: mediaType)
@@ -252,7 +252,7 @@ bgImage.substring(5, bgImage.length - 2);
 <footer>
   <span class="no-break">
     yuuna
-      2.6.8+82
+      2.6.9+83
   </span>
 
   

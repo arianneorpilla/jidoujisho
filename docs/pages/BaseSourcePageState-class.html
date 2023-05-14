@@ -125,7 +125,7 @@ implemented to define shortcuts for common lengthy methods across UI code.</p>
 </dt>
 <dd class="inherited">
   Access the global model responsible for app-wide state management without
-listening to state updates. Useful when accessing state from <a href="https://api.flutter.dev/flutter/widgets/State/initState.html">initState</a>.
+listening to state updates. Useful when accessing state from <a href="../pages/BaseSourcePageState/initState.html">initState</a>.
   <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
 
 </dd>
@@ -159,7 +159,7 @@ listening to state updates. Useful when accessing state from <a href="https://ap
 </dt>
 <dd class="inherited">
   Access the global model responsible for creator state management. without
-listening to state updates. Useful when accessing state from <a href="https://api.flutter.dev/flutter/widgets/State/initState.html">initState</a>.
+listening to state updates. Useful when accessing state from <a href="../pages/BaseSourcePageState/initState.html">initState</a>.
   <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
 
 </dd>
@@ -567,29 +567,29 @@ General widget for showing an error or a retry screen.
 
 </dd>
 
-        <dt id="dispose" class="callable inherited">
-  <span class="name"><a href="https://api.flutter.dev/flutter/widgets/State/dispose.html">dispose</a></span><span class="signature">(<wbr>)
+        <dt id="dispose" class="callable">
+  <span class="name"><a href="../pages/BaseSourcePageState/dispose.html">dispose</a></span><span class="signature">(<wbr>)
     <span class="returntype parameter">&#8594; void</span>
   </span>
   
 
 </dt>
-<dd class="inherited">
+<dd>
   Called when this object is removed from the tree permanently.
-  <div class="features"><span class="feature">inherited</span></div>
+  <div class="features"><span class="feature">override</span></div>
 
 </dd>
 
-        <dt id="initState" class="callable inherited">
-  <span class="name"><a href="https://api.flutter.dev/flutter/widgets/State/initState.html">initState</a></span><span class="signature">(<wbr>)
+        <dt id="initState" class="callable">
+  <span class="name"><a href="../pages/BaseSourcePageState/initState.html">initState</a></span><span class="signature">(<wbr>)
     <span class="returntype parameter">&#8594; void</span>
   </span>
   
 
 </dt>
-<dd class="inherited">
+<dd>
   Called when this object is inserted into the tree.
-  <div class="features"><span class="feature">inherited</span></div>
+  <div class="features"><span class="feature">override</span></div>
 
 </dd>
 
@@ -603,6 +603,32 @@ General widget for showing an error or a retry screen.
 <dd class="inherited">
   Invoked when a nonexistent method or property is accessed.
   <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="onCreatorClose" class="callable">
+  <span class="name"><a href="../pages/BaseSourcePageState/onCreatorClose.html">onCreatorClose</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Performs an action after closing the Card Creator.
+  
+
+</dd>
+
+        <dt id="onCreatorOpen" class="callable">
+  <span class="name"><a href="../pages/BaseSourcePageState/onCreatorOpen.html">onCreatorOpen</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Performs an action before opening the Card Creator.
+  
 
 </dd>
 
@@ -937,9 +963,11 @@ tools and by <a href="https://api.flutter.dev/flutter/foundation/DiagnosticsNode
           <li class="inherited"><a href="https://api.flutter.dev/flutter/widgets/State/debugFillProperties.html">debugFillProperties</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/widgets/State/didChangeDependencies.html">didChangeDependencies</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/widgets/State/didUpdateWidget.html">didUpdateWidget</a></li>
-          <li class="inherited"><a href="https://api.flutter.dev/flutter/widgets/State/dispose.html">dispose</a></li>
-          <li class="inherited"><a href="https://api.flutter.dev/flutter/widgets/State/initState.html">initState</a></li>
+          <li><a href="../pages/BaseSourcePageState/dispose.html">dispose</a></li>
+          <li><a href="../pages/BaseSourcePageState/initState.html">initState</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
+          <li><a href="../pages/BaseSourcePageState/onCreatorClose.html">onCreatorClose</a></li>
+          <li><a href="../pages/BaseSourcePageState/onCreatorOpen.html">onCreatorOpen</a></li>
           <li><a href="../pages/BaseSourcePageState/onSearch.html">onSearch</a></li>
           <li class="inherited"><a href="../pages/BasePageState/onShare.html">onShare</a></li>
           <li><a href="../pages/BaseSourcePageState/onSourcePagePop.html">onSourcePagePop</a></li>
@@ -967,7 +995,7 @@ tools and by <a href="https://api.flutter.dev/flutter/foundation/DiagnosticsNode
 <footer>
   <span class="no-break">
     yuuna
-      2.6.8+82
+      2.6.9+83
   </span>
 
   
