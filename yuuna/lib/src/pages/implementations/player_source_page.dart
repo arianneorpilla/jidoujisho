@@ -427,7 +427,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         }
       }
 
-      if (_durationNotifier.value != Duration.zero) {
+      if (_durationNotifier.value != Duration.zero &&
+          _positionNotifier.value != Duration.zero) {
         updateHistory();
       }
     }

@@ -62,6 +62,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
     super.didChangeAppLifecycleState(state);
 
     if (state == AppLifecycleState.resumed) {
+      FocusScope.of(context).unfocus();
       _focusNode.requestFocus();
     }
   }
@@ -91,6 +92,12 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   void clearDictionaryResult() async {
     super.clearDictionaryResult();
     unselectWebViewTextSelection(_controller);
+  }
+
+  @override
+  void onCreatorClose() {
+    _focusNode.unfocus();
+    _focusNode.requestFocus();
   }
 
   @override
@@ -447,6 +454,9 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
 
     switch (messageJson['jidoujisho-message-type']) {
       case 'lookup':
+        FocusScope.of(context).unfocus();
+        _focusNode.requestFocus();
+
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
         int index = messageJson['index'];
@@ -547,9 +557,6 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           mediaSource.setCurrentSentence(sentence.replaceAll('\\n', '\n'));
         } catch (e) {
           clearDictionaryResult();
-        } finally {
-          FocusScope.of(context).unfocus();
-          _focusNode.requestFocus();
         }
 
         break;

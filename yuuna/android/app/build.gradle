@@ -86,15 +86,27 @@ android {
                 } else {
                     newName = "${appName}_${defaultConfig.versionName}.apk"
                 }
+                
+                output.versionCodeOverride = (100 * project.android.defaultConfig.versionCode)
             } else {
                 if (buildType == 'debug') {
                     newName = "${appName}_${defaultConfig.versionName}-${architecture}-debug.apk"
                 } else {
                     newName = "${appName}_${defaultConfig.versionName}-${architecture}.apk"
                 }
-            }
 
-            outputFileName = newName
+                def offset
+                if (architecture == "armeabi") {
+                    offset = 1
+                } else if (architecture == "arm64") {
+                    offset = 2
+                } else if (architecture == "x86_64") {
+                    offset = 3
+                }
+
+                outputFileName = newName
+                output.versionCodeOverride = (100 * project.android.defaultConfig.versionCode) + offset
+            }
         }
     }
 }

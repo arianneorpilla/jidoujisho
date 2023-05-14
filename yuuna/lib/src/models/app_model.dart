@@ -357,6 +357,11 @@ class AppModel with ChangeNotifier {
   final StreamController<void> _playPauseHeadsetActionStreamController =
       StreamController.broadcast();
 
+  /// For listening to changes for whether or not the Card Creator is open.
+  Stream<bool> get creatorActiveStream => _creatorActiveController.stream;
+  final StreamController<bool> _creatorActiveController =
+      StreamController.broadcast();
+
   /// Used to check whether or not the creator is currently in the navigation
   /// stack.
   bool get isCreatorOpen => _isCreatorOpen;
@@ -2257,6 +2262,7 @@ class AppModel with ChangeNotifier {
     }
 
     _isCreatorOpen = true;
+    _creatorActiveController.add(true);
 
     await Navigator.push(
       _navigatorKey.currentContext!,
@@ -2276,6 +2282,7 @@ class AppModel with ChangeNotifier {
     );
 
     _isCreatorOpen = false;
+    _creatorActiveController.add(false);
   }
 
   /// Whether or not the media item should be killed upon exit.

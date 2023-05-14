@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
@@ -28,6 +30,32 @@ abstract class BaseSourcePage extends BasePage {
 /// collection of shared functions and variables. In large part, this was
 /// implemented to define shortcuts for common lengthy methods across UI code.
 class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _creatorActiveStreamSubscription = appModel.creatorActiveStream.listen(
+        (creatorActive) {
+          if (creatorActive) {
+            onCreatorOpen();
+          } else {
+            onCreatorClose();
+          }
+        },
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _creatorActiveStreamSubscription?.cancel();
+    super.dispose();
+  }
+
+  /// Used for listening to when the Card Creator is opened and closed.
+  StreamSubscription<bool>? _creatorActiveStreamSubscription;
+
   /// Allows customisation of dictionary background.
   double get dictionaryBackgroundOpacity => 0.95;
 
@@ -389,4 +417,10 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   void onStash(String searchTerm) {
     appModel.addToStash(terms: [searchTerm]);
   }
+
+  /// Performs an action before opening the Card Creator.
+  void onCreatorOpen() {}
+
+  /// Performs an action after closing the Card Creator.
+  void onCreatorClose() {}
 }

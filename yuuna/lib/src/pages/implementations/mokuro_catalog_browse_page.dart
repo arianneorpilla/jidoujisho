@@ -47,6 +47,8 @@ class _MokuroCatalogBrowsePageState
   void initState() {
     super.initState();
 
+    WidgetsBinding.instance.addObserver(this);
+
     _titleNotifier =
         ValueNotifier<String>(widget.catalog?.name ?? widget.item?.title ?? '');
     _urlNotifier = ValueNotifier<String>(
@@ -59,8 +61,6 @@ class _MokuroCatalogBrowsePageState
     _isMokuroPageFoundNotifier.addListener(() {
       setState(() {});
     });
-
-    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
@@ -70,17 +70,23 @@ class _MokuroCatalogBrowsePageState
   }
 
   @override
+  void onCreatorClose() {
+    _focusNode.unfocus();
+    _focusNode.requestFocus();
+  }
+
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
     if (state == AppLifecycleState.resumed) {
+      FocusScope.of(context).unfocus();
       _focusNode.requestFocus();
     }
   }
 
   AppBar buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.transparent,
       leading: buildBackButton(),
       title: buildTitle(),
       actions: buildActions(),
@@ -575,6 +581,9 @@ document.getElementById('pageIdxDisplay').style.color = 'white';
       case 'lookup':
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
+        FocusScope.of(context).unfocus();
+        _focusNode.requestFocus();
+
         int index = messageJson['index'];
         String text = messageJson['text'];
         int x = messageJson['x'];
@@ -672,9 +681,6 @@ document.getElementById('pageIdxDisplay').style.color = 'white';
           mediaSource.setExtraData(imageUrl);
         } catch (e) {
           clearDictionaryResult();
-        } finally {
-          FocusScope.of(context).unfocus();
-          _focusNode.requestFocus();
         }
 
         break;

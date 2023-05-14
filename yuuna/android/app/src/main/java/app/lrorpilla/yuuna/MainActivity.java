@@ -45,6 +45,7 @@ public class MainActivity extends AudioServiceActivity {
         // Create the example data
         mAnkiDroid = new AnkiDroidHelper(context);
     }
+    
 
     private boolean deckExists(String deck) {
         Long deckId = mAnkiDroid.findDeckIdByName(deck);
