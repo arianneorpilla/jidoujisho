@@ -551,19 +551,19 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
                 unselectWebViewTextSelection(_controller);
               }
             }
+
+            JidoujishoTextSelection selection =
+                appModel.targetLanguage.getSentenceFromParagraph(
+              paragraph: text,
+              index: index,
+              startOffset: offsetIndex,
+              endOffset: offsetIndex + length,
+            );
+
+            mediaSource.setCurrentSentence(
+              selection: selection,
+            );
           });
-
-          JidoujishoTextSelection selection =
-              appModel.targetLanguage.getSentenceFromParagraph(
-            paragraph: text,
-            index: index,
-            startOffset: offsetIndex,
-            endOffset: offsetIndex + length,
-          );
-
-          mediaSource.setCurrentSentence(
-            selection: selection,
-          );
         } catch (e) {
           clearDictionaryResult();
         }
