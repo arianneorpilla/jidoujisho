@@ -552,11 +552,10 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
                               creatorFieldValues: CreatorFieldValues(
                                 textValues: {
                                   SentenceField.instance: selection.text,
-                                  ClozeBeforeField.instance:
-                                      selection.textBefore,
-                                  ClozeInsideField.instance:
-                                      selection.textInside,
-                                  ClozeAfterField.instance: selection.textAfter,
+                                  TermField.instance: '',
+                                  ClozeBeforeField.instance: '',
+                                  ClozeInsideField.instance: '',
+                                  ClozeAfterField.instance: '',
                                 },
                               ),
                               killOnPop: false,

@@ -409,18 +409,6 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
     source.clearCurrentSentence();
   }
 
-  void creatorAction(String text) async {
-    await appModel.openCreator(
-      creatorFieldValues: CreatorFieldValues(
-        textValues: {
-          SentenceField.instance: text,
-        },
-      ),
-      killOnPop: false,
-      ref: ref,
-    );
-  }
-
   @override
   MaterialTextSelectionControls get selectionControls =>
       JidoujishoTextSelectionControls(
@@ -432,9 +420,10 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
             creatorFieldValues: CreatorFieldValues(
               textValues: {
                 SentenceField.instance: selection.text,
-                ClozeBeforeField.instance: selection.textBefore,
-                ClozeInsideField.instance: selection.textInside,
-                ClozeAfterField.instance: selection.textAfter,
+                TermField.instance: '',
+                ClozeBeforeField.instance: '',
+                ClozeInsideField.instance: '',
+                ClozeAfterField.instance: '',
               },
             ),
             killOnPop: false,
