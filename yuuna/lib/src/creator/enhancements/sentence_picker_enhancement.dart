@@ -43,11 +43,16 @@ class SentencePickerEnhancement extends Enhancement {
       exampleSentences: appModel.targetLanguage
           .getSentences(sourceText)
           .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
           .toList(),
       onSelect: (selection) {
-        creatorModel.getFieldController(field).text = selection
-            .join(appModel.targetLanguage.isSpaceDelimited ? ' ' : '')
-            .trim();
+        creatorModel.setSentenceAndCloze(
+          JidoujishoTextSelection(
+            text: selection
+                .join(appModel.targetLanguage.isSpaceDelimited ? ' ' : '')
+                .trim(),
+          ),
+        );
       },
     );
   }
