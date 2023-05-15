@@ -65,9 +65,11 @@ class TatoebaExampleSentencesEnhancement extends Enhancement {
           return;
         }
 
-        for (String result in selection) {
-          creatorModel.appendSentenceAndCloze(result);
-        }
+        String currentSentence =
+            creatorModel.getFieldController(SentenceField.instance).text;
+
+        creatorModel.getFieldController(SentenceField.instance).text =
+            '${currentSentence.trim()}\n\n${selection.join('\n\n')}'.trim();
       },
     );
   }

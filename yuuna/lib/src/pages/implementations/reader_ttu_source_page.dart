@@ -530,12 +530,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
             searchTerm: searchTerm,
             position: position,
           ).then((_) async {
-            int length = isSpaceDelimited
-                ? appModel.targetLanguage
-                    .textToWords(searchTerm)
-                    .firstWhere((e) => e.trim().isNotEmpty)
-                    .length
-                : max(1, currentResult?.bestLength ?? 0);
+            int length = max(1, currentResult?.bestLength ?? 0);
 
             if (mediaSource.highlightOnTap) {
               await selectTextOnwards(

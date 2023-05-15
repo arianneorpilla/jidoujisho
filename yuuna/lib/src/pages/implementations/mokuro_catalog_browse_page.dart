@@ -656,12 +656,7 @@ document.getElementById('pageIdxDisplay').style.color = 'white';
             searchTerm: searchTerm,
             position: position,
           ).then((_) {
-            int length = isSpaceDelimited
-                ? appModel.targetLanguage
-                    .textToWords(searchTerm)
-                    .firstWhere((e) => e.trim().isNotEmpty)
-                    .length
-                : max(1, currentResult?.bestLength ?? 0);
+            int length = max(1, currentResult?.bestLength ?? 0);
 
             if (mediaSource.highlightOnTap) {
               selectTextOnwards(

@@ -187,7 +187,7 @@ class _ReaderClipboardPageState<ReaderClipboardPage>
       if (index != 0 && text.substring(index).startsWith(loneSurrogate)) {
         index = index - 1;
       }
-      bool isSpaceDelimited = appModel.targetLanguage.isSpaceDelimited;
+
       int whitespaceOffset = searchTerm.length - searchTerm.trimLeft().length;
       int offsetIndex = index + whitespaceOffset;
       int length = appModel.targetLanguage
@@ -204,12 +204,7 @@ class _ReaderClipboardPageState<ReaderClipboardPage>
         searchTerm: searchTerm,
         position: position,
       ).then((result) {
-        int length = isSpaceDelimited
-            ? appModel.targetLanguage
-                .textToWords(searchTerm)
-                .firstWhere((e) => e.trim().isNotEmpty)
-                .length
-            : max(1, currentResult?.bestLength ?? 0);
+        int length = max(1, currentResult?.bestLength ?? 0);
 
         controller.setSelection(offsetIndex, offsetIndex + length);
 

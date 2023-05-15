@@ -295,7 +295,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
       if (index != 0 && text.substring(index).startsWith(loneSurrogate)) {
         index = index - 1;
       }
-      bool isSpaceDelimited = appModel.targetLanguage.isSpaceDelimited;
+
       int whitespaceOffset = searchTerm.length - searchTerm.trimLeft().length;
       int offsetIndex =
           appModel.targetLanguage.getStartingIndex(text: text, index: index) +
@@ -314,12 +314,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
         searchTerm: searchTerm,
         position: position,
       ).then((result) {
-        int length = isSpaceDelimited
-            ? appModel.targetLanguage
-                .textToWords(searchTerm)
-                .firstWhere((e) => e.trim().isNotEmpty)
-                .length
-            : max(1, currentResult?.bestLength ?? 0);
+        int length = max(1, currentResult?.bestLength ?? 0);
 
         controller.setSelection(offsetIndex, offsetIndex + length);
 

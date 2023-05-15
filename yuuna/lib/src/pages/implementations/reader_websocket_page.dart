@@ -187,7 +187,7 @@ class _ReaderWebsocketPageState
       if (index != 0 && text.substring(index).startsWith(loneSurrogate)) {
         index = index - 1;
       }
-      bool isSpaceDelimited = appModel.targetLanguage.isSpaceDelimited;
+
       String searchTerm = appModel.targetLanguage.getSearchTermFromIndex(
         text: text,
         index: index,
@@ -210,12 +210,7 @@ class _ReaderWebsocketPageState
         searchTerm: searchTerm,
         position: position,
       ).then((result) {
-        int length = isSpaceDelimited
-            ? appModel.targetLanguage
-                .textToWords(searchTerm)
-                .firstWhere((e) => e.trim().isNotEmpty)
-                .length
-            : max(1, currentResult?.bestLength ?? 0);
+        int length = max(1, currentResult?.bestLength ?? 0);
 
         controller.setSelection(offsetIndex, offsetIndex + length);
 
