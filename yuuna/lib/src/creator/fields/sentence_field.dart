@@ -36,7 +36,7 @@ class SentenceField extends Field {
     required String? dictionaryName,
   }) {
     if (creatorJustLaunched) {
-      return appModel.getCurrentSentence();
+      return appModel.getCurrentSentence().text.trim();
     } else {
       return null;
     }

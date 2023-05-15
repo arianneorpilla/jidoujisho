@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:yuuna/i18n/strings.g.dart';
+import 'package:yuuna/utils.dart';
 
 /// Used for handling text selection.
 typedef OffsetValue = void Function(int start, int end);
@@ -14,15 +14,16 @@ typedef OffsetValue = void Function(int start, int end);
 class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
   /// Define text selection controls with custom behaviour.
   JidoujishoTextSelectionControls({
-    required this.searchAction,
     required this.stashAction,
     required this.shareAction,
     required this.allowCopy,
     required this.allowCut,
     required this.allowPaste,
     required this.allowSelectAll,
+    this.searchAction,
     this.handleColor,
     this.creatorAction,
+    this.sentenceAction,
   });
 
   /// Allows the text handles to be customized.
@@ -33,10 +34,13 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
       : materialTextSelectionControls;
 
   /// Behaviour for the creator action.
-  final Function(String)? creatorAction;
+  final Function(JidoujishoTextSelection)? sentenceAction;
+
+  /// Behaviour for the creator action.
+  final Function(JidoujishoTextSelection)? creatorAction;
 
   /// Behaviour for the search action.
-  final Function(String) searchAction;
+  final Function(String)? searchAction;
 
   /// Behaviour for the share action.
   final Function(String) shareAction;
@@ -124,6 +128,36 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
       creatorAction: (creatorAction != null)
           ? () {
               creatorAction?.call(
+                JidoujishoTextSelection(
+                  text: delegate.textEditingValue.text,
+                  range: TextRange(
+                    start: delegate.textEditingValue.selection.start,
+                    end: delegate.textEditingValue.selection.end,
+                  ),
+                ),
+              );
+
+              delegate.hideToolbar();
+            }
+          : null,
+      sentenceAction: (sentenceAction != null)
+          ? () {
+              sentenceAction?.call(
+                JidoujishoTextSelection(
+                  text: delegate.textEditingValue.text,
+                  range: TextRange(
+                    start: delegate.textEditingValue.selection.start,
+                    end: delegate.textEditingValue.selection.end,
+                  ),
+                ),
+              );
+
+              delegate.hideToolbar();
+            }
+          : null,
+      searchAction: (searchAction != null)
+          ? () {
+              searchAction?.call(
                 delegate.textEditingValue.selection
                     .textInside(delegate.textEditingValue.text),
               );
@@ -131,14 +165,6 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
               delegate.hideToolbar();
             }
           : null,
-      searchAction: () {
-        searchAction(
-          delegate.textEditingValue.selection
-              .textInside(delegate.textEditingValue.text),
-        );
-
-        delegate.hideToolbar();
-      },
       stashAction: () {
         stashAction(
           delegate.textEditingValue.selection
@@ -178,6 +204,7 @@ class JidoujishoSelectionToolbar extends StatefulWidget {
     required this.clipboardStatus,
     required this.creatorAction,
     required this.searchAction,
+    required this.sentenceAction,
     required this.stashAction,
     required this.shareAction,
     required this.handleCopy,
@@ -197,7 +224,10 @@ class JidoujishoSelectionToolbar extends StatefulWidget {
   final ClipboardStatusNotifier clipboardStatus;
 
   /// Behaviour for the custom action.
-  final Function() searchAction;
+  final Function()? searchAction;
+
+  /// Behaviour for the custom action.
+  final Function()? sentenceAction;
 
   /// Behaviour for the stash action.
   final Function() stashAction;
@@ -266,10 +296,16 @@ class _JidoujishoSelectionToolbarState
 
     final List<_TextSelectionToolbarItemData> itemDatas =
         <_TextSelectionToolbarItemData>[
-      _TextSelectionToolbarItemData(
-        onPressed: widget.searchAction,
-        label: t.search,
-      ),
+      if (widget.sentenceAction != null)
+        _TextSelectionToolbarItemData(
+          onPressed: widget.sentenceAction,
+          label: t.cloze,
+        ),
+      if (widget.searchAction != null)
+        _TextSelectionToolbarItemData(
+          onPressed: widget.searchAction,
+          label: t.search,
+        ),
       _TextSelectionToolbarItemData(
         onPressed: widget.stashAction,
         label: t.stash,

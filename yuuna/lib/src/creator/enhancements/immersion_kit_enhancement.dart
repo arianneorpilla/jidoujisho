@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 import 'package:http/http.dart' as http;
+import 'package:yuuna/utils.dart';
 
 /// An entity used to neatly return and organise results fetched from
 /// ImmersionKit.
@@ -42,6 +43,27 @@ class ImmersionKitResult {
 
   /// Index of the words to highlight.
   List<int> wordIndices;
+
+  /// Get the range for this result for cloze purposes.
+  TextRange get range {
+    if (wordIndices.isEmpty) {
+      return TextRange.empty;
+    } else {
+      int length = wordList[wordIndices.first].length;
+      String beforeFirst = wordList.sublist(0, wordIndices.first).join();
+
+      return TextRange(
+        start: beforeFirst.length,
+        end: beforeFirst.length + length,
+      );
+    }
+  }
+
+  /// Get a selection with this result's text and range.
+  JidoujishoTextSelection get selection => JidoujishoTextSelection(
+        text: text,
+        range: range,
+      );
 }
 
 /// An enhancement used to fetch example sentences via Massif.
@@ -101,10 +123,13 @@ class ImmersionKitEnhancement extends Enhancement {
           return;
         }
 
-        creatorModel.getFieldController(SentenceField.instance).text =
-            selection.map((result) => result.text).join('\n\n');
+        ImmersionKitResult firstResult = selection.removeAt(0);
+        creatorModel.setSentenceAndCloze(firstResult.selection);
+        for (ImmersionKitResult result in selection) {
+          creatorModel.appendSentenceAndCloze(result.text);
+        }
 
-        if (selection.first.imageUrl.isNotEmpty) {
+        if (firstResult.imageUrl.isNotEmpty) {
           await ImageField.instance.setImages(
             cause: cause,
             appModel: appModel,
@@ -114,7 +139,7 @@ class ImmersionKitEnhancement extends Enhancement {
               String imagePath = '${directory.path}/image';
               File imageFile = File(imagePath);
               File networkFile = await DefaultCacheManager()
-                  .getSingleFile(selection.first.imageUrl);
+                  .getSingleFile(firstResult.imageUrl);
               networkFile.copySync(imageFile.path);
 
               return [NetworkToFileImage(file: imageFile)];
@@ -122,7 +147,7 @@ class ImmersionKitEnhancement extends Enhancement {
           );
         }
 
-        if (selection.first.audioUrl.isNotEmpty) {
+        if (firstResult.audioUrl.isNotEmpty) {
           await AudioSentenceField.instance.setAudio(
             appModel: appModel,
             creatorModel: creatorModel,
@@ -133,7 +158,7 @@ class ImmersionKitEnhancement extends Enhancement {
               String audioPath = '${directory.path}/audio.mp3';
               File audioFile = File(audioPath);
               File networkFile = await DefaultCacheManager()
-                  .getSingleFile(selection.first.audioUrl);
+                  .getSingleFile(firstResult.audioUrl);
               networkFile.copySync(audioFile.path);
 
               return audioFile;
@@ -146,12 +171,9 @@ class ImmersionKitEnhancement extends Enhancement {
           return;
         }
 
-        String currentSentence =
-            creatorModel.getFieldController(SentenceField.instance).text;
-
-        creatorModel.getFieldController(SentenceField.instance).text =
-            '${currentSentence.trim()}\n\n${selection.map((result) => result.text).join('\n\n')}'
-                .trim();
+        for (ImmersionKitResult result in selection) {
+          creatorModel.appendSentenceAndCloze(result.text);
+        }
       },
     );
   }

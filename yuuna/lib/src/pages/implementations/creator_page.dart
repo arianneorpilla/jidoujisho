@@ -971,6 +971,39 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     }
   }
 
+  void onSentenceSearch(JidoujishoTextSelection selection) async {
+    String searchTerm = selection.textInside;
+
+    String term = creatorModel.getFieldController(TermField.instance).text;
+    String afterSearchTerm = searchTerm;
+    await appModel.openRecursiveDictionarySearch(
+      searchTerm: searchTerm,
+      onUpdateQuery: (query) {
+        afterSearchTerm = query;
+      },
+      killOnPop: false,
+    );
+
+    String afterTerm = creatorModel.getFieldController(TermField.instance).text;
+
+    if (afterSearchTerm == searchTerm) {
+      if (term != afterTerm) {
+        creatorModel.setSentenceAndCloze(selection);
+      }
+    }
+  }
+
+  MaterialTextSelectionControls get sentenceSelectionControls =>
+      JidoujishoTextSelectionControls(
+        sentenceAction: onSentenceSearch,
+        stashAction: onStash,
+        shareAction: onShare,
+        allowCopy: true,
+        allowSelectAll: true,
+        allowCut: true,
+        allowPaste: true,
+      );
+
   Widget buildTextField({
     required AnkiMapping mapping,
     required Field field,
@@ -1010,7 +1043,6 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
           labelText: field.getLocalisedLabel(appModel),
           hintText: field.getLocalisedDescription(appModel),
         ),
-        selectionControls: selectionControls,
       );
     } else {
       return TextFormField(
@@ -1036,7 +1068,9 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
               : null,
           labelText: field.getLocalisedLabel(appModel),
         ),
-        selectionControls: selectionControls,
+        selectionControls: field is SentenceField
+            ? sentenceSelectionControls
+            : selectionControls,
       );
     }
   }
@@ -1081,7 +1115,6 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
         labelText: t.add_field,
         hintText: t.add_field_hint,
       ),
-      selectionControls: selectionControls,
     );
   }
 

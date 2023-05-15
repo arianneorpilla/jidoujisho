@@ -3,7 +3,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/language.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/utils.dart';
 
 /// Defines common characteristics required for tuning locale and text
 /// segmentation behaviour for different languages. Override the variables
@@ -113,24 +115,36 @@ abstract class Language {
   /// Given paragraph text and an index, yield the part of the text such that
   /// the result is a sentence. Different languages may decide to use different
   /// delimiters.
-  String getSentenceFromParagraph({
+  JidoujishoTextSelection getSentenceFromParagraph({
     required String paragraph,
     required int index,
+    required int startOffset,
+    required int endOffset,
   }) {
     List<String> sentences = getSentences(paragraph);
     int currentIndex = 0;
     String sentenceToReturn = paragraph;
 
+    int sentenceLength = 0;
+
     for (String sentence in sentences) {
       sentenceToReturn = sentence;
+      sentenceLength = sentence.length;
 
-      currentIndex += sentenceToReturn.length;
+      currentIndex += sentenceLength;
       if (currentIndex > index) {
         break;
       }
     }
 
-    return sentenceToReturn.trim();
+    TextRange range = TextRange(
+      start: sentenceLength - currentIndex + startOffset,
+      end: sentenceLength - currentIndex + endOffset,
+    );
+    return JidoujishoTextSelection(
+      text: sentenceToReturn,
+      range: range,
+    );
   }
 
   /// Returns a list of sentences for a block of text.
@@ -143,12 +157,7 @@ abstract class Language {
       return [text];
     }
 
-    List<String> sentences =
-        matches.map((match) => match.group(0) ?? '').toList();
-
-    if (matches.last.end != text.length) {
-      sentences.add(text.substring(matches.last.end));
-    }
+    List<String> sentences = regex.allMatchesWithSep(text);
 
     return sentences;
   }

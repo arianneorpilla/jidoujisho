@@ -20,10 +20,10 @@ class MassifSentencesDialogPage extends BasePage {
   final List<MassifResult> exampleSentences;
 
   /// Select action callback.
-  final Function(List<String>) onSelect;
+  final Function(List<MassifResult>) onSelect;
 
   /// Append action callback.
-  final Function(List<String>) onAppend;
+  final Function(List<MassifResult>) onAppend;
 
   @override
   BasePageState createState() => _MassifSentencesDialogPage();
@@ -159,12 +159,12 @@ class _MassifSentencesDialogPage
     );
   }
 
-  List<String> get selection {
-    List<String> results = [];
+  List<MassifResult> get selection {
+    List<MassifResult> results = [];
 
     widget.exampleSentences.forEachIndexed((index, result) {
       if (_valuesSelected[index]!.value) {
-        results.add(result.text);
+        results.add(result);
       }
     });
 

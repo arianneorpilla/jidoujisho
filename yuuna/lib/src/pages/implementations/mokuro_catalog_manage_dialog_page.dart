@@ -69,6 +69,7 @@ class _MokuroCatalogManageDialogPageState
           context: context,
           builder: (context) => const MokuroCatalogEditDialogPage(),
         );
+        setState(() {});
       },
     );
   }

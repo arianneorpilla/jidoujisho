@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/utils.dart';
 
 /// A global [Provider] for the card creator.
 final creatorProvider = ChangeNotifierProvider<CreatorModel>((ref) {
@@ -70,6 +71,20 @@ class CreatorModel with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Set the sentence and cloze fields with a new selection.
+  void setSentenceAndCloze(JidoujishoTextSelection selection) {
+    getFieldController(SentenceField.instance).text = selection.text;
+    getFieldController(ClozeBeforeField.instance).text = selection.textBefore;
+    getFieldController(ClozeInsideField.instance).text = selection.textInside;
+    getFieldController(ClozeAfterField.instance).text = selection.textAfter;
+  }
+
+  /// Append the appropriate fields for cloze compatibility.
+  void appendSentenceAndCloze(String sentence) {
+    getFieldController(SentenceField.instance).text += '\n\n$sentence';
+    getFieldController(ClozeAfterField.instance).text += '\n\n$sentence';
+  }
+
   /// Get the [TextEditingController] for a particular field.
   TextEditingController getFieldController(Field field) {
     return _controllersByField[field]!;
@@ -107,6 +122,14 @@ class CreatorModel with ChangeNotifier {
       } else {
         getFieldController(field).clear();
       }
+
+      if (field is SentenceField) {
+        getFieldController(SentenceField.instance).clear();
+        getFieldController(ClozeBeforeField.instance).clear();
+        getFieldController(ClozeInsideField.instance).clear();
+        getFieldController(ClozeAfterField.instance).clear();
+      }
+
       if (notify) {
         notifyListeners();
       }

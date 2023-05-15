@@ -177,17 +177,25 @@ abstract class MediaSource {
   /// Supplies a sentence that can be used for the sentence field when making
   /// a card while this source is active. Can be set with [setCurrentSentence]
   /// and [clearCurrentSentence] in a source page.
-  String get currentSentence => _currentSentence;
-  String _currentSentence = '';
+  JidoujishoTextSelection get currentSentence => _currentSentence;
+  JidoujishoTextSelection _currentSentence = JidoujishoTextSelection(
+    text: '',
+  );
 
   /// Update the current sentence.
-  void setCurrentSentence(String sentence) {
-    _currentSentence = sentence;
+  void setCurrentSentence({
+    required JidoujishoTextSelection selection,
+  }) {
+    debugPrint(selection.toString());
+    _currentSentence = selection;
   }
 
   /// Clear the current sentence.
   void clearCurrentSentence() {
-    _currentSentence = '';
+    debugPrint('Selection Cleared');
+    _currentSentence = JidoujishoTextSelection(
+      text: '',
+    );
   }
 
   /// This is used to hold data for generating images and audio.

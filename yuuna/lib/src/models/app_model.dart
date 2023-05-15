@@ -71,6 +71,9 @@ final List<Field> globalFields = List<Field>.unmodifiable(
     FuriganaField.instance,
     FrequencyField.instance,
     ContextField.instance,
+    ClozeBeforeField.instance,
+    ClozeInsideField.instance,
+    ClozeAfterField.instance,
     ExpandedMeaningField.instance,
     CollapsedMeaningField.instance,
     HiddenMeaningField.instance,
@@ -575,13 +578,15 @@ class AppModel with ChangeNotifier {
       );
 
   /// Get the sentence to be used by the [SentenceField] upon card creation.
-  String getCurrentSentence() {
+  JidoujishoTextSelection getCurrentSentence() {
     if (isMediaOpen) {
       return _currentMediaSource!.currentSentence;
     } else {
       MediaType mediaType = mediaTypes.values.toList()[currentHomeTabIndex];
       if (mediaType is DictionaryMediaType) {
-        return '';
+        return JidoujishoTextSelection(
+          text: '',
+        );
       } else {
         return (_currentMediaSource ??
                 (getCurrentSourceForMediaType(mediaType: mediaType)))
@@ -832,7 +837,6 @@ class AppModel with ChangeNotifier {
       ],
       NotesField.instance: [
         ClearFieldEnhancement(field: NotesField.instance),
-        TextSegmentationEnhancement(field: NotesField.instance),
         OpenStashEnhancement(field: NotesField.instance),
         PopFromStashEnhancement(field: NotesField.instance),
       ],
@@ -842,11 +846,9 @@ class AppModel with ChangeNotifier {
         CropImageEnhancement(),
         PickImageEnhancement(),
         CameraEnhancement(),
-        ImageSearchTermPickerEnhancement(),
       ],
       MeaningField.instance: [
         ClearFieldEnhancement(field: MeaningField.instance),
-        TextSegmentationEnhancement(field: MeaningField.instance),
         SentencePickerEnhancement(field: MeaningField.instance),
       ],
       ReadingField.instance: [
@@ -854,7 +856,7 @@ class AppModel with ChangeNotifier {
       ],
       SentenceField.instance: [
         ClearFieldEnhancement(field: SentenceField.instance),
-        TextSegmentationEnhancement(field: SentenceField.instance),
+        TextSegmentationEnhancement(),
         SentencePickerEnhancement(field: SentenceField.instance),
         OpenStashEnhancement(field: SentenceField.instance),
         PopFromStashEnhancement(field: SentenceField.instance),
@@ -870,7 +872,6 @@ class AppModel with ChangeNotifier {
       ],
       ContextField.instance: [
         ClearFieldEnhancement(field: ContextField.instance),
-        TextSegmentationEnhancement(field: ContextField.instance),
         OpenStashEnhancement(field: ContextField.instance),
         PopFromStashEnhancement(field: ContextField.instance),
       ],
@@ -885,22 +886,28 @@ class AppModel with ChangeNotifier {
       ],
       CollapsedMeaningField.instance: [
         ClearFieldEnhancement(field: CollapsedMeaningField.instance),
-        TextSegmentationEnhancement(field: CollapsedMeaningField.instance),
         SentencePickerEnhancement(field: CollapsedMeaningField.instance),
       ],
       ExpandedMeaningField.instance: [
         ClearFieldEnhancement(field: ExpandedMeaningField.instance),
-        TextSegmentationEnhancement(field: ExpandedMeaningField.instance),
         SentencePickerEnhancement(field: ExpandedMeaningField.instance),
       ],
       HiddenMeaningField.instance: [
         ClearFieldEnhancement(field: HiddenMeaningField.instance),
-        TextSegmentationEnhancement(field: HiddenMeaningField.instance),
         SentencePickerEnhancement(field: HiddenMeaningField.instance),
       ],
       TagsField.instance: [
         ClearFieldEnhancement(field: TagsField.instance),
         SaveTagsEnhancement(),
+      ],
+      ClozeBeforeField.instance: [
+        ClearFieldEnhancement(field: ClozeBeforeField.instance),
+      ],
+      ClozeAfterField.instance: [
+        ClearFieldEnhancement(field: ClozeAfterField.instance),
+      ],
+      ClozeInsideField.instance: [
+        ClearFieldEnhancement(field: ClozeInsideField.instance),
       ],
     };
 
@@ -1543,13 +1550,13 @@ class AppModel with ChangeNotifier {
   }
 
   /// Add a selected catalog to the database.
-  void addCatalog(MokuroCatalog catalog) async {
-    _database.writeTxnSync(() {
+  Future<void> addCatalog(MokuroCatalog catalog) async {
+    await _database.writeTxn(() async {
       if (catalog.id != null &&
           _database.mokuroCatalogs.getSync(catalog.id!) != null) {
-        _database.mokuroCatalogs.deleteSync(catalog.id!);
+        await _database.mokuroCatalogs.delete(catalog.id!);
       }
-      _database.mokuroCatalogs.putSync(catalog);
+      await _database.mokuroCatalogs.put(catalog);
     });
   }
 
@@ -2439,6 +2446,7 @@ class AppModel with ChangeNotifier {
   Future<void> openRecursiveDictionarySearch({
     required String searchTerm,
     required bool killOnPop,
+    Function(String)? onUpdateQuery,
   }) async {
     _currentMediaPauseController.add(null);
 
@@ -2453,6 +2461,7 @@ class AppModel with ChangeNotifier {
             RecursiveDictionaryPage(
           searchTerm: searchTerm,
           killOnPop: killOnPop,
+          onUpdateQuery: onUpdateQuery,
         ),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
@@ -2479,8 +2488,8 @@ class AppModel with ChangeNotifier {
   Future<void> openTextSegmentationDialog({
     required String sourceText,
     List<String>? segmentedText,
-    Function(String, List<String>)? onSelect,
-    Function(String, List<String>)? onSearch,
+    Function(JidoujishoTextSelection)? onSelect,
+    Function(JidoujishoTextSelection)? onSearch,
   }) async {
     if (sourceText.trim().isEmpty) {
       return;
@@ -2522,8 +2531,8 @@ class AppModel with ChangeNotifier {
   /// returned from Massif.
   Future<void> openMassifSentenceDialog({
     required List<MassifResult> exampleSentences,
-    required Function(List<String>) onSelect,
-    required Function(List<String>) onAppend,
+    required Function(List<MassifResult>) onSelect,
+    required Function(List<MassifResult>) onAppend,
   }) async {
     await showDialog(
       context: _navigatorKey.currentContext!,

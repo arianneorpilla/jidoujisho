@@ -4,24 +4,25 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
 
-/// Returns information about the current context in human-readable format
-class ContextField extends Field {
+/// Highlighted text in a sentence.
+class ClozeInsideField extends Field {
   /// Initialise this field with the predetermined and hardset values.
-  ContextField._privateConstructor()
+  ClozeInsideField._privateConstructor()
       : super(
           uniqueKey: key,
-          label: 'Context',
-          description: 'Name of current source media.',
-          icon: Icons.perm_media,
+          label: 'Cloze Inside',
+          description: 'Highlighted text in a sentence.',
+          icon: Icons.dehaze,
         );
 
   /// Get the singleton instance of this field.
-  static ContextField get instance => _instance;
+  static ClozeInsideField get instance => _instance;
 
-  static final ContextField _instance = ContextField._privateConstructor();
+  static final ClozeInsideField _instance =
+      ClozeInsideField._privateConstructor();
 
   /// The unique key for this field.
-  static const String key = 'context';
+  static const String key = 'cloze_inside';
 
   @override
   String? onCreatorOpenAction({
@@ -33,10 +34,10 @@ class ContextField extends Field {
     required bool creatorJustLaunched,
     required String? dictionaryName,
   }) {
-    if (appModel.currentMediaItem != null) {
-      return appModel.currentMediaItem!.title;
+    if (creatorJustLaunched) {
+      return appModel.getCurrentSentence().textInside;
     } else {
-      return '';
+      return null;
     }
   }
 }

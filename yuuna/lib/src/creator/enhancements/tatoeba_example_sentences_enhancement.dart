@@ -6,6 +6,7 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/language.dart';
 import 'package:yuuna/models.dart';
 import 'package:http/http.dart' as http;
+import 'package:yuuna/utils.dart';
 
 /// An enhancement used to fetch example sentences via Tatoeba.
 class TatoebaExampleSentencesEnhancement extends Enhancement {
@@ -52,19 +53,21 @@ class TatoebaExampleSentencesEnhancement extends Enhancement {
           return;
         }
 
-        creatorModel.getFieldController(SentenceField.instance).text =
-            selection.join('\n\n');
+        String firstResult = selection.removeAt(0);
+        creatorModel
+            .setSentenceAndCloze(JidoujishoTextSelection(text: firstResult));
+        for (String result in selection) {
+          creatorModel.appendSentenceAndCloze(result);
+        }
       },
       onAppend: (selection) {
         if (selection.isEmpty) {
           return;
         }
 
-        String currentSentence =
-            creatorModel.getFieldController(SentenceField.instance).text;
-
-        creatorModel.getFieldController(SentenceField.instance).text =
-            '${currentSentence.trim()}\n\n${selection.join('\n\n')}'.trim();
+        for (String result in selection) {
+          creatorModel.appendSentenceAndCloze(result);
+        }
       },
     );
   }

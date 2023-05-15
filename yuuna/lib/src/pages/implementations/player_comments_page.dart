@@ -263,8 +263,6 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
       return;
     }
 
-    source.setCurrentSentence('$author:\n$text');
-
     double x = details.globalPosition.dx;
     double y = details.globalPosition.dy;
 
@@ -324,6 +322,14 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
             : max(1, currentResult?.bestLength ?? 0);
 
         controller.setSelection(offsetIndex, offsetIndex + length);
+
+        final range = TextRange(start: offsetIndex, end: offsetIndex + length);
+        source.setCurrentSentence(
+          selection: JidoujishoTextSelection(
+            text: text,
+            range: range,
+          ),
+        );
       });
     } else {
       clearDictionaryResult();
@@ -397,8 +403,9 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
                       ),
                       selectionControls: JidoujishoTextSelectionControls(
                         searchAction: (selection) async {
-                          source
-                              .setCurrentSentence('${comment.author}:\n$text');
+                          source.setCurrentSentence(
+                            selection: JidoujishoTextSelection(text: text),
+                          );
                           await appModel.openRecursiveDictionarySearch(
                             searchTerm: selection,
                             killOnPop: false,
@@ -408,7 +415,18 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
                         stashAction: onStash,
                         shareAction: onShare,
                         creatorAction: (selection) async {
-                          launchCreator(term: '', sentence: selection);
+                          await appModel.openCreator(
+                            creatorFieldValues: CreatorFieldValues(
+                              textValues: {
+                                SentenceField.instance: selection.text,
+                                ClozeBeforeField.instance: selection.textBefore,
+                                ClozeInsideField.instance: selection.textInside,
+                                ClozeAfterField.instance: selection.textAfter,
+                              },
+                            ),
+                            killOnPop: false,
+                            ref: ref,
+                          );
                         },
                         allowCopy: true,
                         allowSelectAll: false,
@@ -419,8 +437,8 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
                       style: const TextStyle(fontSize: 18),
                     ),
                   ),
-                  buildSentencePickerButton('${comment.author}:\n$text'),
-                  buildCardCreatorButton('${comment.author}:\n$text'),
+                  buildSentencePickerButton(text),
+                  buildCardCreatorButton(text),
                 ],
               ),
               const Space.normal(),
@@ -527,22 +545,20 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
         tooltip: t.card_creator,
         icon: Icons.note_add,
         onTap: () async {
-          launchCreator(term: '', sentence: message);
+          await appModel.openCreator(
+            creatorFieldValues: CreatorFieldValues(
+              textValues: {
+                SentenceField.instance: message,
+                ClozeAfterField.instance: '',
+                ClozeBeforeField.instance: '',
+                ClozeInsideField.instance: '',
+              },
+            ),
+            killOnPop: false,
+            ref: ref,
+          );
         },
       ),
-    );
-  }
-
-  void launchCreator({required String term, required String sentence}) async {
-    await appModel.openCreator(
-      creatorFieldValues: CreatorFieldValues(
-        textValues: {
-          SentenceField.instance: sentence,
-          TermField.instance: term,
-        },
-      ),
-      killOnPop: false,
-      ref: ref,
     );
   }
 }

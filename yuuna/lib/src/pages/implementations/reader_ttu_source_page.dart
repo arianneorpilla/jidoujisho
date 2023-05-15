@@ -479,6 +479,8 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
           }
         }
 
+        text = text.replaceAll('\\n', '\n');
+
         if (text.isEmpty || index == -1) {
           clearDictionaryResult();
           mediaSource.clearCurrentSentence();
@@ -550,11 +552,18 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
               }
             }
           });
-          String sentence = appModel.targetLanguage.getSentenceFromParagraph(
+
+          JidoujishoTextSelection selection =
+              appModel.targetLanguage.getSentenceFromParagraph(
             paragraph: text,
             index: index,
+            startOffset: offsetIndex,
+            endOffset: offsetIndex + length,
           );
-          mediaSource.setCurrentSentence(sentence.replaceAll('\\n', '\n'));
+
+          mediaSource.setCurrentSentence(
+            selection: selection,
+          );
         } catch (e) {
           clearDictionaryResult();
         }

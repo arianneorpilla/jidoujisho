@@ -119,6 +119,9 @@ class AnkiMapping {
       CollapsedMeaningField.key: {0: ClearFieldEnhancement.key},
       ExpandedMeaningField.key: {0: ClearFieldEnhancement.key},
       HiddenMeaningField.key: {0: ClearFieldEnhancement.key},
+      ClozeBeforeField.key: {0: ClearFieldEnhancement.key},
+      ClozeAfterField.key: {0: ClearFieldEnhancement.key},
+      ClozeInsideField.key: {0: ClearFieldEnhancement.key},
     },
     'en-US': {
       SentenceField.key: {
@@ -166,6 +169,9 @@ class AnkiMapping {
       CollapsedMeaningField.key: {0: ClearFieldEnhancement.key},
       ExpandedMeaningField.key: {0: ClearFieldEnhancement.key},
       HiddenMeaningField.key: {0: ClearFieldEnhancement.key},
+      ClozeBeforeField.key: {0: ClearFieldEnhancement.key},
+      ClozeAfterField.key: {0: ClearFieldEnhancement.key},
+      ClozeInsideField.key: {0: ClearFieldEnhancement.key},
     },
   };
 

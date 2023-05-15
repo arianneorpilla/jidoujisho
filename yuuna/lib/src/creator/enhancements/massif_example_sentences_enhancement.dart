@@ -6,12 +6,14 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/language.dart';
 import 'package:yuuna/models.dart';
 import 'package:http/http.dart' as http;
+import 'package:yuuna/utils.dart';
 
 /// An entity used to neatly return and organise results fetched from Massif.
 class MassifResult {
   /// Define a result with the given parameters.
   MassifResult({
     required this.text,
+    required this.range,
     required this.source,
     required this.spans,
   });
@@ -24,6 +26,15 @@ class MassifResult {
 
   /// A formatted widget which may contain highlighted text.
   List<InlineSpan> spans;
+
+  /// First selected range.
+  TextRange range;
+
+  /// Get a selection with this result's text and range.
+  JidoujishoTextSelection get selection => JidoujishoTextSelection(
+        text: text,
+        range: range,
+      );
 }
 
 /// An enhancement used to fetch example sentences via Massif.
@@ -71,19 +82,20 @@ class MassifExampleSentencesEnhancement extends Enhancement {
           return;
         }
 
-        creatorModel.getFieldController(SentenceField.instance).text =
-            selection.join('\n\n');
+        MassifResult firstResult = selection.removeAt(0);
+        creatorModel.setSentenceAndCloze(firstResult.selection);
+        for (MassifResult result in selection) {
+          creatorModel.appendSentenceAndCloze(result.text);
+        }
       },
       onAppend: (selection) {
         if (selection.isEmpty) {
           return;
         }
 
-        String currentSentence =
-            creatorModel.getFieldController(SentenceField.instance).text;
-
-        creatorModel.getFieldController(SentenceField.instance).text =
-            '${currentSentence.trim()}\n\n${selection.join('\n\n')}'.trim();
+        for (MassifResult result in selection) {
+          creatorModel.appendSentenceAndCloze(result.text);
+        }
       },
     );
   }
@@ -130,14 +142,26 @@ class MassifExampleSentencesEnhancement extends Enhancement {
         List<String> splitWithDelims =
             highlightedText.splitWithDelim(RegExp(r'<em>(.*?)<\/em>'));
 
+        final buffer = StringBuffer();
+        TextRange range = TextRange.empty;
+
+        bool firstFound = false;
         for (String splitWithDelim in splitWithDelims) {
           if (splitWithDelim.startsWith('<em>') &&
               splitWithDelim.endsWith('</em>')) {
+            String text =
+                splitWithDelim.replaceAll('<em>', '').replaceAll('</em>', '');
+            if (!firstFound) {
+              firstFound = true;
+              range = TextRange(
+                start: buffer.length,
+                end: buffer.length + text.length,
+              );
+            }
+
             spans.add(
               TextSpan(
-                text: splitWithDelim
-                    .replaceAll('<em>', '')
-                    .replaceAll('</em>', ''),
+                text: text,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.primary,
@@ -146,6 +170,7 @@ class MassifExampleSentencesEnhancement extends Enhancement {
               ),
             );
           } else {
+            buffer.write(splitWithDelim);
             spans.add(
               TextSpan(
                 text: splitWithDelim,
@@ -160,6 +185,7 @@ class MassifExampleSentencesEnhancement extends Enhancement {
 
         MassifResult result = MassifResult(
           text: text,
+          range: range,
           source: source,
           spans: spans,
         );

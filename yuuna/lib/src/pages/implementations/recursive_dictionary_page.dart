@@ -14,6 +14,7 @@ class RecursiveDictionaryPage extends BasePage {
   const RecursiveDictionaryPage({
     required this.searchTerm,
     required this.killOnPop,
+    this.onUpdateQuery,
     super.key,
   });
 
@@ -22,6 +23,9 @@ class RecursiveDictionaryPage extends BasePage {
 
   /// If true, popping will exit the application.
   final bool killOnPop;
+
+  /// Used to track changes to the query.
+  final Function(String)? onUpdateQuery;
 
   @override
   BasePageState<RecursiveDictionaryPage> createState() =>
@@ -182,6 +186,7 @@ class _RecursiveDictionaryPageState
       return;
     } else {
       lastQuery = query;
+      widget.onUpdateQuery?.call(query);
     }
 
     if (mounted) {
@@ -272,6 +277,15 @@ class _RecursiveDictionaryPageState
     );
   }
 
+  @override
+  void onSearch(String searchTerm, {String? sentence = ''}) async {
+    await appModel.openRecursiveDictionarySearch(
+      searchTerm: searchTerm,
+      killOnPop: false,
+      onUpdateQuery: widget.onUpdateQuery,
+    );
+  }
+
   Widget buildSegmentButton() {
     return FloatingSearchBarAction(
       showIfOpened: true,
@@ -279,16 +293,19 @@ class _RecursiveDictionaryPageState
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
         tooltip: t.text_segmentation,
         icon: Icons.account_tree,
-        onTap: () {
-          appModel.openTextSegmentationDialog(
+        onTap: () async {
+          await appModel.openTextSegmentationDialog(
             sourceText: _controller.query,
-            onSearch: (selection, items) async {
+            onSearch: (selection) async {
               await appModel.openRecursiveDictionarySearch(
-                searchTerm: selection,
+                searchTerm: selection.textInside,
                 killOnPop: false,
+                onUpdateQuery: widget.onUpdateQuery,
               );
             },
           );
+
+          widget.onUpdateQuery?.call(_controller.query);
         },
       ),
     );

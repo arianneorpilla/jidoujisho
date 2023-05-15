@@ -8,8 +8,9 @@ import 'package:yuuna/utils.dart';
 /// An enhancement used to pick an appropriate term from a text field easily.
 class TextSegmentationEnhancement extends Enhancement {
   /// Initialise this enhancement with the hardset parameters.
-  TextSegmentationEnhancement({required super.field})
+  TextSegmentationEnhancement()
       : super(
+          field: SentenceField.instance,
           uniqueKey: key,
           label: 'Text Segmentation',
           description: 'Search or select a new term from segmented text.',
@@ -39,16 +40,35 @@ class TextSegmentationEnhancement extends Enhancement {
       return;
     }
 
-    appModel.openTextSegmentationDialog(
+    await appModel.openTextSegmentationDialog(
       sourceText: sourceText,
-      onSearch: (selection, items) {
-        appModel.openRecursiveDictionarySearch(
-          searchTerm: selection,
+      onSearch: (selection) async {
+        String searchTerm = selection.textInside;
+
+        String term = creatorModel.getFieldController(TermField.instance).text;
+        String afterSearchTerm = searchTerm;
+        await appModel.openRecursiveDictionarySearch(
+          searchTerm: searchTerm,
+          onUpdateQuery: (query) {
+            afterSearchTerm = query;
+          },
           killOnPop: false,
         );
+
+        String afterTerm =
+            creatorModel.getFieldController(TermField.instance).text;
+
+        if (afterSearchTerm == searchTerm) {
+          if (term != afterTerm) {
+            creatorModel.setSentenceAndCloze(selection);
+          }
+        }
       },
-      onSelect: (selection, items) {
-        creatorModel.getFieldController(TermField.instance).text = selection;
+      onSelect: (selection) {
+        creatorModel.setSentenceAndCloze(selection);
+        creatorModel.getFieldController(TermField.instance).text =
+            selection.textInside;
+
         Navigator.pop(context);
       },
     );

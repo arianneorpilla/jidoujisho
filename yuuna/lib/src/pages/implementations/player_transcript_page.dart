@@ -569,8 +569,6 @@ class _PlayerTranscriptPageState
       return;
     }
 
-    appModel.currentMediaSource?.setCurrentSentence(text);
-
     double x = details.globalPosition.dx;
     double y = details.globalPosition.dy;
 
@@ -636,6 +634,14 @@ class _PlayerTranscriptPageState
             : max(1, currentResult?.bestLength ?? 0);
 
         controller.setSelection(offsetIndex, offsetIndex + length);
+        final range = TextRange(start: offsetIndex, end: offsetIndex + length);
+
+        appModel.currentMediaSource?.setCurrentSentence(
+          selection: JidoujishoTextSelection(
+            text: text,
+            range: range,
+          ),
+        );
       });
     } else {
       clearDictionaryResult();
@@ -782,8 +788,13 @@ class _PlayerTranscriptPageState
                                   (appModel.currentMediaSource
                                           as PlayerMediaSource)
                                       .setTranscriptSubtitle(subtitle);
+
                                   appModel.currentMediaSource
-                                      ?.setCurrentSentence(subtitleText);
+                                      ?.setCurrentSentence(
+                                    selection: JidoujishoTextSelection(
+                                      text: subtitleText,
+                                    ),
+                                  );
                                   await appModel.openRecursiveDictionarySearch(
                                     searchTerm: selection,
                                     killOnPop: false,
@@ -797,7 +808,25 @@ class _PlayerTranscriptPageState
                                   (appModel.currentMediaSource
                                           as PlayerMediaSource)
                                       .setTranscriptSubtitle(subtitle);
-                                  launchCreator(term: '', sentence: selection);
+                                  dialogSmartPause();
+
+                                  await appModel.openCreator(
+                                    creatorFieldValues: CreatorFieldValues(
+                                      textValues: {
+                                        SentenceField.instance: selection.text,
+                                        ClozeBeforeField.instance:
+                                            selection.textBefore,
+                                        ClozeInsideField.instance:
+                                            selection.textInside,
+                                        ClozeAfterField.instance:
+                                            selection.textAfter,
+                                      },
+                                    ),
+                                    killOnPop: false,
+                                    ref: ref,
+                                  );
+
+                                  dialogSmartResume();
                                 },
                                 allowCopy: true,
                                 allowSelectAll: false,
@@ -874,27 +903,25 @@ class _PlayerTranscriptPageState
           (appModel.currentMediaSource as PlayerMediaSource)
               .setTranscriptSubtitle(subtitle);
 
-          launchCreator(term: '', sentence: message);
+          dialogSmartPause();
+
+          await appModel.openCreator(
+            creatorFieldValues: CreatorFieldValues(
+              textValues: {
+                SentenceField.instance: message,
+                ClozeAfterField.instance: '',
+                ClozeBeforeField.instance: '',
+                ClozeInsideField.instance: '',
+              },
+            ),
+            killOnPop: false,
+            ref: ref,
+          );
+
+          dialogSmartResume();
         },
       ),
     );
-  }
-
-  void launchCreator({required String term, required String sentence}) async {
-    dialogSmartPause();
-
-    await appModel.openCreator(
-      creatorFieldValues: CreatorFieldValues(
-        textValues: {
-          SentenceField.instance: sentence,
-          TermField.instance: term,
-        },
-      ),
-      killOnPop: false,
-      ref: ref,
-    );
-
-    dialogSmartResume();
   }
 
   Widget buildAlignButton(int index) {

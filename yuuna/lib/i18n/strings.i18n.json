@@ -387,6 +387,7 @@
     "find_previous": "Find Previous",
     "shadowing_mode": "Shadowing Mode",
     "display_settings": "Display Settings",
+    "cloze": "Cloze",
     "retrying_in": {
         "seconds": {
           "one": "Retrying in $n second...",

@@ -24,10 +24,10 @@ class TextSegmentationDialogPage extends BasePage {
   final List<String> segmentedText;
 
   /// The callback to be called for a selection to extract from the text.
-  final Function(String, List<String>)? onSelect;
+  final Function(JidoujishoTextSelection)? onSelect;
 
   /// The callback to be called for a selection to perform a search on.
-  final Function(String, List<String>)? onSearch;
+  final Function(JidoujishoTextSelection)? onSearch;
 
   @override
   BasePageState createState() => _TextSegmentationDialogPage();
@@ -80,7 +80,40 @@ class _TextSegmentationDialogPage
     widget.segmentedText.forEachIndexed((index, segment) {
       Widget widget = GestureDetector(
         onTap: () {
+          /// Algorithm for deselecting values that are not adjacent trues to
+          /// the newly selected index.
+
           _valuesSelected[index]!.value = !_valuesSelected[index]!.value;
+
+          bool rightDeselectFlag = false;
+          for (int i = index; i < _valuesSelected.length; i++) {
+            if (rightDeselectFlag) {
+              _valuesSelected[i]!.value = false;
+              continue;
+            }
+
+            if (_valuesSelected[i]!.value) {
+              continue;
+            } else {
+              _valuesSelected[i]!.value = false;
+              rightDeselectFlag = true;
+            }
+          }
+
+          bool leftDeselectFlag = false;
+          for (int i = index; i >= 0; i--) {
+            if (leftDeselectFlag) {
+              _valuesSelected[i]!.value = false;
+              continue;
+            }
+
+            if (_valuesSelected[i]!.value) {
+              continue;
+            } else {
+              _valuesSelected[i]!.value = false;
+              leftDeselectFlag = true;
+            }
+          }
         },
         child: ValueListenableBuilder<bool>(
           valueListenable: _valuesSelected[index]!,
@@ -145,32 +178,28 @@ class _TextSegmentationDialogPage
     );
   }
 
-  String get selection {
+  JidoujishoTextSelection get selection {
     StringBuffer buffer = StringBuffer();
+    int? start;
+    int? end;
 
-    widget.segmentedText.forEachIndexed((index, segment) {
-      if (_valuesSelected[index]!.value) {
-        buffer.write(segment);
-
-        if (appModel.targetLanguage.isSpaceDelimited) {
-          buffer.write(' ');
-        }
+    for (int i = 0; i < _valuesSelected.length; i++) {
+      if (_valuesSelected[i]!.value) {
+        start ??= buffer.length;
+        end = buffer.length + widget.segmentedText[i].length;
       }
-    });
+      buffer.write(widget.segmentedText[i]);
+    }
 
-    return buffer.toString().trim();
-  }
+    TextRange range = TextRange.empty;
+    if (start != null && end != null) {
+      range = TextRange(start: start, end: end);
+    }
 
-  List<String> get selectedItems {
-    List<String> items = [];
-
-    widget.segmentedText.forEachIndexed((index, segment) {
-      if (_valuesSelected[index]!.value) {
-        items.add(segment);
-      }
-    });
-
-    return items;
+    return JidoujishoTextSelection(
+      text: widget.sourceText,
+      range: range,
+    );
   }
 
   void executeStash() {
@@ -185,18 +214,10 @@ class _TextSegmentationDialogPage
   }
 
   void executeSearch() {
-    if (selection.isEmpty) {
-      widget.onSearch?.call(widget.sourceText, selectedItems);
-    } else {
-      widget.onSearch?.call(selection, selectedItems);
-    }
+    widget.onSearch?.call(selection);
   }
 
   void executeSelect() {
-    if (selection.isEmpty) {
-      widget.onSelect?.call(widget.sourceText, selectedItems);
-    } else {
-      widget.onSelect?.call(selection, selectedItems);
-    }
+    widget.onSelect?.call(selection);
   }
 }

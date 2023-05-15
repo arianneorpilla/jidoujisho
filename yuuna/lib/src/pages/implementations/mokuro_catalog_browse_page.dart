@@ -588,9 +588,10 @@ document.getElementById('pageIdxDisplay').style.color = 'white';
         String text = messageJson['text'];
         int x = messageJson['x'];
         int y = messageJson['y'];
-        String sentence = messageJson['sentence'];
         String? imageUrl = messageJson['imageUrl'];
         String nextLine = messageJson['nextLine'];
+        int rawIndex = messageJson['rawIndex'];
+        String rawText = messageJson['rawText'];
 
         late JidoujishoPopupPosition position;
         if (MediaQuery.of(context).orientation == Orientation.portrait) {
@@ -671,13 +672,47 @@ document.getElementById('pageIdxDisplay').style.color = 'white';
                 whitespaceOffset: whitespaceOffset,
                 isSpaceDelimited: isSpaceDelimited,
               );
+
+              final range = TextRange(start: rawIndex, end: rawIndex + length);
+
+              final rawSelection = JidoujishoTextSelection(
+                text: rawText,
+                range: range,
+              );
+
+              final sb = StringBuffer();
+              sb.write(rawSelection.textBefore
+                  .split('\n')
+                  .map((e) => e.trim())
+                  .join());
+
+              int finalStart = sb.length;
+
+              sb.write(rawSelection.textInside
+                  .split('\n')
+                  .map((e) => e.trim())
+                  .join());
+
+              int finalEnd = sb.length;
+              sb.write(rawSelection.textAfter
+                  .split('\n')
+                  .map((e) => e.trim())
+                  .join());
+
+              String finalText = sb.toString();
+
+              TextRange finalRange =
+                  TextRange(start: finalStart, end: finalEnd);
+
+              mediaSource.setCurrentSentence(
+                selection: JidoujishoTextSelection(
+                  text: finalText,
+                  range: finalRange,
+                ),
+              );
             }
           });
 
-          String sanitizedSentence =
-              sentence.split('\n').map((e) => e.trim()).join();
-
-          mediaSource.setCurrentSentence(sanitizedSentence);
           mediaSource.setExtraData(imageUrl);
         } catch (e) {
           clearDictionaryResult();
@@ -732,6 +767,8 @@ function tapToSelect(e) {
         "y": e.clientY,
         "sentence": "",
         "nextLine": "",
+        "rawIndex": 0,
+        "rawText": "",
 			}));
     return;
   }
@@ -745,12 +782,19 @@ function tapToSelect(e) {
         "y": e.clientY,
         "sentence": "",
         "nextLine": "",
+        "rawIndex": 0,
+        "rawText": "",
 			}));
     return;
   }
 
+  var lineNumber = 0;
   var lastTextBox = e.target.closest('.textBox');
-  
+  for (var i = 0; i < lastTextBox.children.length; i++) {
+    if (lastTextBox.children[i] === e.target) {
+      lineNumber = i;
+    }
+  } 
   var pageContainer = e.target.closest('.pageContainer');
   var backgroundStyle = pageContainer.style.backgroundImage;
   var imageUrl = backgroundStyle.substring(5, backgroundStyle.length - 2);
@@ -769,6 +813,8 @@ function tapToSelect(e) {
         "y": e.clientY,
         "sentence": "",
         "nextLine": "",
+        "rawIndex": 0,
+        "rawText": "",
 			}));
     return;
   }
@@ -857,6 +903,20 @@ function tapToSelect(e) {
   if (nextElementSibling) {
     nextLine = nextElementSibling.textContent;
   }
+
+  var rawText = "";
+  for (var i = 0; i < lastTextBox.children.length; i++) {
+    rawText += lastTextBox.children[i].textContent;
+  }
+  var rawIndex = 0;
+  for (var i = 0; i < lastTextBox.children.length; i++) {
+    if (i == lineNumber) {
+      rawIndex += index;
+      break;
+    } else {
+      rawIndex += lastTextBox.children[i].textContent.length;
+    }
+  } 
   
   var character = text[index];
   if (character) {
@@ -869,6 +929,8 @@ function tapToSelect(e) {
       "sentence": sentence,
       "imageUrl": imageUrl,
       "nextLine": nextLine,
+      "rawIndex": rawIndex,
+      "rawText": rawText,
     }));
     console.log(character);
   } else {
@@ -881,6 +943,8 @@ function tapToSelect(e) {
       "sentence": sentence,
       "imageUrl": imageUrl,
       "nextLine": nextLine,
+      "rawIndex": 0,
+      "rawText": "",
     }));
   }
 }

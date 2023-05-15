@@ -231,8 +231,12 @@ class ReaderMokuroSource extends ReaderMediaSource {
     }
 
     String filePath = filePaths.first;
-    String basename = path.basename(filePath);
+    String fileBasename = path.basename(filePath);
+
     String directory = path.dirname(filePath);
+    String directoryBasename = path.basename(directory);
+
+    String parentDirectory = path.dirname(directory);
 
     appModel.setLastPickedDirectory(
       type: ReaderMediaType.instance,
@@ -247,7 +251,8 @@ class ReaderMokuroSource extends ReaderMediaSource {
         ),
       ),
       initialUrlRequest: URLRequest(
-        url: Uri.parse('file://$directory/${Uri.encodeComponent(basename)}'),
+        url: Uri.parse(
+            'file://$parentDirectory/${Uri.encodeComponent(directoryBasename)}/${Uri.encodeComponent(fileBasename)}'),
       ),
       onLoadStop: (controller, url) async {
         MediaItem? item = await generateMediaItemFromWebView(

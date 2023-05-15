@@ -374,11 +374,6 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
         searchTerm: searchTerm,
         position: position,
       ).then((result) {
-        source.setCurrentSentence(
-          appModel.targetLanguage
-              .getSentenceFromParagraph(paragraph: text, index: index),
-        );
-
         int length = isSpaceDelimited
             ? appModel.targetLanguage
                 .textToWords(searchTerm)
@@ -387,6 +382,17 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
             : max(1, currentResult?.bestLength ?? 0);
 
         controller.setSelection(offsetIndex, offsetIndex + length);
+        JidoujishoTextSelection selection =
+            appModel.targetLanguage.getSentenceFromParagraph(
+          paragraph: text,
+          index: index,
+          startOffset: offsetIndex,
+          endOffset: offsetIndex + length,
+        );
+
+        source.setCurrentSentence(
+          selection: selection,
+        );
       });
     } else {
       clearDictionaryResult();
@@ -421,7 +427,20 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
         searchAction: onSearch,
         stashAction: onStash,
         shareAction: onShare,
-        creatorAction: creatorAction,
+        creatorAction: (selection) async {
+          await appModel.openCreator(
+            creatorFieldValues: CreatorFieldValues(
+              textValues: {
+                SentenceField.instance: selection.text,
+                ClozeBeforeField.instance: selection.textBefore,
+                ClozeInsideField.instance: selection.textInside,
+                ClozeAfterField.instance: selection.textAfter,
+              },
+            ),
+            killOnPop: false,
+            ref: ref,
+          );
+        },
         allowCopy: true,
         allowSelectAll: false,
         allowCut: true,

@@ -372,7 +372,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       }
 
       if (!_transcriptOpenNotifier.value) {
-        widget.source.setCurrentSentence(sentence);
+        widget.source.setCurrentSentence(
+          selection: JidoujishoTextSelection(
+            text: sentence,
+          ),
+        );
       }
 
       if (_currentSubtitle.value != newSubtitle) {
@@ -744,7 +748,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       });
     } finally {
       (widget.source as PlayerMediaSource).clearTranscriptSubtitle();
-      widget.source.setCurrentSentence(_currentSubtitle.value?.data ?? '');
+      widget.source.setCurrentSentence(
+        selection: JidoujishoTextSelection(
+          text: _currentSubtitle.value?.data ?? '',
+        ),
+      );
       _transcriptOpenNotifier.value = false;
     }
 
@@ -1241,8 +1249,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             });
           } finally {
             widget.source.setShouldGenerateAudio(value: true);
-            widget.source
-                .setCurrentSentence(_currentSubtitle.value?.data ?? '');
+            widget.source.setCurrentSentence(
+              selection: JidoujishoTextSelection(
+                text: _currentSubtitle.value?.data ?? '',
+              ),
+            );
           }
 
           await Future.delayed(const Duration(milliseconds: 5), () {});
@@ -2009,6 +2020,14 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           : max(1, currentResult?.bestLength ?? 0);
 
       _selectableTextController.setSelection(offsetIndex, offsetIndex + length);
+      final range = TextRange(start: offsetIndex, end: offsetIndex + length);
+
+      source.setCurrentSentence(
+        selection: JidoujishoTextSelection(
+          text: text,
+          range: range,
+        ),
+      );
     });
   }
 
@@ -2060,7 +2079,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       }
 
       if (!_transcriptOpenNotifier.value) {
-        widget.source.setCurrentSentence(sentence);
+        source.setCurrentSentence(
+          selection: JidoujishoTextSelection(
+            text: sentence,
+          ),
+        );
       }
     } else {
       widget.source.clearCurrentSentence();

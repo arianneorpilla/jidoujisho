@@ -160,8 +160,6 @@ class _ReaderWebsocketPageState
       return;
     }
 
-    source.setCurrentSentence(text);
-
     double x = details.globalPosition.dx;
     double y = details.globalPosition.dy;
 
@@ -220,6 +218,14 @@ class _ReaderWebsocketPageState
             : max(1, currentResult?.bestLength ?? 0);
 
         controller.setSelection(offsetIndex, offsetIndex + length);
+
+        final range = TextRange(start: offsetIndex, end: offsetIndex + length);
+        source.setCurrentSentence(
+          selection: JidoujishoTextSelection(
+            text: text,
+            range: range,
+          ),
+        );
       });
     } else {
       clearDictionaryResult();
@@ -254,7 +260,9 @@ class _ReaderWebsocketPageState
                   ),
                   selectionControls: JidoujishoTextSelectionControls(
                     searchAction: (selection) async {
-                      source.setCurrentSentence(message);
+                      source.setCurrentSentence(
+                        selection: JidoujishoTextSelection(text: message),
+                      );
                       await appModel.openRecursiveDictionarySearch(
                         searchTerm: selection,
                         killOnPop: false,
@@ -264,7 +272,18 @@ class _ReaderWebsocketPageState
                     shareAction: onShare,
                     stashAction: onStash,
                     creatorAction: (selection) async {
-                      launchCreator(term: '', sentence: selection);
+                      await appModel.openCreator(
+                        creatorFieldValues: CreatorFieldValues(
+                          textValues: {
+                            SentenceField.instance: selection.text,
+                            ClozeBeforeField.instance: selection.textBefore,
+                            ClozeInsideField.instance: selection.textInside,
+                            ClozeAfterField.instance: selection.textAfter,
+                          },
+                        ),
+                        killOnPop: false,
+                        ref: ref,
+                      );
                     },
                     allowCopy: true,
                     allowSelectAll: false,
@@ -332,22 +351,20 @@ class _ReaderWebsocketPageState
         tooltip: t.card_creator,
         icon: Icons.note_add,
         onTap: () async {
-          launchCreator(term: '', sentence: message);
+          await appModel.openCreator(
+            creatorFieldValues: CreatorFieldValues(
+              textValues: {
+                SentenceField.instance: message,
+                ClozeAfterField.instance: '',
+                ClozeBeforeField.instance: '',
+                ClozeInsideField.instance: '',
+              },
+            ),
+            killOnPop: false,
+            ref: ref,
+          );
         },
       ),
-    );
-  }
-
-  void launchCreator({required String term, required String sentence}) async {
-    await appModel.openCreator(
-      creatorFieldValues: CreatorFieldValues(
-        textValues: {
-          SentenceField.instance: sentence,
-          TermField.instance: term,
-        },
-      ),
-      killOnPop: false,
-      ref: ref,
     );
   }
 }

@@ -4,24 +4,26 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
 
-/// Returns information about the current context in human-readable format
-class ContextField extends Field {
+/// Text after highlighted text in a sentence.
+class ClozeAfterField extends Field {
   /// Initialise this field with the predetermined and hardset values.
-  ContextField._privateConstructor()
+  ClozeAfterField._privateConstructor()
       : super(
           uniqueKey: key,
-          label: 'Context',
-          description: 'Name of current source media.',
-          icon: Icons.perm_media,
+          label: 'Cloze After',
+          description: 'Text after highlighted text in a sentence. '
+              'Empty if nothing is highlighted.',
+          icon: Icons.keyboard_double_arrow_right,
         );
 
   /// Get the singleton instance of this field.
-  static ContextField get instance => _instance;
+  static ClozeAfterField get instance => _instance;
 
-  static final ContextField _instance = ContextField._privateConstructor();
+  static final ClozeAfterField _instance =
+      ClozeAfterField._privateConstructor();
 
   /// The unique key for this field.
-  static const String key = 'context';
+  static const String key = 'cloze_after';
 
   @override
   String? onCreatorOpenAction({
@@ -33,10 +35,10 @@ class ContextField extends Field {
     required bool creatorJustLaunched,
     required String? dictionaryName,
   }) {
-    if (appModel.currentMediaItem != null) {
-      return appModel.currentMediaItem!.title;
+    if (creatorJustLaunched) {
+      return appModel.getCurrentSentence().textAfter.trimRight();
     } else {
-      return '';
+      return null;
     }
   }
 }

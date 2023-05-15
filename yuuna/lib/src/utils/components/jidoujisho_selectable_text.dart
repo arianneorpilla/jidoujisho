@@ -138,6 +138,7 @@ class JidoujishoSelectableTextController {
     }
 
     assert(start <= end);
+
     selection = TextSelection(
       baseOffset: start,
       extentOffset: end,
