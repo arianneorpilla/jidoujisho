@@ -355,6 +355,17 @@ class AppModel with ChangeNotifier {
   final StreamController<void> _currentMediaPauseController =
       StreamController.broadcast();
 
+  /// For listening to searches made inside the Card Creator.
+  Stream<void> get cardCreatorRecursiveSearchStream =>
+      _cardCreatorRecursiveSearchStreamController.stream;
+  final StreamController<void> _cardCreatorRecursiveSearchStreamController =
+      StreamController.broadcast();
+
+  /// Broadcast that a search was made in the Card Creator
+  void notifyRecursiveSearch() {
+    _cardCreatorRecursiveSearchStreamController.add(null);
+  }
+
   /// Allows actions to be performed upon Play/Pause on headset buttons.
   Stream<void> get playPauseHeadsetActionStream =>
       _playPauseHeadsetActionStreamController.stream;
@@ -957,6 +968,57 @@ class AppModel with ChangeNotifier {
           order: 0,
         ));
       });
+    } else {
+      AnkiMapping standardProfile = _database.ankiMappings
+          .where()
+          .labelEqualTo(AnkiMapping.standardProfileName)
+          .findFirstSync()!;
+      if (standardProfile.model != AnkiMapping.standardModelName) {
+        String newLabel = 'Legacy Standard';
+        int attempts = 1;
+
+        while (_database.ankiMappings
+            .where()
+            .labelEqualTo(newLabel)
+            .findAllSync()
+            .isNotEmpty) {
+          attempts += 1;
+          newLabel = 'Legacy Standard ($attempts)';
+        }
+
+        AnkiMapping legacyProfile = standardProfile.copyWith(
+          label: newLabel,
+        );
+
+        _database.writeTxnSync(() {
+          _database.ankiMappings.putAllSync(
+            [
+              legacyProfile,
+              AnkiMapping.defaultMapping(
+                language: language,
+                order: nextMappingOrder,
+              ),
+            ],
+          );
+        });
+
+        await showDialog(
+          barrierDismissible: true,
+          context: _navigatorKey.currentContext!,
+          builder: (context) => AlertDialog(
+            title: Text(t.info_standard_update),
+            content: Text(
+              t.info_standard_update_content,
+            ),
+            actions: [
+              TextButton(
+                child: Text(t.dialog_close),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        );
+      }
     }
   }
 
@@ -1777,7 +1839,7 @@ class AppModel with ChangeNotifier {
     await methodChannel.invokeMethod('requestAnkidroidPermissions');
   }
 
-  /// Adds the default 'jidoujisho Yuuna' model to the list of Anki card types.
+  /// Adds the default 'jidoujisho Kinomoto' model to the list of Anki card types.
   Future<void> addDefaultModelIfMissing() async {
     List<String> models = await getModelList();
     if (!models.contains(AnkiMapping.standardModelName)) {
@@ -2496,9 +2558,6 @@ class AppModel with ChangeNotifier {
     }
 
     segmentedText ??= targetLanguage.textToWords(sourceText);
-    if (targetLanguage.isSpaceDelimited) {
-      segmentedText = segmentedText.where((e) => e != ' ').toList();
-    }
 
     await showDialog(
       context: _navigatorKey.currentContext!,

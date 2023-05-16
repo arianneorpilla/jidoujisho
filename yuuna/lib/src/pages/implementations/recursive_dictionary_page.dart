@@ -325,6 +325,10 @@ class _RecursiveDictionaryPageState
             creatorFieldValues: CreatorFieldValues(
               textValues: {
                 SentenceField.instance: _controller.query,
+                TermField.instance: '',
+                ClozeBeforeField.instance: '',
+                ClozeInsideField.instance: '',
+                ClozeAfterField.instance: '',
               },
             ),
           );

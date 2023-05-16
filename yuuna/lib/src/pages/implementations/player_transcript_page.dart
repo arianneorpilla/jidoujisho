@@ -268,8 +268,8 @@ class _PlayerTranscriptPageState
             ...widget.subtitles.sublist(0, index),
           ];
 
-    Subtitle? subtitle = subtitlesToSearch
-        .firstWhereOrNull((subtitle) => subtitle.data.contains(query));
+    Subtitle? subtitle = subtitlesToSearch.firstWhereOrNull((subtitle) =>
+        subtitle.data.toLowerCase().contains(query.toLowerCase()));
     if (subtitle != null) {
       widget.currentSubtitle.value = subtitle;
       Duration offsetStart = subtitle.start -
@@ -606,10 +606,9 @@ class _PlayerTranscriptPageState
       int offsetIndex =
           appModel.targetLanguage.getStartingIndex(text: text, index: index) +
               whitespaceOffset;
-      int length = appModel.targetLanguage
-          .textToWords(searchTerm)
-          .firstWhere((e) => e.trim().isNotEmpty)
-          .length;
+      int length = appModel.targetLanguage.getGuessHighlightLength(
+        searchTerm: searchTerm,
+      );
 
       controller.setSelection(
         offsetIndex,
@@ -626,7 +625,10 @@ class _PlayerTranscriptPageState
         searchTerm: searchTerm,
         position: position,
       ).then((result) {
-        int length = max(1, currentResult?.bestLength ?? 0);
+        length = appModel.targetLanguage.getFinalHighlightLength(
+          result: currentResult,
+          searchTerm: searchTerm,
+        );
 
         controller.setSelection(offsetIndex, offsetIndex + length);
         final range = TextRange(start: offsetIndex, end: offsetIndex + length);
@@ -799,7 +801,7 @@ class _PlayerTranscriptPageState
                                 },
                                 stashAction: onStash,
                                 shareAction: onShare,
-                                creatorAction: (selection) async {
+                                creatorAction: (text) async {
                                   (appModel.currentMediaSource
                                           as PlayerMediaSource)
                                       .setTranscriptSubtitle(subtitle);
@@ -808,7 +810,7 @@ class _PlayerTranscriptPageState
                                   await appModel.openCreator(
                                     creatorFieldValues: CreatorFieldValues(
                                       textValues: {
-                                        SentenceField.instance: selection.text,
+                                        SentenceField.instance: text,
                                         TermField.instance: '',
                                         ClozeBeforeField.instance: '',
                                         ClozeInsideField.instance: '',
@@ -902,6 +904,7 @@ class _PlayerTranscriptPageState
             creatorFieldValues: CreatorFieldValues(
               textValues: {
                 SentenceField.instance: message,
+                TermField.instance: '',
                 ClozeAfterField.instance: '',
                 ClozeBeforeField.instance: '',
                 ClozeInsideField.instance: '',

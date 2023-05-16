@@ -133,7 +133,7 @@ class _TextSegmentationDialogPage
               child: SizedBox(
                 height: (textTheme.titleLarge?.fontSize)! * 1.3,
                 child: Text(
-                  segment,
+                  segment.trim(),
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: textTheme.titleMedium?.fontSize,
@@ -214,10 +214,18 @@ class _TextSegmentationDialogPage
   }
 
   void executeSearch() {
+    if (selection.range == TextRange.empty) {
+      return;
+    }
+
     widget.onSearch?.call(selection);
   }
 
   void executeSelect() {
+    if (selection.range == TextRange.empty) {
+      return;
+    }
+
     widget.onSelect?.call(selection);
   }
 }

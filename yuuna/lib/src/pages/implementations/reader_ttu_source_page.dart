@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:document_file_save_plus/document_file_save_plus.dart';
 import 'package:flutter/material.dart';
@@ -12,10 +11,9 @@ import 'package:local_assets_server/local_assets_server.dart';
 import 'package:pretty_json/pretty_json.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:spaces/spaces.dart';
+import 'package:yuuna/creator.dart';
 import 'package:yuuna/media.dart';
-import 'package:yuuna/src/creator/creator_field_values.dart';
-import 'package:yuuna/src/creator/fields/sentence_field.dart';
-import 'package:yuuna/src/pages/base_source_page.dart';
+import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 
 /// The media page used for the [ReaderTtuSource].
@@ -510,10 +508,9 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
                   .getStartingIndex(text: text, index: index) +
               whitespaceOffset;
 
-          int length = appModel.targetLanguage
-              .textToWords(searchTerm)
-              .firstWhere((e) => e.trim().isNotEmpty)
-              .length;
+          int length = appModel.targetLanguage.getGuessHighlightLength(
+            searchTerm: searchTerm,
+          );
 
           if (mediaSource.highlightOnTap) {
             await selectTextOnwards(
@@ -530,7 +527,10 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
             searchTerm: searchTerm,
             position: position,
           ).then((_) async {
-            int length = max(1, currentResult?.bestLength ?? 0);
+            length = appModel.targetLanguage.getFinalHighlightLength(
+              result: currentResult,
+              searchTerm: searchTerm,
+            );
 
             if (mediaSource.highlightOnTap) {
               await selectTextOnwards(
@@ -667,7 +667,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   }
 
   void creatorMenuAction() async {
-    String searchTerm = await getSelectedText();
+    String text = (await getSelectedText()).replaceAll('\\n', '\n');
 
     await unselectWebViewTextSelection(_controller);
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -678,7 +678,11 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
       killOnPop: false,
       creatorFieldValues: CreatorFieldValues(
         textValues: {
-          SentenceField.instance: searchTerm.replaceAll('\\n', '\n'),
+          SentenceField.instance: text,
+          TermField.instance: '',
+          ClozeBeforeField.instance: '',
+          ClozeInsideField.instance: '',
+          ClozeAfterField.instance: '',
         },
       ),
     );

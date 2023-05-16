@@ -120,6 +120,21 @@ class InstantExportAction extends QuickAction {
           overrideLocks: true,
           savedTags: appModel.savedTags,
         );
+
+        /// Need to clear media as these conflict.
+        CreatorModel cardCreatorModel = ref.read(creatorProvider);
+        cardCreatorModel.clearField(
+          ImageField.instance,
+          savedTags: appModel.savedTags,
+        );
+        cardCreatorModel.clearField(
+          AudioField.instance,
+          savedTags: appModel.savedTags,
+        );
+        cardCreatorModel.clearField(
+          SentenceField.instance,
+          savedTags: appModel.savedTags,
+        );
       },
     );
   }

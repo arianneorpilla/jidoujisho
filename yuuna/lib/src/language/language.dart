@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/language.dart';
@@ -271,6 +272,37 @@ abstract class Language {
       return termBuffer.toString();
     } else {
       return text.substring(index);
+    }
+  }
+
+  /// Get preliminary highlight length before a dictionary search.
+  int getGuessHighlightLength({
+    required String searchTerm,
+  }) {
+    return textToWords(searchTerm)
+        .firstWhere((e) => e.trim().isNotEmpty)
+        .trim()
+        .length;
+  }
+
+  /// Get final highlight length after a dictionary search.
+  int getFinalHighlightLength({
+    required DictionarySearchResult? result,
+    required String searchTerm,
+  }) {
+    if (isSpaceDelimited) {
+      RegExp regex = RegExp('[ ]');
+
+      int numberOfWords = result?.headings
+              .firstWhereOrNull((e) => e.id == result.headingIds.first)
+              ?.term
+              .splitWithDelim(regex)
+              .length ??
+          1;
+      List<String> searchTermWords = searchTerm.splitWithDelim(regex);
+      return searchTermWords.sublist(0, numberOfWords).join().length;
+    } else {
+      return max(1, result?.bestLength ?? 0);
     }
   }
 

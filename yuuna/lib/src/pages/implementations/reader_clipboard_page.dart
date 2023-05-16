@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -190,10 +188,9 @@ class _ReaderClipboardPageState<ReaderClipboardPage>
 
       int whitespaceOffset = searchTerm.length - searchTerm.trimLeft().length;
       int offsetIndex = index + whitespaceOffset;
-      int length = appModel.targetLanguage
-          .textToWords(searchTerm)
-          .firstWhere((e) => e.trim().isNotEmpty)
-          .length;
+      int length = appModel.targetLanguage.getGuessHighlightLength(
+        searchTerm: searchTerm,
+      );
 
       controller.setSelection(
         offsetIndex,
@@ -204,8 +201,10 @@ class _ReaderClipboardPageState<ReaderClipboardPage>
         searchTerm: searchTerm,
         position: position,
       ).then((result) {
-        int length = max(1, currentResult?.bestLength ?? 0);
-
+        length = appModel.targetLanguage.getFinalHighlightLength(
+          result: currentResult,
+          searchTerm: searchTerm,
+        );
         controller.setSelection(offsetIndex, offsetIndex + length);
 
         JidoujishoTextSelection selection =
@@ -241,11 +240,11 @@ class _ReaderClipboardPageState<ReaderClipboardPage>
         searchAction: onSearch,
         stashAction: onStash,
         shareAction: onShare,
-        creatorAction: (selection) async {
+        creatorAction: (text) async {
           await appModel.openCreator(
             creatorFieldValues: CreatorFieldValues(
               textValues: {
-                SentenceField.instance: selection.text,
+                SentenceField.instance: text,
                 TermField.instance: '',
                 ClozeBeforeField.instance: '',
                 ClozeInsideField.instance: '',

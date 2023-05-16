@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -196,10 +194,9 @@ class _ReaderWebsocketPageState
       int offsetIndex =
           appModel.targetLanguage.getStartingIndex(text: text, index: index) +
               whitespaceOffset;
-      int length = appModel.targetLanguage
-          .textToWords(searchTerm)
-          .firstWhere((e) => e.trim().isNotEmpty)
-          .length;
+      int length = appModel.targetLanguage.getGuessHighlightLength(
+        searchTerm: searchTerm,
+      );
 
       controller.setSelection(
         offsetIndex,
@@ -210,7 +207,10 @@ class _ReaderWebsocketPageState
         searchTerm: searchTerm,
         position: position,
       ).then((result) {
-        int length = max(1, currentResult?.bestLength ?? 0);
+        length = appModel.targetLanguage.getFinalHighlightLength(
+          result: currentResult,
+          searchTerm: searchTerm,
+        );
 
         controller.setSelection(offsetIndex, offsetIndex + length);
 
@@ -266,11 +266,11 @@ class _ReaderWebsocketPageState
                     },
                     shareAction: onShare,
                     stashAction: onStash,
-                    creatorAction: (selection) async {
+                    creatorAction: (text) async {
                       await appModel.openCreator(
                         creatorFieldValues: CreatorFieldValues(
                           textValues: {
-                            SentenceField.instance: selection.text,
+                            SentenceField.instance: text,
                             TermField.instance: '',
                             ClozeBeforeField.instance: '',
                             ClozeInsideField.instance: '',
@@ -316,17 +316,22 @@ class _ReaderWebsocketPageState
             exampleSentences: appModel.targetLanguage
                 .getSentences(message)
                 .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
                 .toList(),
             onSelect: (selection) {
               appModel.openCreator(
+                ref: ref,
+                killOnPop: false,
                 creatorFieldValues: CreatorFieldValues(
                   textValues: {
                     SentenceField.instance: selection.join(
                         appModel.targetLanguage.isSpaceDelimited ? ' ' : ''),
+                    TermField.instance: '',
+                    ClozeBeforeField.instance: '',
+                    ClozeInsideField.instance: '',
+                    ClozeAfterField.instance: '',
                   },
                 ),
-                killOnPop: false,
-                ref: ref,
               );
             },
           );
@@ -351,6 +356,7 @@ class _ReaderWebsocketPageState
             creatorFieldValues: CreatorFieldValues(
               textValues: {
                 SentenceField.instance: message,
+                TermField.instance: '',
                 ClozeAfterField.instance: '',
                 ClozeBeforeField.instance: '',
                 ClozeInsideField.instance: '',

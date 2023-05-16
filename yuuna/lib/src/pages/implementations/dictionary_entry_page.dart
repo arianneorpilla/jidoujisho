@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -110,10 +108,9 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
                         index: selection.baseOffset,
                       ) +
                       whitespaceOffset;
-                  int length = appModel.targetLanguage
-                      .textToWords(searchTerm)
-                      .firstWhere((e) => e.trim().isNotEmpty)
-                      .length;
+                  int length = appModel.targetLanguage.getGuessHighlightLength(
+                    searchTerm: searchTerm,
+                  );
 
                   _selectableTextController.setSelection(
                     offsetIndex,
@@ -126,12 +123,10 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
                     searchWithWildcards: false,
                   );
 
-                  length = appModel.targetLanguage.isSpaceDelimited
-                      ? appModel.targetLanguage
-                          .textToWords(searchTerm)
-                          .firstWhere((e) => e.trim().isNotEmpty)
-                          .length
-                      : max(1, result.bestLength);
+                  length = appModel.targetLanguage.getFinalHighlightLength(
+                    result: result,
+                    searchTerm: searchTerm,
+                  );
 
                   _selectableTextController.setSelection(
                       offsetIndex, offsetIndex + length);

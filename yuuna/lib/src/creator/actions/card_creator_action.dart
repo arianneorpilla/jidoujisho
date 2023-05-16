@@ -70,6 +70,8 @@ class CardCreatorAction extends QuickAction {
         }
       }
 
+      appModel.notifyRecursiveSearch();
+
       Navigator.of(context).popUntil((route) {
         return route.settings.name == (CreatorPage).toString();
       });

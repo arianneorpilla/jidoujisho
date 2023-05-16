@@ -690,6 +690,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       await dialogSmartPause();
     }
 
+    clearDictionaryResult();
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     await Future.delayed(const Duration(milliseconds: 5), () {});
 
@@ -1228,6 +1229,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         icon: Icons.comment_outlined,
         tooltip: t.comments,
         onTap: () async {
+          clearDictionaryResult();
+
           await dialogSmartPause();
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
           await Future.delayed(const Duration(milliseconds: 5), () {});
@@ -1372,6 +1375,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         action: () async {
           await dialogSmartPause();
 
+          clearDictionaryResult();
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
           await Future.delayed(const Duration(milliseconds: 5), () {});
 
@@ -1996,10 +2000,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     int offsetIndex =
         appModel.targetLanguage.getStartingIndex(text: text, index: index) +
             whitespaceOffset;
-    int length = appModel.targetLanguage
-        .textToWords(searchTerm)
-        .firstWhere((e) => e.trim().isNotEmpty)
-        .length;
+    int length = appModel.targetLanguage.getGuessHighlightLength(
+      searchTerm: searchTerm,
+    );
 
     _selectableTextController.setSelection(offsetIndex, offsetIndex + length);
     if (searchTerm.isNotEmpty) {
@@ -2012,7 +2015,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       searchTerm: searchTerm,
       position: JidoujishoPopupPosition.topThreeFourths,
     ).then((result) {
-      int length = max(1, currentResult?.bestLength ?? 0);
+      length = appModel.targetLanguage.getFinalHighlightLength(
+        result: currentResult,
+        searchTerm: searchTerm,
+      );
 
       _selectableTextController.setSelection(offsetIndex, offsetIndex + length);
       final range = TextRange(start: offsetIndex, end: offsetIndex + length);
@@ -2052,6 +2058,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       creatorFieldValues: CreatorFieldValues(
         textValues: {
           SentenceField.instance: sentence,
+          TermField.instance: '',
+          ClozeAfterField.instance: '',
+          ClozeBeforeField.instance: '',
+          ClozeInsideField.instance: '',
         },
       ),
     );

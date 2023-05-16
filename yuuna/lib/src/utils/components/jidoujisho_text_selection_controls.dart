@@ -37,7 +37,7 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
   final Function(JidoujishoTextSelection)? sentenceAction;
 
   /// Behaviour for the creator action.
-  final Function(JidoujishoTextSelection)? creatorAction;
+  final Function(String)? creatorAction;
 
   /// Behaviour for the search action.
   final Function(String)? searchAction;
@@ -128,13 +128,8 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
       creatorAction: (creatorAction != null)
           ? () {
               creatorAction?.call(
-                JidoujishoTextSelection(
-                  text: delegate.textEditingValue.text,
-                  range: TextRange(
-                    start: delegate.textEditingValue.selection.start,
-                    end: delegate.textEditingValue.selection.end,
-                  ),
-                ),
+                delegate.textEditingValue.selection
+                    .textInside(delegate.textEditingValue.text),
               );
 
               delegate.hideToolbar();

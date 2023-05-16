@@ -42,17 +42,21 @@ class AnkiMapping {
       model: standardModelName,
       exportFieldKeys: [
         TermField.key,
-        SentenceField.key,
         ReadingField.key,
-        MeaningField.key,
-        NotesField.key,
-        ImageField.key,
-        AudioField.key,
-        PitchAccentField.key,
         FuriganaField.key,
-        FrequencyField.key,
+        SentenceField.key,
+        ClozeBeforeField.key,
+        ClozeInsideField.key,
+        ClozeAfterField.key,
+        MeaningField.key,
         ExpandedMeaningField.key,
         CollapsedMeaningField.key,
+        NotesField.key,
+        ContextField.key,
+        FrequencyField.key,
+        PitchAccentField.key,
+        ImageField.key,
+        AudioField.key,
         AudioSentenceField.key,
       ],
       creatorFieldKeys: defaultCreatorFieldKeys,
@@ -190,6 +194,10 @@ class AnkiMapping {
   /// Default fields to show upon opening the Card Creator.
   static const List<String> defaultCreatorCollapsedFieldKeys = [
     TagsField.key,
+    ContextField.key,
+    ClozeBeforeField.key,
+    ClozeInsideField.key,
+    ClozeAfterField.key,
     FuriganaField.key,
     FrequencyField.key,
     PitchAccentField.key,
@@ -216,7 +224,7 @@ class AnkiMapping {
   };
 
   /// The default mapping name which cannot be deleted or reused.
-  static String standardModelName = 'jidoujisho Yuuna';
+  static String standardModelName = 'jidoujisho Kinomoto';
 
   /// The default mapping name which cannot be deleted or reused.
   static String standardProfileName = 'Standard';

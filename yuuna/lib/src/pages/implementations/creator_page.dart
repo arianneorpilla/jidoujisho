@@ -973,9 +973,15 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
   void onSentenceSearch(JidoujishoTextSelection selection) async {
     String searchTerm = selection.textInside;
-
-    String term = creatorModel.getFieldController(TermField.instance).text;
     String afterSearchTerm = searchTerm;
+
+    final subscription =
+        appModel.cardCreatorRecursiveSearchStream.listen((event) {
+      if (searchTerm == afterSearchTerm) {
+        creatorModel.setSentenceAndCloze(selection);
+      }
+    });
+
     await appModel.openRecursiveDictionarySearch(
       searchTerm: searchTerm,
       onUpdateQuery: (query) {
@@ -984,13 +990,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       killOnPop: false,
     );
 
-    String afterTerm = creatorModel.getFieldController(TermField.instance).text;
-
-    if (afterSearchTerm == searchTerm) {
-      if (term != afterTerm) {
-        creatorModel.setSentenceAndCloze(selection);
-      }
-    }
+    subscription.cancel();
   }
 
   MaterialTextSelectionControls get sentenceSelectionControls =>

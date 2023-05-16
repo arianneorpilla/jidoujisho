@@ -36,6 +36,10 @@ class FuriganaField extends Field {
     required bool creatorJustLaunched,
     required String? dictionaryName,
   }) {
+    if (appModel.targetLanguage is! JapaneseLanguage) {
+      return null;
+    }
+
     List<RubyTextData>? rubyDatas = JapaneseLanguage.instance.fetchFurigana(
       heading: heading,
     );

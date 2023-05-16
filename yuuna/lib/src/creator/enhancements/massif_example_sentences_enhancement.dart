@@ -146,18 +146,28 @@ class MassifExampleSentencesEnhancement extends Enhancement {
         TextRange range = TextRange.empty;
 
         bool firstFound = false;
+        bool consecutiveFlag = false;
+        int? start;
+        int? end;
+
         for (String splitWithDelim in splitWithDelims) {
           if (splitWithDelim.startsWith('<em>') &&
               splitWithDelim.endsWith('</em>')) {
             String text =
                 splitWithDelim.replaceAll('<em>', '').replaceAll('</em>', '');
+
             if (!firstFound) {
+              consecutiveFlag = true;
               firstFound = true;
-              range = TextRange(
-                start: buffer.length,
-                end: buffer.length + text.length,
-              );
+              start = buffer.length;
+              end = buffer.length + text.length;
             }
+
+            if (firstFound && consecutiveFlag) {
+              end = buffer.length + text.length;
+            }
+
+            buffer.write(text);
 
             spans.add(
               TextSpan(
@@ -170,6 +180,10 @@ class MassifExampleSentencesEnhancement extends Enhancement {
               ),
             );
           } else {
+            if (splitWithDelim.trim().isNotEmpty) {
+              consecutiveFlag = false;
+            }
+
             buffer.write(splitWithDelim);
             spans.add(
               TextSpan(
@@ -181,6 +195,13 @@ class MassifExampleSentencesEnhancement extends Enhancement {
               ),
             );
           }
+        }
+
+        if (start != null && end != null) {
+          range = TextRange(
+            start: start,
+            end: end,
+          );
         }
 
         MassifResult result = MassifResult(

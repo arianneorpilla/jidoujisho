@@ -52,9 +52,9 @@ class _HomePageState extends BasePageState<HomePage>
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      appModel.populateDefaultMapping(appModel.targetLanguage);
       if (appModel.isFirstTimeSetup) {
         await appModel.showLanguageMenu();
-        appModel.populateDefaultMapping(appModel.targetLanguage);
         appModel.setLastSelectedDictionaryFormat(
             appModel.targetLanguage.standardFormat);
         appModel.setFirstTimeSetupFlag();

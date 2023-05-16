@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -275,7 +274,7 @@ class _MokuroCatalogBrowsePageState
   }
 
   void creatorMenuAction() async {
-    String searchTerm = await getSelectedText();
+    String text = (await getSelectedText()).replaceAll('\\n', '\n');
     String imageUrl = await getImageUrl();
 
     await unselectWebViewTextSelection(_controller);
@@ -288,7 +287,11 @@ class _MokuroCatalogBrowsePageState
       killOnPop: false,
       creatorFieldValues: CreatorFieldValues(
         textValues: {
-          SentenceField.instance: searchTerm.replaceAll('\\n', '\n'),
+          SentenceField.instance: text,
+          TermField.instance: '',
+          ClozeBeforeField.instance: '',
+          ClozeInsideField.instance: '',
+          ClozeAfterField.instance: '',
         },
       ),
     );
@@ -636,10 +639,9 @@ document.getElementById('pageIdxDisplay').style.color = 'white';
                   .getStartingIndex(text: text, index: index) +
               whitespaceOffset;
 
-          int length = appModel.targetLanguage
-              .textToWords(searchTerm)
-              .firstWhere((e) => e.trim().isNotEmpty)
-              .length;
+          int length = appModel.targetLanguage.getGuessHighlightLength(
+            searchTerm: searchTerm,
+          );
 
           if (mediaSource.highlightOnTap) {
             await selectTextOnwards(
@@ -656,7 +658,10 @@ document.getElementById('pageIdxDisplay').style.color = 'white';
             searchTerm: searchTerm,
             position: position,
           ).then((_) {
-            int length = max(1, currentResult?.bestLength ?? 0);
+            length = appModel.targetLanguage.getFinalHighlightLength(
+              result: currentResult,
+              searchTerm: searchTerm,
+            );
 
             if (mediaSource.highlightOnTap) {
               selectTextOnwards(

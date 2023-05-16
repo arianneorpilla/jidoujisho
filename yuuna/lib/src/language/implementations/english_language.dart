@@ -38,7 +38,19 @@ class EnglishLanguage extends Language {
 
   @override
   List<String> textToWords(String text) {
-    return text.splitWithDelim(RegExp(r'[-\n\r\s]+'));
+    List<String> splitText = text.splitWithDelim(RegExp(r'[-\n\r\s]+'));
+    return splitText
+        .mapIndexed((index, element) {
+          if (index.isEven && index + 1 < splitText.length) {
+            return [splitText[index], splitText[index + 1]].join();
+          } else if (index + 1 == splitText.length) {
+            return splitText[index];
+          } else {
+            return '';
+          }
+        })
+        .where((e) => e.isNotEmpty)
+        .toList();
   }
 }
 
@@ -203,11 +215,17 @@ Future<int?> prepareSearchResultsEnglishLanguage(
         continue;
       }
 
+      List<String> blocks = partialTerm.split(' ');
+      String lastBlock = blocks.removeLast();
+
       List<String> possibleDeinflections = lemmatizer
-          .lemmas(partialTerm)
+          .lemmas(lastBlock)
           .map((lemma) => lemma.lemmas)
           .flattened
           .where((e) => e.isNotEmpty)
+          .map(
+            (e) => [...blocks, e].join(),
+          )
           .toList();
 
       List<DictionaryHeading> termExactResults = [];
@@ -268,12 +286,27 @@ Future<int?> prepareSearchResultsEnglishLanguage(
       uniqueHeadingsById.addEntries(exactHeadingsToAdd);
       uniqueHeadingsById.addEntries(deinflectedHeadingsToAdd);
 
-      List<MapEntry<int, DictionaryHeading>> startsWithHeadingsToAdd = [
-        ...(termStartsWithResultsByLength[length] ?? [])
-            .map((heading) => MapEntry(heading.id, heading)),
-      ];
+      if (params.searchWithWildcards) {
+        for (int length = searchTerm.length; length > 0; length--) {
+          List<MapEntry<int, DictionaryHeading>> startsWithHeadingsToAdd = [
+            ...(termStartsWithResultsByLength[length] ?? [])
+                .map((heading) => MapEntry(heading.id, heading)),
+          ];
 
-      uniqueHeadingsById.addEntries(startsWithHeadingsToAdd);
+          uniqueHeadingsById.addEntries(startsWithHeadingsToAdd);
+        }
+      }
+    }
+
+    if (!params.searchWithWildcards) {
+      for (int length = searchTerm.length; length > 0; length--) {
+        List<MapEntry<int, DictionaryHeading>> startsWithHeadingsToAdd = [
+          ...(termStartsWithResultsByLength[length] ?? [])
+              .map((heading) => MapEntry(heading.id, heading)),
+        ];
+
+        uniqueHeadingsById.addEntries(startsWithHeadingsToAdd);
+      }
     }
   }
 
