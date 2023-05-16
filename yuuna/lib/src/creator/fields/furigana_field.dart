@@ -13,8 +13,7 @@ class FuriganaField extends Field {
       : super(
           uniqueKey: key,
           label: 'Furigana',
-          description: 'Pre-fills HTML to export for furigana. See '
-              ' documentation for required CSS.',
+          description: 'Pre-fills text to export for Furigana.',
           icon: Icons.data_array,
         );
 

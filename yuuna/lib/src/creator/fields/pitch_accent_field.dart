@@ -15,8 +15,7 @@ class PitchAccentField extends Field {
       : super(
           uniqueKey: key,
           label: 'Pitch Accent',
-          description: 'Pre-fills HTML to export for pitch accent diagrams. '
-              ' See documentation for required CSS.',
+          description: 'Pre-fills text to export for pitch accent diagrams.',
           icon: Icons.swap_vert,
         );
 
