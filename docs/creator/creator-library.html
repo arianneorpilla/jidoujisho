@@ -148,15 +148,6 @@ of a <a href="../models/CreatorModel-class.html">CreatorModel</a> pertaining to 
   An enhancement used effectively as a shortcut for opening the Card Creator.
 </dd>
 
-        <dt id="CharacterSearchAction">
-  <span class="name "><a href="../creator/CharacterSearchAction-class.html">CharacterSearchAction</a></span> 
-
-</dt>
-<dd>
-  An enhancement that is useful for searching single characters, such as
-kanji characters.
-</dd>
-
         <dt id="ClearFieldEnhancement">
   <span class="name "><a href="../creator/ClearFieldEnhancement-class.html">ClearFieldEnhancement</a></span> 
 
@@ -164,6 +155,30 @@ kanji characters.
 <dd>
   An enhancement used effectively as a shortcut for clearing the contents
 of a <a href="../models/CreatorModel-class.html">CreatorModel</a> pertaining to a certain field.
+</dd>
+
+        <dt id="ClozeAfterField">
+  <span class="name "><a href="../creator/ClozeAfterField-class.html">ClozeAfterField</a></span> 
+
+</dt>
+<dd>
+  Text after highlighted text in a sentence.
+</dd>
+
+        <dt id="ClozeBeforeField">
+  <span class="name "><a href="../creator/ClozeBeforeField-class.html">ClozeBeforeField</a></span> 
+
+</dt>
+<dd>
+  Text before highlighted text in a sentence
+</dd>
+
+        <dt id="ClozeInsideField">
+  <span class="name "><a href="../creator/ClozeInsideField-class.html">ClozeInsideField</a></span> 
+
+</dt>
+<dd>
+  Highlighted text in a sentence.
 </dd>
 
         <dt id="CollapsedMeaningField">
@@ -256,6 +271,15 @@ could handle exclusively images, or dictionary definitions.
   An entity used to neatly return and organise results fetched from Forvo.
 </dd>
 
+        <dt id="FrequencyField">
+  <span class="name "><a href="../creator/FrequencyField-class.html">FrequencyField</a></span> 
+
+</dt>
+<dd>
+  Returns the frequency of a <a href="../dictionary/DictionaryHeading-class.html">DictionaryHeading</a> (uses harmonic mean for
+multiple entries, idea taken from @MarvNC).
+</dd>
+
         <dt id="FuriganaField">
   <span class="name "><a href="../creator/FuriganaField-class.html">FuriganaField</a></span> 
 
@@ -296,14 +320,6 @@ based on its values.
 </dt>
 <dd>
   Returns audio information from context.
-</dd>
-
-        <dt id="ImageSearchTermPickerEnhancement">
-  <span class="name "><a href="../creator/ImageSearchTermPickerEnhancement-class.html">ImageSearchTermPickerEnhancement</a></span> 
-
-</dt>
-<dd>
-  An enhancement used to pick a new image search term.
 </dd>
 
         <dt id="ImmersionKitEnhancement">
@@ -411,6 +427,15 @@ based on its values.
 </dt>
 <dd>
   Returns the formatted pitch accent diagram HTML of a <a href="../dictionary/DictionaryHeading-class.html">DictionaryHeading</a>.
+</dd>
+
+        <dt id="PitchSvg">
+  <span class="name "><a href="../creator/PitchSvg-class.html">PitchSvg</a></span> 
+
+</dt>
+<dd>
+  Pitch utilities courtesy of Matthew Chan.
+https://github.com/mathewthe2/immersion_reader/blob/main/lib/japanese/pitch.dart
 </dd>
 
         <dt id="PlayAudioAction">
@@ -817,6 +842,14 @@ seed.
 may change the context of how the enhancement should be executed.
 </dd>
 
+        <dt id="SortingMethod">
+  <span class="name "><a href="../creator/SortingMethod.html">SortingMethod</a></span> 
+
+</dt>
+<dd>
+  The method by which the frequency value is calculated.
+</dd>
+
       </dl>
     </section>
 
@@ -867,8 +900,10 @@ may change the context of how the enhancement should be executed.
         <li><a href="../creator/BingImagesSearchEnhancement-class.html">BingImagesSearchEnhancement</a></li>
         <li><a href="../creator/CameraEnhancement-class.html">CameraEnhancement</a></li>
         <li><a href="../creator/CardCreatorAction-class.html">CardCreatorAction</a></li>
-        <li><a href="../creator/CharacterSearchAction-class.html">CharacterSearchAction</a></li>
         <li><a href="../creator/ClearFieldEnhancement-class.html">ClearFieldEnhancement</a></li>
+        <li><a href="../creator/ClozeAfterField-class.html">ClozeAfterField</a></li>
+        <li><a href="../creator/ClozeBeforeField-class.html">ClozeBeforeField</a></li>
+        <li><a href="../creator/ClozeInsideField-class.html">ClozeInsideField</a></li>
         <li><a href="../creator/CollapsedMeaningField-class.html">CollapsedMeaningField</a></li>
         <li><a href="../creator/ContextField-class.html">ContextField</a></li>
         <li><a href="../creator/CopyToClipboardAction-class.html">CopyToClipboardAction</a></li>
@@ -879,12 +914,12 @@ may change the context of how the enhancement should be executed.
         <li><a href="../creator/Field-class.html">Field</a></li>
         <li><a href="../creator/ForvoAudioEnhancement-class.html">ForvoAudioEnhancement</a></li>
         <li><a href="../creator/ForvoResult-class.html">ForvoResult</a></li>
+        <li><a href="../creator/FrequencyField-class.html">FrequencyField</a></li>
         <li><a href="../creator/FuriganaField-class.html">FuriganaField</a></li>
         <li><a href="../creator/HiddenMeaningField-class.html">HiddenMeaningField</a></li>
         <li><a href="../creator/ImageEnhancement-class.html">ImageEnhancement</a></li>
         <li><a href="../creator/ImageExportField-class.html">ImageExportField</a></li>
         <li><a href="../creator/ImageField-class.html">ImageField</a></li>
-        <li><a href="../creator/ImageSearchTermPickerEnhancement-class.html">ImageSearchTermPickerEnhancement</a></li>
         <li><a href="../creator/ImmersionKitEnhancement-class.html">ImmersionKitEnhancement</a></li>
         <li><a href="../creator/ImmersionKitResult-class.html">ImmersionKitResult</a></li>
         <li><a href="../creator/InstantExportAction-class.html">InstantExportAction</a></li>
@@ -898,6 +933,7 @@ may change the context of how the enhancement should be executed.
         <li><a href="../creator/PickAudioEnhancement-class.html">PickAudioEnhancement</a></li>
         <li><a href="../creator/PickImageEnhancement-class.html">PickImageEnhancement</a></li>
         <li><a href="../creator/PitchAccentField-class.html">PitchAccentField</a></li>
+        <li><a href="../creator/PitchSvg-class.html">PitchSvg</a></li>
         <li><a href="../creator/PlayAudioAction-class.html">PlayAudioAction</a></li>
         <li><a href="../creator/PopFromStashEnhancement-class.html">PopFromStashEnhancement</a></li>
         <li><a href="../creator/QuickAction-class.html">QuickAction</a></li>
@@ -949,6 +985,7 @@ may change the context of how the enhancement should be executed.
 
       <li class="section-title"><a href="../creator/creator-library.html#enums">Enums</a></li>
         <li><a href="../creator/EnhancementTriggerCause.html">EnhancementTriggerCause</a></li>
+        <li><a href="../creator/SortingMethod.html">SortingMethod</a></li>
 
 
 </ol>
@@ -960,7 +997,7 @@ may change the context of how the enhancement should be executed.
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

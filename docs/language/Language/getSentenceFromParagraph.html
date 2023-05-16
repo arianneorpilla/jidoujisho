@@ -59,9 +59,11 @@
     <section class="multi-line-signature">
       
 
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+<span class="returntype"><a href="../../utils/JidoujishoTextSelection-class.html">JidoujishoTextSelection</a></span>
 <span class="name ">getSentenceFromParagraph</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="getSentenceFromParagraph-param-paragraph">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">paragraph</span>, </span></li>
-<li><span class="parameter" id="getSentenceFromParagraph-param-index"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">index</span>}</span></li>
+<li><span class="parameter" id="getSentenceFromParagraph-param-index"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">index</span>, </span></li>
+<li><span class="parameter" id="getSentenceFromParagraph-param-startOffset"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">startOffset</span>, </span></li>
+<li><span class="parameter" id="getSentenceFromParagraph-param-endOffset"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">endOffset</span>}</span></li>
 </ol>)
 
       
@@ -78,24 +80,36 @@ delimiters.</p>
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">String getSentenceFromParagraph({
+  <pre class="language-dart"><code class="language-dart">JidoujishoTextSelection getSentenceFromParagraph({
   required String paragraph,
   required int index,
+  required int startOffset,
+  required int endOffset,
 }) {
   List&lt;String&gt; sentences = getSentences(paragraph);
   int currentIndex = 0;
   String sentenceToReturn = paragraph;
 
+  int sentenceLength = 0;
+
   for (String sentence in sentences) {
     sentenceToReturn = sentence;
+    sentenceLength = sentence.length;
 
-    currentIndex += sentenceToReturn.length;
+    currentIndex += sentenceLength;
     if (currentIndex &gt; index) {
       break;
     }
   }
 
-  return sentenceToReturn.trim();
+  TextRange range = TextRange(
+    start: sentenceLength - currentIndex + startOffset,
+    end: sentenceLength - currentIndex + endOffset,
+  );
+  return JidoujishoTextSelection(
+    text: sentenceToReturn,
+    range: range,
+  );
 }</code></pre>
 </section>
 
@@ -146,6 +160,8 @@ delimiters.</p>
           <li><a href="../../language/Language/threeLetterCode.html">threeLetterCode</a></li>
 
         <li class="section-title"><a href="../../language/Language-class.html#instance-methods">Methods</a></li>
+          <li><a href="../../language/Language/getFinalHighlightLength.html">getFinalHighlightLength</a></li>
+          <li><a href="../../language/Language/getGuessHighlightLength.html">getGuessHighlightLength</a></li>
           <li><a href="../../language/Language/getPitchWidget.html">getPitchWidget</a></li>
           <li><a href="../../language/Language/getSearchTermFromIndex.html">getSearchTermFromIndex</a></li>
           <li><a href="../../language/Language/getSentenceFromParagraph.html">getSentenceFromParagraph</a></li>
@@ -177,7 +193,7 @@ delimiters.</p>
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

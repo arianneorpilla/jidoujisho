@@ -59,7 +59,7 @@
     <section class="multi-line-signature">
       
 
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+<span class="returntype"><a href="../../utils/JidoujishoTextSelection-class.html">JidoujishoTextSelection</a></span>
 <span class="name ">getCurrentSentence</span>(<wbr>)
 
       
@@ -74,13 +74,15 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">String getCurrentSentence() {
+  <pre class="language-dart"><code class="language-dart">JidoujishoTextSelection getCurrentSentence() {
   if (isMediaOpen) {
     return _currentMediaSource!.currentSentence;
   } else {
     MediaType mediaType = mediaTypes.values.toList()[currentHomeTabIndex];
     if (mediaType is DictionaryMediaType) {
-      return &#39;&#39;;
+      return JidoujishoTextSelection(
+        text: &#39;&#39;,
+      );
     } else {
       return (_currentMediaSource ??
               (getCurrentSourceForMediaType(mediaType: mediaType)))
@@ -130,6 +132,7 @@
           <li><a href="../../models/AppModel/blurOptions.html">blurOptions</a></li>
           <li><a href="../../models/AppModel/browserDirectory.html">browserDirectory</a></li>
           <li><a href="../../models/AppModel/cacheManager.html">cacheManager</a></li>
+          <li><a href="../../models/AppModel/cardCreatorRecursiveSearchStream.html">cardCreatorRecursiveSearchStream</a></li>
           <li><a href="../../models/AppModel/closeCreatorOnExport.html">closeCreatorOnExport</a></li>
           <li><a href="../../models/AppModel/creatorActiveStream.html">creatorActiveStream</a></li>
           <li><a href="../../models/AppModel/currentHomeTabIndex.html">currentHomeTabIndex</a></li>
@@ -275,6 +278,7 @@
           <li><a href="../../models/AppModel/mappingNameHasDuplicate.html">mappingNameHasDuplicate</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/foundation/ChangeNotifier/notifyListeners.html">notifyListeners</a></li>
+          <li><a href="../../models/AppModel/notifyRecursiveSearch.html">notifyRecursiveSearch</a></li>
           <li><a href="../../models/AppModel/openCreator.html">openCreator</a></li>
           <li><a href="../../models/AppModel/openCreatorEnhancementsEditor.html">openCreatorEnhancementsEditor</a></li>
           <li><a href="../../models/AppModel/openCreatorFieldsEditor.html">openCreatorFieldsEditor</a></li>
@@ -388,7 +392,7 @@
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

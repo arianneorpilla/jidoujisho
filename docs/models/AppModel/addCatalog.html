@@ -59,7 +59,7 @@
     <section class="multi-line-signature">
       
 
-<span class="returntype">void</span>
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
 <span class="name ">addCatalog</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="addCatalog-param-catalog"><span class="type-annotation"><a href="../../utils/MokuroCatalog-class.html">MokuroCatalog</a></span> <span class="parameter-name">catalog</span></span></li>
 </ol>)
 
@@ -75,13 +75,13 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">void addCatalog(MokuroCatalog catalog) async {
-  _database.writeTxnSync(() {
+  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; addCatalog(MokuroCatalog catalog) async {
+  await _database.writeTxn(() async {
     if (catalog.id != null &amp;&amp;
         _database.mokuroCatalogs.getSync(catalog.id!) != null) {
-      _database.mokuroCatalogs.deleteSync(catalog.id!);
+      await _database.mokuroCatalogs.delete(catalog.id!);
     }
-    _database.mokuroCatalogs.putSync(catalog);
+    await _database.mokuroCatalogs.put(catalog);
   });
 }</code></pre>
 </section>
@@ -126,6 +126,7 @@
           <li><a href="../../models/AppModel/blurOptions.html">blurOptions</a></li>
           <li><a href="../../models/AppModel/browserDirectory.html">browserDirectory</a></li>
           <li><a href="../../models/AppModel/cacheManager.html">cacheManager</a></li>
+          <li><a href="../../models/AppModel/cardCreatorRecursiveSearchStream.html">cardCreatorRecursiveSearchStream</a></li>
           <li><a href="../../models/AppModel/closeCreatorOnExport.html">closeCreatorOnExport</a></li>
           <li><a href="../../models/AppModel/creatorActiveStream.html">creatorActiveStream</a></li>
           <li><a href="../../models/AppModel/currentHomeTabIndex.html">currentHomeTabIndex</a></li>
@@ -271,6 +272,7 @@
           <li><a href="../../models/AppModel/mappingNameHasDuplicate.html">mappingNameHasDuplicate</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/foundation/ChangeNotifier/notifyListeners.html">notifyListeners</a></li>
+          <li><a href="../../models/AppModel/notifyRecursiveSearch.html">notifyRecursiveSearch</a></li>
           <li><a href="../../models/AppModel/openCreator.html">openCreator</a></li>
           <li><a href="../../models/AppModel/openCreatorEnhancementsEditor.html">openCreatorEnhancementsEditor</a></li>
           <li><a href="../../models/AppModel/openCreatorFieldsEditor.html">openCreatorFieldsEditor</a></li>
@@ -384,7 +386,7 @@
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

@@ -110,11 +110,16 @@ Future&lt;void&gt; enhanceCreatorParams({
     exampleSentences: appModel.targetLanguage
         .getSentences(sourceText)
         .map((e) =&gt; e.trim())
+        .where((e) =&gt; e.isNotEmpty)
         .toList(),
     onSelect: (selection) {
-      creatorModel.getFieldController(field).text = selection
-          .join(appModel.targetLanguage.isSpaceDelimited ? &#39; &#39; : &#39;&#39;)
-          .trim();
+      creatorModel.setSentenceAndCloze(
+        JidoujishoTextSelection(
+          text: selection
+              .join(appModel.targetLanguage.isSpaceDelimited ? &#39; &#39; : &#39;&#39;)
+              .trim(),
+        ),
+      );
     },
   );
 }</code></pre>
@@ -187,7 +192,7 @@ Future&lt;void&gt; enhanceCreatorParams({
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

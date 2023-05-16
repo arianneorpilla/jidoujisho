@@ -110,8 +110,12 @@ Future&lt;void&gt; enhanceCreatorParams({
         return;
       }
 
-      creatorModel.getFieldController(SentenceField.instance).text =
-          selection.join(&#39;\n\n&#39;);
+      String firstResult = selection.removeAt(0);
+      creatorModel
+          .setSentenceAndCloze(JidoujishoTextSelection(text: firstResult));
+      for (String result in selection) {
+        creatorModel.appendSentenceAndCloze(result);
+      }
     },
     onAppend: (selection) {
       if (selection.isEmpty) {
@@ -196,7 +200,7 @@ Future&lt;void&gt; enhanceCreatorParams({
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

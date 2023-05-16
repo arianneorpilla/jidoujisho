@@ -106,16 +106,34 @@ Future&lt;void&gt; enhanceCreatorParams({
     return;
   }
 
-  appModel.openTextSegmentationDialog(
+  await appModel.openTextSegmentationDialog(
     sourceText: sourceText,
-    onSearch: (selection, items) {
-      appModel.openRecursiveDictionarySearch(
-        searchTerm: selection,
+    onSearch: (selection) async {
+      String searchTerm = selection.textInside;
+      String afterSearchTerm = searchTerm;
+
+      final subscription =
+          appModel.cardCreatorRecursiveSearchStream.listen((event) {
+        if (searchTerm == afterSearchTerm) {
+          creatorModel.setSentenceAndCloze(selection);
+        }
+      });
+
+      await appModel.openRecursiveDictionarySearch(
+        searchTerm: searchTerm,
+        onUpdateQuery: (query) {
+          afterSearchTerm = query;
+        },
         killOnPop: false,
       );
+
+      subscription.cancel();
     },
-    onSelect: (selection, items) {
-      creatorModel.getFieldController(TermField.instance).text = selection;
+    onSelect: (selection) {
+      creatorModel.setSentenceAndCloze(selection);
+      creatorModel.getFieldController(TermField.instance).text =
+          selection.textInside;
+
       Navigator.pop(context);
     },
   );
@@ -189,7 +207,7 @@ Future&lt;void&gt; enhanceCreatorParams({
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

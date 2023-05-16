@@ -58,8 +58,7 @@
 
     <section class="multi-line-signature">
       
-      <span class="name ">TextSegmentationEnhancement</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="-param-field">{<span>required</span> <span class="type-annotation"><a href="../../creator/Field-class.html">Field</a></span> <span class="parameter-name">field</span>}</span></li>
-</ol>)
+      <span class="name ">TextSegmentationEnhancement</span>(<wbr>)
     </section>
 
     
@@ -71,8 +70,9 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">TextSegmentationEnhancement({required super.field})
+  <pre class="language-dart"><code class="language-dart">TextSegmentationEnhancement()
     : super(
+        field: SentenceField.instance,
         uniqueKey: key,
         label: &#39;Text Segmentation&#39;,
         description: &#39;Search or select a new term from segmented text.&#39;,
@@ -147,7 +147,7 @@
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

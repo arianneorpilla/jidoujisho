@@ -110,19 +110,20 @@ Future&lt;void&gt; enhanceCreatorParams({
         return;
       }
 
-      creatorModel.getFieldController(SentenceField.instance).text =
-          selection.join(&#39;\n\n&#39;);
+      MassifResult firstResult = selection.removeAt(0);
+      creatorModel.setSentenceAndCloze(firstResult.selection);
+      for (MassifResult result in selection) {
+        creatorModel.appendSentenceAndCloze(result.text);
+      }
     },
     onAppend: (selection) {
       if (selection.isEmpty) {
         return;
       }
 
-      String currentSentence =
-          creatorModel.getFieldController(SentenceField.instance).text;
-
-      creatorModel.getFieldController(SentenceField.instance).text =
-          &#39;${currentSentence.trim()}\n\n${selection.join(&#39;\n\n&#39;)}&#39;.trim();
+      for (MassifResult result in selection) {
+        creatorModel.appendSentenceAndCloze(result.text);
+      }
     },
   );
 }</code></pre>
@@ -196,7 +197,7 @@ Future&lt;void&gt; enhanceCreatorParams({
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

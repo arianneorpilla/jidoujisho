@@ -62,12 +62,10 @@
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
 <span class="name ">openTextSegmentationDialog</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="openTextSegmentationDialog-param-sourceText">{<span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">sourceText</span>, </span></li>
 <li><span class="parameter" id="openTextSegmentationDialog-param-segmentedText"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span>?</span> <span class="parameter-name">segmentedText</span>, </span></li>
-<li><span class="parameter" id="openTextSegmentationDialog-param-onSelect"><span class="type-annotation">dynamic</span> <span class="parameter-name">onSelect</span>(<ol class="parameter-list"><li><span class="parameter" id="param-"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, </span></li>
-<li><span class="parameter" id="param-"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span></span></li>
+<li><span class="parameter" id="openTextSegmentationDialog-param-onSelect"><span class="type-annotation">dynamic</span> <span class="parameter-name">onSelect</span>(<ol class="parameter-list"><li><span class="parameter" id="param-"><span class="type-annotation"><a href="../../utils/JidoujishoTextSelection-class.html">JidoujishoTextSelection</a></span></span></li>
 </ol>
 )?, </span></li>
-<li><span class="parameter" id="openTextSegmentationDialog-param-onSearch"><span class="type-annotation">dynamic</span> <span class="parameter-name">onSearch</span>(<ol class="parameter-list"><li><span class="parameter" id="param-"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, </span></li>
-<li><span class="parameter" id="param-"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span></span></li>
+<li><span class="parameter" id="openTextSegmentationDialog-param-onSearch"><span class="type-annotation">dynamic</span> <span class="parameter-name">onSearch</span>(<ol class="parameter-list"><li><span class="parameter" id="param-"><span class="type-annotation"><a href="../../utils/JidoujishoTextSelection-class.html">JidoujishoTextSelection</a></span></span></li>
 </ol>
 )?}</span></li>
 </ol>)
@@ -87,17 +85,14 @@
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; openTextSegmentationDialog({
   required String sourceText,
   List&lt;String&gt;? segmentedText,
-  Function(String, List&lt;String&gt;)? onSelect,
-  Function(String, List&lt;String&gt;)? onSearch,
+  Function(JidoujishoTextSelection)? onSelect,
+  Function(JidoujishoTextSelection)? onSearch,
 }) async {
   if (sourceText.trim().isEmpty) {
     return;
   }
 
   segmentedText ??= targetLanguage.textToWords(sourceText);
-  if (targetLanguage.isSpaceDelimited) {
-    segmentedText = segmentedText.where((e) =&gt; e != &#39; &#39;).toList();
-  }
 
   await showDialog(
     context: _navigatorKey.currentContext!,
@@ -151,6 +146,7 @@
           <li><a href="../../models/AppModel/blurOptions.html">blurOptions</a></li>
           <li><a href="../../models/AppModel/browserDirectory.html">browserDirectory</a></li>
           <li><a href="../../models/AppModel/cacheManager.html">cacheManager</a></li>
+          <li><a href="../../models/AppModel/cardCreatorRecursiveSearchStream.html">cardCreatorRecursiveSearchStream</a></li>
           <li><a href="../../models/AppModel/closeCreatorOnExport.html">closeCreatorOnExport</a></li>
           <li><a href="../../models/AppModel/creatorActiveStream.html">creatorActiveStream</a></li>
           <li><a href="../../models/AppModel/currentHomeTabIndex.html">currentHomeTabIndex</a></li>
@@ -296,6 +292,7 @@
           <li><a href="../../models/AppModel/mappingNameHasDuplicate.html">mappingNameHasDuplicate</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/foundation/ChangeNotifier/notifyListeners.html">notifyListeners</a></li>
+          <li><a href="../../models/AppModel/notifyRecursiveSearch.html">notifyRecursiveSearch</a></li>
           <li><a href="../../models/AppModel/openCreator.html">openCreator</a></li>
           <li><a href="../../models/AppModel/openCreatorEnhancementsEditor.html">openCreatorEnhancementsEditor</a></li>
           <li><a href="../../models/AppModel/openCreatorFieldsEditor.html">openCreatorFieldsEditor</a></li>
@@ -409,7 +406,7 @@
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

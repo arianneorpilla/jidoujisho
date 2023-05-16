@@ -88,7 +88,19 @@ should stay intact for languages that feature such, such as spaces.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
 List&lt;String&gt; textToWords(String text) {
-  return text.splitWithDelim(RegExp(r&#39;[-\n\r\s]+&#39;));
+  List&lt;String&gt; splitText = text.splitWithDelim(RegExp(r&#39;[-\n\r\s]+&#39;));
+  return splitText
+      .mapIndexed((index, element) {
+        if (index.isEven &amp;&amp; index + 1 &lt; splitText.length) {
+          return [splitText[index], splitText[index + 1]].join();
+        } else if (index + 1 == splitText.length) {
+          return splitText[index];
+        } else {
+          return &#39;&#39;;
+        }
+      })
+      .where((e) =&gt; e.isNotEmpty)
+      .toList();
 }</code></pre>
 </section>
 
@@ -137,6 +149,8 @@ List&lt;String&gt; textToWords(String text) {
           <li class="inherited"><a href="../../language/Language/threeLetterCode.html">threeLetterCode</a></li>
 
         <li class="section-title"><a href="../../language/EnglishLanguage-class.html#instance-methods">Methods</a></li>
+          <li class="inherited"><a href="../../language/Language/getFinalHighlightLength.html">getFinalHighlightLength</a></li>
+          <li class="inherited"><a href="../../language/Language/getGuessHighlightLength.html">getGuessHighlightLength</a></li>
           <li class="inherited"><a href="../../language/Language/getPitchWidget.html">getPitchWidget</a></li>
           <li class="inherited"><a href="../../language/Language/getSearchTermFromIndex.html">getSearchTermFromIndex</a></li>
           <li class="inherited"><a href="../../language/Language/getSentenceFromParagraph.html">getSentenceFromParagraph</a></li>
@@ -170,7 +184,7 @@ List&lt;String&gt; textToWords(String text) {
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

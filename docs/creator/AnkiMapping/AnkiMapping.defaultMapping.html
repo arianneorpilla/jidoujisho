@@ -83,16 +83,21 @@ are suggested.</p>
     model: standardModelName,
     exportFieldKeys: [
       TermField.key,
-      SentenceField.key,
       ReadingField.key,
-      MeaningField.key,
-      NotesField.key,
-      ImageField.key,
-      AudioField.key,
-      PitchAccentField.key,
       FuriganaField.key,
+      SentenceField.key,
+      ClozeBeforeField.key,
+      ClozeInsideField.key,
+      ClozeAfterField.key,
+      MeaningField.key,
       ExpandedMeaningField.key,
       CollapsedMeaningField.key,
+      NotesField.key,
+      ContextField.key,
+      FrequencyField.key,
+      PitchAccentField.key,
+      ImageField.key,
+      AudioField.key,
       AudioSentenceField.key,
     ],
     creatorFieldKeys: defaultCreatorFieldKeys,
@@ -199,7 +204,7 @@ are suggested.</p>
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

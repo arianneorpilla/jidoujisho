@@ -118,14 +118,36 @@
       List&lt;String&gt; splitWithDelims =
           highlightedText.splitWithDelim(RegExp(r&#39;&lt;em&gt;(.*?)&lt;\&#47;em&gt;&#39;));
 
+      final buffer = StringBuffer();
+      TextRange range = TextRange.empty;
+
+      bool firstFound = false;
+      bool consecutiveFlag = false;
+      int? start;
+      int? end;
+
       for (String splitWithDelim in splitWithDelims) {
         if (splitWithDelim.startsWith(&#39;&lt;em&gt;&#39;) &amp;&amp;
             splitWithDelim.endsWith(&#39;&lt;&#47;em&gt;&#39;)) {
+          String text =
+              splitWithDelim.replaceAll(&#39;&lt;em&gt;&#39;, &#39;&#39;).replaceAll(&#39;&lt;&#47;em&gt;&#39;, &#39;&#39;);
+
+          if (!firstFound) {
+            consecutiveFlag = true;
+            firstFound = true;
+            start = buffer.length;
+            end = buffer.length + text.length;
+          }
+
+          if (firstFound &amp;&amp; consecutiveFlag) {
+            end = buffer.length + text.length;
+          }
+
+          buffer.write(text);
+
           spans.add(
             TextSpan(
-              text: splitWithDelim
-                  .replaceAll(&#39;&lt;em&gt;&#39;, &#39;&#39;)
-                  .replaceAll(&#39;&lt;&#47;em&gt;&#39;, &#39;&#39;),
+              text: text,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.primary,
@@ -134,6 +156,11 @@
             ),
           );
         } else {
+          if (splitWithDelim.trim().isNotEmpty) {
+            consecutiveFlag = false;
+          }
+
+          buffer.write(splitWithDelim);
           spans.add(
             TextSpan(
               text: splitWithDelim,
@@ -146,8 +173,16 @@
         }
       }
 
+      if (start != null &amp;&amp; end != null) {
+        range = TextRange(
+          start: start,
+          end: end,
+        );
+      }
+
       MassifResult result = MassifResult(
         text: text,
+        range: range,
         source: source,
         spans: spans,
       );
@@ -237,7 +272,7 @@
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

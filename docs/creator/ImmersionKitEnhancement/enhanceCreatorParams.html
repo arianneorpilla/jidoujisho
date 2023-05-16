@@ -121,10 +121,13 @@ Future&lt;void&gt; enhanceCreatorParams({
         return;
       }
 
-      creatorModel.getFieldController(SentenceField.instance).text =
-          selection.map((result) =&gt; result.text).join(&#39;\n\n&#39;);
+      ImmersionKitResult firstResult = selection.removeAt(0);
+      creatorModel.setSentenceAndCloze(firstResult.selection);
+      for (ImmersionKitResult result in selection) {
+        creatorModel.appendSentenceAndCloze(result.text);
+      }
 
-      if (selection.first.imageUrl.isNotEmpty) {
+      if (firstResult.imageUrl.isNotEmpty) {
         await ImageField.instance.setImages(
           cause: cause,
           appModel: appModel,
@@ -134,7 +137,7 @@ Future&lt;void&gt; enhanceCreatorParams({
             String imagePath = &#39;${directory.path}&#47;image&#39;;
             File imageFile = File(imagePath);
             File networkFile = await DefaultCacheManager()
-                .getSingleFile(selection.first.imageUrl);
+                .getSingleFile(firstResult.imageUrl);
             networkFile.copySync(imageFile.path);
 
             return [NetworkToFileImage(file: imageFile)];
@@ -142,7 +145,7 @@ Future&lt;void&gt; enhanceCreatorParams({
         );
       }
 
-      if (selection.first.audioUrl.isNotEmpty) {
+      if (firstResult.audioUrl.isNotEmpty) {
         await AudioSentenceField.instance.setAudio(
           appModel: appModel,
           creatorModel: creatorModel,
@@ -153,7 +156,7 @@ Future&lt;void&gt; enhanceCreatorParams({
             String audioPath = &#39;${directory.path}&#47;audio.mp3&#39;;
             File audioFile = File(audioPath);
             File networkFile = await DefaultCacheManager()
-                .getSingleFile(selection.first.audioUrl);
+                .getSingleFile(firstResult.audioUrl);
             networkFile.copySync(audioFile.path);
 
             return audioFile;
@@ -166,12 +169,9 @@ Future&lt;void&gt; enhanceCreatorParams({
         return;
       }
 
-      String currentSentence =
-          creatorModel.getFieldController(SentenceField.instance).text;
-
-      creatorModel.getFieldController(SentenceField.instance).text =
-          &#39;${currentSentence.trim()}\n\n${selection.map((result) =&gt; result.text).join(&#39;\n\n&#39;)}&#39;
-              .trim();
+      for (ImmersionKitResult result in selection) {
+        creatorModel.appendSentenceAndCloze(result.text);
+      }
     },
   );
 }</code></pre>
@@ -245,7 +245,7 @@ Future&lt;void&gt; enhanceCreatorParams({
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

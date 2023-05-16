@@ -235,11 +235,17 @@
         continue;
       }
 
+      List&lt;String&gt; blocks = partialTerm.split(&#39; &#39;);
+      String lastBlock = blocks.removeLast();
+
       List&lt;String&gt; possibleDeinflections = lemmatizer
-          .lemmas(partialTerm)
+          .lemmas(lastBlock)
           .map((lemma) =&gt; lemma.lemmas)
           .flattened
           .where((e) =&gt; e.isNotEmpty)
+          .map(
+            (e) =&gt; [...blocks, e].join(),
+          )
           .toList();
 
       List&lt;DictionaryHeading&gt; termExactResults = [];
@@ -300,12 +306,27 @@
       uniqueHeadingsById.addEntries(exactHeadingsToAdd);
       uniqueHeadingsById.addEntries(deinflectedHeadingsToAdd);
 
-      List&lt;MapEntry&lt;int, DictionaryHeading&gt;&gt; startsWithHeadingsToAdd = [
-        ...(termStartsWithResultsByLength[length] ?? [])
-            .map((heading) =&gt; MapEntry(heading.id, heading)),
-      ];
+      if (params.searchWithWildcards) {
+        for (int length = searchTerm.length; length &gt; 0; length--) {
+          List&lt;MapEntry&lt;int, DictionaryHeading&gt;&gt; startsWithHeadingsToAdd = [
+            ...(termStartsWithResultsByLength[length] ?? [])
+                .map((heading) =&gt; MapEntry(heading.id, heading)),
+          ];
 
-      uniqueHeadingsById.addEntries(startsWithHeadingsToAdd);
+          uniqueHeadingsById.addEntries(startsWithHeadingsToAdd);
+        }
+      }
+    }
+
+    if (!params.searchWithWildcards) {
+      for (int length = searchTerm.length; length &gt; 0; length--) {
+        List&lt;MapEntry&lt;int, DictionaryHeading&gt;&gt; startsWithHeadingsToAdd = [
+          ...(termStartsWithResultsByLength[length] ?? [])
+              .map((heading) =&gt; MapEntry(heading.id, heading)),
+        ];
+
+        uniqueHeadingsById.addEntries(startsWithHeadingsToAdd);
+      }
     }
   }
 
@@ -419,7 +440,7 @@
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

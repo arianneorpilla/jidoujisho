@@ -91,7 +91,6 @@
     ],
     NotesField.instance: [
       ClearFieldEnhancement(field: NotesField.instance),
-      TextSegmentationEnhancement(field: NotesField.instance),
       OpenStashEnhancement(field: NotesField.instance),
       PopFromStashEnhancement(field: NotesField.instance),
     ],
@@ -101,11 +100,9 @@
       CropImageEnhancement(),
       PickImageEnhancement(),
       CameraEnhancement(),
-      ImageSearchTermPickerEnhancement(),
     ],
     MeaningField.instance: [
       ClearFieldEnhancement(field: MeaningField.instance),
-      TextSegmentationEnhancement(field: MeaningField.instance),
       SentencePickerEnhancement(field: MeaningField.instance),
     ],
     ReadingField.instance: [
@@ -113,7 +110,7 @@
     ],
     SentenceField.instance: [
       ClearFieldEnhancement(field: SentenceField.instance),
-      TextSegmentationEnhancement(field: SentenceField.instance),
+      TextSegmentationEnhancement(),
       SentencePickerEnhancement(field: SentenceField.instance),
       OpenStashEnhancement(field: SentenceField.instance),
       PopFromStashEnhancement(field: SentenceField.instance),
@@ -129,7 +126,6 @@
     ],
     ContextField.instance: [
       ClearFieldEnhancement(field: ContextField.instance),
-      TextSegmentationEnhancement(field: ContextField.instance),
       OpenStashEnhancement(field: ContextField.instance),
       PopFromStashEnhancement(field: ContextField.instance),
     ],
@@ -139,24 +135,33 @@
     FuriganaField.instance: [
       ClearFieldEnhancement(field: FuriganaField.instance),
     ],
+    FrequencyField.instance: [
+      ClearFieldEnhancement(field: FrequencyField.instance),
+    ],
     CollapsedMeaningField.instance: [
       ClearFieldEnhancement(field: CollapsedMeaningField.instance),
-      TextSegmentationEnhancement(field: CollapsedMeaningField.instance),
       SentencePickerEnhancement(field: CollapsedMeaningField.instance),
     ],
     ExpandedMeaningField.instance: [
       ClearFieldEnhancement(field: ExpandedMeaningField.instance),
-      TextSegmentationEnhancement(field: ExpandedMeaningField.instance),
       SentencePickerEnhancement(field: ExpandedMeaningField.instance),
     ],
     HiddenMeaningField.instance: [
       ClearFieldEnhancement(field: HiddenMeaningField.instance),
-      TextSegmentationEnhancement(field: HiddenMeaningField.instance),
       SentencePickerEnhancement(field: HiddenMeaningField.instance),
     ],
     TagsField.instance: [
       ClearFieldEnhancement(field: TagsField.instance),
       SaveTagsEnhancement(),
+    ],
+    ClozeBeforeField.instance: [
+      ClearFieldEnhancement(field: ClozeBeforeField.instance),
+    ],
+    ClozeAfterField.instance: [
+      ClearFieldEnhancement(field: ClozeAfterField.instance),
+    ],
+    ClozeInsideField.instance: [
+      ClearFieldEnhancement(field: ClozeInsideField.instance),
     ],
   };
 
@@ -217,6 +222,7 @@
           <li><a href="../../models/AppModel/blurOptions.html">blurOptions</a></li>
           <li><a href="../../models/AppModel/browserDirectory.html">browserDirectory</a></li>
           <li><a href="../../models/AppModel/cacheManager.html">cacheManager</a></li>
+          <li><a href="../../models/AppModel/cardCreatorRecursiveSearchStream.html">cardCreatorRecursiveSearchStream</a></li>
           <li><a href="../../models/AppModel/closeCreatorOnExport.html">closeCreatorOnExport</a></li>
           <li><a href="../../models/AppModel/creatorActiveStream.html">creatorActiveStream</a></li>
           <li><a href="../../models/AppModel/currentHomeTabIndex.html">currentHomeTabIndex</a></li>
@@ -362,6 +368,7 @@
           <li><a href="../../models/AppModel/mappingNameHasDuplicate.html">mappingNameHasDuplicate</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/foundation/ChangeNotifier/notifyListeners.html">notifyListeners</a></li>
+          <li><a href="../../models/AppModel/notifyRecursiveSearch.html">notifyRecursiveSearch</a></li>
           <li><a href="../../models/AppModel/openCreator.html">openCreator</a></li>
           <li><a href="../../models/AppModel/openCreatorEnhancementsEditor.html">openCreatorEnhancementsEditor</a></li>
           <li><a href="../../models/AppModel/openCreatorFieldsEditor.html">openCreatorFieldsEditor</a></li>
@@ -475,7 +482,7 @@
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

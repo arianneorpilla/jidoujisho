@@ -99,6 +99,10 @@ String? onCreatorOpenAction({
   required bool creatorJustLaunched,
   required String? dictionaryName,
 }) {
+  if (appModel.targetLanguage is! JapaneseLanguage) {
+    return null;
+  }
+
   return getAllHtmlPitch(
     appModel: appModel,
     heading: heading,
@@ -159,7 +163,6 @@ String? onCreatorOpenAction({
 
         <li class="section-title"><a href="../../creator/PitchAccentField-class.html#static-methods">Static methods</a></li>
           <li><a href="../../creator/PitchAccentField/getAllHtmlPitch.html">getAllHtmlPitch</a></li>
-          <li><a href="../../creator/PitchAccentField/getHtmlPitch.html">getHtmlPitch</a></li>
 
         <li class="section-title"><a href="../../creator/PitchAccentField-class.html#constants">Constants</a></li>
           <li><a href="../../creator/PitchAccentField/key-constant.html">key</a></li>
@@ -175,7 +178,7 @@ String? onCreatorOpenAction({
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

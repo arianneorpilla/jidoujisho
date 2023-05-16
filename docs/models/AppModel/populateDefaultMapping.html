@@ -83,6 +83,57 @@
         order: 0,
       ));
     });
+  } else {
+    AnkiMapping standardProfile = _database.ankiMappings
+        .where()
+        .labelEqualTo(AnkiMapping.standardProfileName)
+        .findFirstSync()!;
+    if (standardProfile.model != AnkiMapping.standardModelName) {
+      String newLabel = &#39;Legacy Standard&#39;;
+      int attempts = 1;
+
+      while (_database.ankiMappings
+          .where()
+          .labelEqualTo(newLabel)
+          .findAllSync()
+          .isNotEmpty) {
+        attempts += 1;
+        newLabel = &#39;Legacy Standard ($attempts)&#39;;
+      }
+
+      AnkiMapping legacyProfile = standardProfile.copyWith(
+        label: newLabel,
+      );
+
+      _database.writeTxnSync(() {
+        _database.ankiMappings.putAllSync(
+          [
+            legacyProfile,
+            AnkiMapping.defaultMapping(
+              language: language,
+              order: nextMappingOrder,
+            ),
+          ],
+        );
+      });
+
+      await showDialog(
+        barrierDismissible: true,
+        context: _navigatorKey.currentContext!,
+        builder: (context) =&gt; AlertDialog(
+          title: Text(t.info_standard_update),
+          content: Text(
+            t.info_standard_update_content,
+          ),
+          actions: [
+            TextButton(
+              child: Text(t.dialog_close),
+              onPressed: () =&gt; Navigator.pop(context),
+            ),
+          ],
+        ),
+      );
+    }
   }
 }</code></pre>
 </section>
@@ -127,6 +178,7 @@
           <li><a href="../../models/AppModel/blurOptions.html">blurOptions</a></li>
           <li><a href="../../models/AppModel/browserDirectory.html">browserDirectory</a></li>
           <li><a href="../../models/AppModel/cacheManager.html">cacheManager</a></li>
+          <li><a href="../../models/AppModel/cardCreatorRecursiveSearchStream.html">cardCreatorRecursiveSearchStream</a></li>
           <li><a href="../../models/AppModel/closeCreatorOnExport.html">closeCreatorOnExport</a></li>
           <li><a href="../../models/AppModel/creatorActiveStream.html">creatorActiveStream</a></li>
           <li><a href="../../models/AppModel/currentHomeTabIndex.html">currentHomeTabIndex</a></li>
@@ -272,6 +324,7 @@
           <li><a href="../../models/AppModel/mappingNameHasDuplicate.html">mappingNameHasDuplicate</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
           <li class="inherited"><a href="https://api.flutter.dev/flutter/foundation/ChangeNotifier/notifyListeners.html">notifyListeners</a></li>
+          <li><a href="../../models/AppModel/notifyRecursiveSearch.html">notifyRecursiveSearch</a></li>
           <li><a href="../../models/AppModel/openCreator.html">openCreator</a></li>
           <li><a href="../../models/AppModel/openCreatorEnhancementsEditor.html">openCreatorEnhancementsEditor</a></li>
           <li><a href="../../models/AppModel/openCreatorFieldsEditor.html">openCreatorFieldsEditor</a></li>
@@ -385,7 +438,7 @@
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

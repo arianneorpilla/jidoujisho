@@ -99,6 +99,10 @@ String? onCreatorOpenAction({
   required bool creatorJustLaunched,
   required String? dictionaryName,
 }) {
+  if (appModel.targetLanguage is! JapaneseLanguage) {
+    return null;
+  }
+
   List&lt;RubyTextData&gt;? rubyDatas = JapaneseLanguage.instance.fetchFurigana(
     heading: heading,
   );
@@ -187,7 +191,7 @@ String? onCreatorOpenAction({
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

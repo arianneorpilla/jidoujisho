@@ -100,7 +100,7 @@ String? onCreatorOpenAction({
   required String? dictionaryName,
 }) {
   if (creatorJustLaunched) {
-    return appModel.getCurrentSentence();
+    return appModel.getCurrentSentence().text.trim();
   } else {
     return null;
   }
@@ -173,7 +173,7 @@ String? onCreatorOpenAction({
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   

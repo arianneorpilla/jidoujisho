@@ -109,8 +109,12 @@
   }
 
   String filePath = filePaths.first;
-  String basename = path.basename(filePath);
+  String fileBasename = path.basename(filePath);
+
   String directory = path.dirname(filePath);
+  String directoryBasename = path.basename(directory);
+
+  String parentDirectory = path.dirname(directory);
 
   appModel.setLastPickedDirectory(
     type: ReaderMediaType.instance,
@@ -125,7 +129,8 @@
       ),
     ),
     initialUrlRequest: URLRequest(
-      url: Uri.parse(&#39;file:&#47;&#47;$directory&#47;${Uri.encodeComponent(basename)}&#39;),
+      url: Uri.parse(
+          &#39;file:&#47;&#47;$parentDirectory&#47;${Uri.encodeComponent(directoryBasename)}&#47;${Uri.encodeComponent(fileBasename)}&#39;),
     ),
     onLoadStop: (controller, url) async {
       MediaItem? item = await generateMediaItemFromWebView(
@@ -272,7 +277,7 @@
 <footer>
   <span class="no-break">
     yuuna
-      2.6.9+83
+      2.7.0+84
   </span>
 
   
