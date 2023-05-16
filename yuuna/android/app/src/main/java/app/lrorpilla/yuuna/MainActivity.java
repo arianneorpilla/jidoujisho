@@ -106,12 +106,16 @@ public class MainActivity extends AudioServiceActivity {
         }
     }
 
-    private boolean checkForDuplicates(String model, Integer numFields, String key) {
+    private boolean checkForDuplicates(String key) {
         final AddContentApi api = new AddContentApi(context);
-        long modelId = mAnkiDroid.findModelIdByName(model, numFields);
+        for (Long modelId : api.getModelList().keySet()) {
+            List<NoteInfo> notes = api.findDuplicateNotes(modelId, key);
+            if (!notes.isEmpty()) {
+                return true;
+            }
+        }
 
-        List<NoteInfo> notes = api.findDuplicateNotes(modelId, key);
-        return !notes.isEmpty();
+        return false;
     }
 
     private void addNote(String model, String deck, ArrayList<String> fields, ArrayList<String> tags) {
@@ -146,7 +150,6 @@ public class MainActivity extends AudioServiceActivity {
                     final String model = call.argument("model");
                     final String deck = call.argument("deck");
                     final String key = call.argument("key");
-                    final Integer numFields = call.argument("numFields");
                     final ArrayList<String> fields = call.argument("fields"); 
                     final ArrayList<String> tags = call.argument("tags"); 
 
@@ -162,7 +165,7 @@ public class MainActivity extends AudioServiceActivity {
                             result.success("Added note");
                             break;
                         case "checkForDuplicates":
-                            result.success(checkForDuplicates(model, numFields, key));
+                            result.success(checkForDuplicates(key));
                             break;
                         case "getDecks":
                             result.success(api.getDeckList());
