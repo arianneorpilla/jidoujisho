@@ -323,6 +323,8 @@ class _MokuroCatalogBrowsePageState
         .trim();
   }
 
+  bool _firstLoadFlag = false;
+
   Widget buildBody() {
     return InAppWebView(
       initialOptions: InAppWebViewGroupOptions(
@@ -370,15 +372,24 @@ class _MokuroCatalogBrowsePageState
         }
 
         if (_mediaItem != null) {
-          if (mediaSource.useDarkTheme) {
-            await injectDarkTheme();
-          }
-          await controller.evaluateJavascript(source: javascriptToExecute);
+          if (!_firstLoadFlag) {
+            _firstLoadFlag = true;
 
-          await updateOrientation();
-          Future.delayed(const Duration(milliseconds: 300), () {
-            controller.evaluateJavascript(source: 'zoomFitToScreen();');
-          });
+            if (mediaSource.useDarkTheme) {
+              await injectDarkTheme();
+            }
+            await controller.evaluateJavascript(source: javascriptToExecute);
+
+            if (_mediaItem?.sourceMetadata == null) {
+              await updateOrientation();
+              _mediaItem?.sourceMetadata = 'used';
+              appModel.addMediaItem(_mediaItem!);
+            }
+
+            Future.delayed(const Duration(milliseconds: 300), () {
+              controller.evaluateJavascript(source: 'zoomFitToScreen();');
+            });
+          }
 
           Future.delayed(const Duration(seconds: 1), _focusNode.requestFocus);
         }
@@ -439,7 +450,6 @@ document.getElementById('pageIdxDisplay').style.color = 'white';
     if (orientation != lastOrientation) {
       if (_controllerInitialised) {
         clearDictionaryResult();
-        updateOrientation();
       }
       lastOrientation = orientation;
     }
@@ -738,7 +748,8 @@ backgroundStyle.substring(5, backgroundStyle.length - 2);
 
   Future<void> updateOrientation() async {
     await _controller.evaluateJavascript(source: '''
-state.singlePageView = ${MediaQuery.of(context).orientation == Orientation.portrait}
+state.singlePageView = ${MediaQuery.of(context).orientation == Orientation.portrait};
+menuDoublePageView.checked = ${MediaQuery.of(context).orientation != Orientation.portrait};
 saveState();
 updatePage(state.page_idx);
 ''');

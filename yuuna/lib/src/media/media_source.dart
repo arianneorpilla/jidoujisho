@@ -186,13 +186,11 @@ abstract class MediaSource {
   void setCurrentSentence({
     required JidoujishoTextSelection selection,
   }) {
-    debugPrint(selection.toString());
     _currentSentence = selection;
   }
 
   /// Clear the current sentence.
   void clearCurrentSentence() {
-    debugPrint('Selection Cleared');
     _currentSentence = JidoujishoTextSelection(
       text: '',
     );

@@ -371,7 +371,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         sentence = sentence.replaceAll(RegExp(regex), '');
       }
 
-      if (!_transcriptOpenNotifier.value) {
+      if (!_transcriptOpenNotifier.value &&
+          widget.source.currentSentence.text != sentence) {
         widget.source.setCurrentSentence(
           selection: JidoujishoTextSelection(
             text: sentence,
@@ -685,12 +686,15 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   }
 
   Future<void> openTranscript() async {
+    clearDictionaryResult();
+
     bool exporting = false;
     if (!appModel.isTranscriptPlayerMode) {
       await dialogSmartPause();
     }
 
-    clearDictionaryResult();
+    _playerController.pause();
+
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     await Future.delayed(const Duration(milliseconds: 5), () {});
 
@@ -1373,9 +1377,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         label: t.player_align_subtitle_transcript,
         icon: Icons.timer,
         action: () async {
+          clearDictionaryResult();
+
           await dialogSmartPause();
 
-          clearDictionaryResult();
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
           await Future.delayed(const Duration(milliseconds: 5), () {});
 
