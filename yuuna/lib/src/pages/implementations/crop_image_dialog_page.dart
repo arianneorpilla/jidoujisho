@@ -53,6 +53,8 @@ class _CropImageDialogPageState extends BasePageState<CropImageDialogPage> {
   Widget buildContent() {
     return Center(
       child: CropImage(
+          minimumImageSize: 25,
+          gridColor: Theme.of(context).unselectedWidgetColor,
           controller: _controller,
           image: Image(image: FileImage(widget.imageFile))),
     );
