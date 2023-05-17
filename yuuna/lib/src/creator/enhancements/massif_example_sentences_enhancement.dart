@@ -84,6 +84,8 @@ class MassifExampleSentencesEnhancement extends Enhancement {
 
         MassifResult firstResult = selection.removeAt(0);
         creatorModel.setSentenceAndCloze(firstResult.selection);
+        creatorModel.getFieldController(ContextField.instance).text =
+            firstResult.source;
         for (MassifResult result in selection) {
           creatorModel.appendSentenceAndCloze(result.text);
         }

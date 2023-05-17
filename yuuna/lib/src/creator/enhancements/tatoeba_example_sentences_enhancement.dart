@@ -56,6 +56,7 @@ class TatoebaExampleSentencesEnhancement extends Enhancement {
         String firstResult = selection.removeAt(0);
         creatorModel
             .setSentenceAndCloze(JidoujishoTextSelection(text: firstResult));
+        creatorModel.getFieldController(ContextField.instance).clear();
         for (String result in selection) {
           creatorModel.appendSentenceAndCloze(result);
         }
