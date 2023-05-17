@@ -3157,6 +3157,8 @@ class AppModel with ChangeNotifier {
         _preferences.get('subtitle_outline_width', defaultValue: 3.0);
     double subtitleBackgroundBlurRadius =
         _preferences.get('subtitle_background_blur_radius', defaultValue: 0.0);
+    bool alwaysAboveBottomBar =
+        _preferences.get('subtitle_above_bar', defaultValue: false);
 
     return SubtitleOptions(
       audioAllowance: audioAllowance,
@@ -3167,6 +3169,7 @@ class AppModel with ChangeNotifier {
       fontName: fontName,
       regexFilter: regexFilter,
       subtitleOutlineWidth: subtitleOutlineWidth,
+      alwaysAboveBottomBar: alwaysAboveBottomBar,
     );
   }
 
@@ -3183,6 +3186,7 @@ class AppModel with ChangeNotifier {
     _preferences.put('subtitle_outline_width', options.subtitleOutlineWidth);
     _preferences.put('subtitle_background_blur_radius',
         options.subtitleBackgroundBlurRadius);
+    _preferences.put('subtitle_above_bar', options.alwaysAboveBottomBar);
   }
 
   /// Gets the last used audio index of a given media item.

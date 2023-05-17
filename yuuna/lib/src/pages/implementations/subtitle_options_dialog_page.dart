@@ -34,6 +34,8 @@ class _SubtitleOptionsDialogPage
   late final TextEditingController _widthController;
   late final TextEditingController _blurController;
 
+  late ValueNotifier<bool> _aboveBottomBarNotifier;
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +56,8 @@ class _SubtitleOptionsDialogPage
         TextEditingController(text: _options.subtitleOutlineWidth.toString());
     _blurController = TextEditingController(
         text: _options.subtitleBackgroundBlurRadius.toString());
+    _aboveBottomBarNotifier =
+        ValueNotifier<bool>(_options.alwaysAboveBottomBar);
   }
 
   @override
@@ -329,11 +333,32 @@ class _SubtitleOptionsDialogPage
                   ),
                 ),
                 const SizedBox(height: 10),
+                buildAlwaysAboveBottomBar(),
+                const SizedBox(height: 10),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget buildAlwaysAboveBottomBar() {
+    return Row(
+      children: [
+        Expanded(child: Text(t.player_option_subtitle_always_above_bottom_bar)),
+        ValueListenableBuilder<bool>(
+          valueListenable: _aboveBottomBarNotifier,
+          builder: (_, value, __) {
+            return Switch(
+              value: value,
+              onChanged: (value) {
+                _aboveBottomBarNotifier.value = value;
+              },
+            );
+          },
+        )
+      ],
     );
   }
 
@@ -358,6 +383,8 @@ class _SubtitleOptionsDialogPage
 
     String blurText = _blurController.text;
     double? newBlur = double.tryParse(blurText);
+
+    bool newAlwaysAboveBottomBar = _aboveBottomBarNotifier.value;
 
     if (newDelay != null &&
         newAllowance != null &&
@@ -386,6 +413,7 @@ class _SubtitleOptionsDialogPage
       subtitleOptions.subtitleBackgroundOpacity = newOpacity;
       subtitleOptions.subtitleOutlineWidth = newWidth;
       subtitleOptions.subtitleBackgroundBlurRadius = newBlur;
+      subtitleOptions.alwaysAboveBottomBar = newAlwaysAboveBottomBar;
 
       widget.notifier.value = subtitleOptions;
 

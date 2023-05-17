@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 369
+/// Strings: 370
 ///
-/// Built on 2023-05-16 at 07:45 UTC
+/// Built on 2023-05-17 at 11:06 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -383,6 +383,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get player_option_subtitle_background_opacity => 'Subtitle background opacity';
 	String get player_option_subtitle_background_blur_radius => 'Subtitle background blur radius';
 	String get player_option_outline_width => 'Subtitle outline width';
+	String get player_option_subtitle_always_above_bottom_bar => 'Always show subtitle above bottom bar area';
 	String get player_subtitles_transcript_empty => 'Transcript is empty.';
 	String get player_prepare_export => 'Preparing card...';
 	String get player_change_player_orientation => 'Change Player Orientation';
@@ -784,6 +785,7 @@ extension on _StringsEn {
 			case 'player_option_subtitle_background_opacity': return 'Subtitle background opacity';
 			case 'player_option_subtitle_background_blur_radius': return 'Subtitle background blur radius';
 			case 'player_option_outline_width': return 'Subtitle outline width';
+			case 'player_option_subtitle_always_above_bottom_bar': return 'Always show subtitle above bottom bar area';
 			case 'player_subtitles_transcript_empty': return 'Transcript is empty.';
 			case 'player_prepare_export': return 'Preparing card...';
 			case 'player_change_player_orientation': return 'Change Player Orientation';

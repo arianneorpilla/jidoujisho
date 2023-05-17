@@ -1791,7 +1791,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         return Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
-            padding: _isMenuHidden.value
+            padding: _isMenuHidden.value &&
+                    !_subtitleOptionsNotifier.value.alwaysAboveBottomBar
                 ? const EdgeInsets.only(bottom: 20)
                 : const EdgeInsets.only(bottom: _menuHeight + 8),
             child: child,

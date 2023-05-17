@@ -10,6 +10,7 @@ class SubtitleOptions {
     required this.regexFilter,
     required this.subtitleOutlineWidth,
     required this.subtitleBackgroundBlurRadius,
+    required this.alwaysAboveBottomBar,
   });
 
   /// Audio allowance, used for audio export, in milliseconds.
@@ -35,4 +36,7 @@ class SubtitleOptions {
 
   /// Regex filter used for the subtitle.
   String regexFilter;
+
+  /// Whether or not the subtitle should always be above the bottom bar.
+  bool alwaysAboveBottomBar;
 }
