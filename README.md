@@ -8,10 +8,10 @@
     <img src="https://img.shields.io/github/v/release/lrorpilla/jidoujisho" alt="latest release" />
   </a>
   <a href="https://github.com/lrorpilla/jidoujisho/commits/main">
-    <img src="https://img.shields.io/github/last-commit/lrorpilla/jidoujisho" alt="last update" />
+    <img src="https://img.shields.io/github/last-commit/lrorpilla/jidoujisho" alt="latest commit" />
   </a>
   <a href="https://github.com/lrorpilla/jidoujisho/actions">
-    <img src="https://img.shields.io/github/actions/workflow/status/lrorpilla/jidoujisho/main.yml" alt="sponsor" />
+    <img src="https://img.shields.io/github/actions/workflow/status/lrorpilla/jidoujisho/main.yml" alt="actions" />
   </a>
   <a href="https://github.com/lrorpilla/jidoujisho/stargazers">
     <img src="https://img.shields.io/github/stars/lrorpilla/jidoujisho" alt="stars" />
@@ -19,14 +19,14 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/">
     <img src="https://img.shields.io/github/downloads/lrorpilla/jidoujisho/total" alt="downloads" />
   </a>
-  <a href="https://github.com/lrorpilla/jidoujisho/issues/">
-    <img src="https://img.shields.io/github/issues/lrorpilla/jidoujisho" alt="open issues" />
-  </a>
   <a href="https://github.com/lrorpilla/jidoujisho/blob/master/LICENSE">
     <img src="https://img.shields.io/github/license/lrorpilla/jidoujisho" alt="license" />
   </a>
+  <a href="https://crowdin.com/project/jidoujisho">
+    <img src="https://img.shields.io/badge/translate-crowdin-9C86B8" alt="translate" />
+  </a>
   <a href="https://ko-fi.com/lrorpilla">
-    <img src="https://img.shields.io/badge/donate-ko--fi-ff5f5f" alt="sponsor" />
+    <img src="https://img.shields.io/badge/donate-ko--fi-ff5f5f" alt="donate" />
   </a>
 </p>
 
