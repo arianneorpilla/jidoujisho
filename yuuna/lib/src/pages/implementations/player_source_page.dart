@@ -693,8 +693,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       await dialogSmartPause();
     }
 
-    _playerController.pause();
-
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     await Future.delayed(const Duration(milliseconds: 5), () {});
 
