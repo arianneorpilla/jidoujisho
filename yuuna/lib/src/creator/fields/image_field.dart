@@ -32,7 +32,6 @@ class ImageField extends ImageExportField {
 
   @override
   String? onCreatorOpenAction({
-    required BuildContext context,
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
@@ -211,14 +210,14 @@ class ImageField extends ImageExportField {
           WidgetSpan(
             alignment: PlaceholderAlignment.middle,
             child: Padding(
+              padding: EdgeInsets.only(
+                top: 1.25,
+                right: Spacing.of(context).spaces.small,
+              ),
               child: Icon(
                 icon,
                 size: fontSize,
                 color: Theme.of(context).unselectedWidgetColor,
-              ),
-              padding: EdgeInsets.only(
-                top: 1.25,
-                right: Spacing.of(context).spaces.small,
               ),
             ),
           ),
@@ -316,14 +315,14 @@ class ImageField extends ImageExportField {
           WidgetSpan(
             alignment: PlaceholderAlignment.middle,
             child: Padding(
+              padding: EdgeInsets.only(
+                top: 1.25,
+                right: Spacing.of(context).spaces.small,
+              ),
               child: Icon(
                 icon,
                 size: fontSize,
                 color: Theme.of(context).unselectedWidgetColor,
-              ),
-              padding: EdgeInsets.only(
-                top: 1.25,
-                right: Spacing.of(context).spaces.small,
               ),
             ),
           ),

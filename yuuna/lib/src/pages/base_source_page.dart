@@ -98,9 +98,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
               if (mounted) {
                 Navigator.pop(context, true);
               }
-
               await appModel.closeMedia(
-                context: context,
                 ref: ref,
                 mediaSource: appModel.currentMediaSource!,
                 item: widget.item,

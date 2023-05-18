@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
@@ -17,7 +16,6 @@ abstract class ImageEnhancement extends Enhancement {
   /// Given a search term, generate a list of images.
   Future<List<NetworkToFileImage>> fetchImages({
     required AppModel appModel,
-    required BuildContext context,
     String? searchTerm,
   });
 }

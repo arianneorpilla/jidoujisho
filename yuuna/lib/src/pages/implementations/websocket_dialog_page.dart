@@ -92,8 +92,8 @@ class _WebsocketDialogPageState extends BasePageState<WebsocketDialogPage> {
 
   Widget buildConnectButton() {
     return TextButton(
-      child: Text(t.dialog_connect),
       onPressed: executeSearch,
+      child: Text(t.dialog_connect),
     );
   }
 

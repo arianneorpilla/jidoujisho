@@ -292,7 +292,6 @@ class AudioSentenceField extends AudioExportField {
 
   @override
   String? onCreatorOpenAction({
-    required BuildContext context,
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,

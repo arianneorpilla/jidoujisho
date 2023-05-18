@@ -52,31 +52,31 @@ class CropImageEnhancement extends ImageEnhancement {
     String timestamp = DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
     File copyFile = File('$cropImagePath/$timestamp');
     imageFile.copySync(copyFile.path);
-
-    await showDialog<File?>(
-      context: context,
-      builder: (context) => CropImageDialogPage(
-        imageFile: copyFile,
-        onCrop: (file) {
-          imageField.setImages(
-            cause: cause,
-            appModel: appModel,
-            creatorModel: creatorModel,
-            newAutoCannotOverride: false,
-            searchTerm: searchTerm,
-            generateImages: () async {
-              return [NetworkToFileImage(file: file)];
-            },
-          );
-        },
-      ),
-    );
+    if (context.mounted) {
+      await showDialog<File?>(
+        context: context,
+        builder: (_) => CropImageDialogPage(
+          imageFile: copyFile,
+          onCrop: (file) {
+            imageField.setImages(
+              cause: cause,
+              appModel: appModel,
+              creatorModel: creatorModel,
+              newAutoCannotOverride: false,
+              searchTerm: searchTerm,
+              generateImages: () async {
+                return [NetworkToFileImage(file: file)];
+              },
+            );
+          },
+        ),
+      );
+    }
   }
 
   @override
   Future<List<NetworkToFileImage>> fetchImages({
     required AppModel appModel,
-    required BuildContext context,
     String? searchTerm,
   }) async {
     return [];

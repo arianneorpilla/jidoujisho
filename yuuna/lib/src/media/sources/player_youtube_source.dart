@@ -674,6 +674,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     required AppModel appModel,
     required BuildContext context,
   }) async {
+    final navigator = Navigator.of(context);
     String playlistId = getTrendingPlaylistId(appModel.targetLanguage)!;
     Playlist trendingPlaylist = await getPlaylistFromId(playlistId);
 
@@ -703,8 +704,8 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     }
 
     // Prevent recursion.
-    Navigator.of(context).popUntil((route) => route.isFirst);
-    await Navigator.of(context).push(
+    navigator.popUntil((route) => route.isFirst);
+    await navigator.push(
       MaterialPageRoute<void>(
         builder: (context) => YoutubeVideoResultsPage(
           showAppBar: true,
@@ -725,6 +726,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     required BuildContext context,
     required MediaItem item,
   }) async {
+    final navigator = Navigator.of(context);
     late String channelId;
     if (item.authorIdentifier == null) {
       String? fetchedId = _channelIdFetchedFromVideoCache[item.mediaIdentifier];
@@ -773,8 +775,8 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     }
 
     // Prevent recursion.
-    Navigator.of(context).popUntil((route) => route.isFirst);
-    await Navigator.of(context).push(
+    navigator.popUntil((route) => route.isFirst);
+    await navigator.push(
       MaterialPageRoute<void>(
         builder: (context) => YoutubeVideoResultsPage(
           showAppBar: true,

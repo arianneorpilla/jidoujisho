@@ -87,7 +87,7 @@ class _DictionaryDialogPageState extends BasePageState {
   }
 
   Widget buildEnablePageTurningSwitch() {
-    ValueNotifier<bool> _notifier =
+    ValueNotifier<bool> notifier =
         ValueNotifier<bool>(source.volumePageTurningEnabled);
 
     return Row(
@@ -96,13 +96,13 @@ class _DictionaryDialogPageState extends BasePageState {
           child: Text(t.volume_button_page_turning),
         ),
         ValueListenableBuilder<bool>(
-          valueListenable: _notifier,
+          valueListenable: notifier,
           builder: (_, value, __) {
             return Switch(
               value: value,
               onChanged: (value) {
                 source.toggleVolumePageTurningEnabled();
-                _notifier.value = source.volumePageTurningEnabled;
+                notifier.value = source.volumePageTurningEnabled;
               },
             );
           },
@@ -112,7 +112,7 @@ class _DictionaryDialogPageState extends BasePageState {
   }
 
   Widget buildInvertPageTurningSwitch() {
-    ValueNotifier<bool> _notifier =
+    ValueNotifier<bool> notifier =
         ValueNotifier<bool>(source.volumePageTurningInverted);
 
     return Row(
@@ -121,13 +121,13 @@ class _DictionaryDialogPageState extends BasePageState {
           child: Text(t.invert_volume_buttons),
         ),
         ValueListenableBuilder<bool>(
-          valueListenable: _notifier,
+          valueListenable: notifier,
           builder: (_, value, __) {
             return Switch(
               value: value,
               onChanged: (value) {
                 source.toggleVolumePageTurningInverted();
-                _notifier.value = source.volumePageTurningInverted;
+                notifier.value = source.volumePageTurningInverted;
               },
             );
           },
@@ -137,7 +137,7 @@ class _DictionaryDialogPageState extends BasePageState {
   }
 
   Widget buildExtendPageSwitch() {
-    ValueNotifier<bool> _notifier =
+    ValueNotifier<bool> notifier =
         ValueNotifier<bool>(source.extendPageBeyondNavigationBar);
 
     return Row(
@@ -146,13 +146,13 @@ class _DictionaryDialogPageState extends BasePageState {
           child: Text(t.extend_page_beyond_navbar),
         ),
         ValueListenableBuilder<bool>(
-          valueListenable: _notifier,
+          valueListenable: notifier,
           builder: (_, value, __) {
             return Switch(
               value: value,
               onChanged: (value) {
                 source.toggleExtendPageBeyondNavigationBar();
-                _notifier.value = source.extendPageBeyondNavigationBar;
+                notifier.value = source.extendPageBeyondNavigationBar;
               },
             );
           },
@@ -162,7 +162,7 @@ class _DictionaryDialogPageState extends BasePageState {
   }
 
   Widget buildAdaptThemeSwitch() {
-    ValueNotifier<bool> _notifier = ValueNotifier<bool>(source.adaptTtuTheme);
+    ValueNotifier<bool> notifier = ValueNotifier<bool>(source.adaptTtuTheme);
 
     return Row(
       children: [
@@ -170,13 +170,13 @@ class _DictionaryDialogPageState extends BasePageState {
           child: Text(t.adapt_ttu_theme),
         ),
         ValueListenableBuilder<bool>(
-          valueListenable: _notifier,
+          valueListenable: notifier,
           builder: (_, value, __) {
             return Switch(
               value: value,
               onChanged: (value) {
                 source.toggleAdaptTtuTheme();
-                _notifier.value = source.adaptTtuTheme;
+                notifier.value = source.adaptTtuTheme;
               },
             );
           },
@@ -186,7 +186,7 @@ class _DictionaryDialogPageState extends BasePageState {
   }
 
   Widget buildHighlightOnTapSwitch() {
-    ValueNotifier<bool> _notifier = ValueNotifier<bool>(source.highlightOnTap);
+    ValueNotifier<bool> notifier = ValueNotifier<bool>(source.highlightOnTap);
 
     return Row(
       children: [
@@ -194,13 +194,13 @@ class _DictionaryDialogPageState extends BasePageState {
           child: Text(t.highlight_on_tap),
         ),
         ValueListenableBuilder<bool>(
-          valueListenable: _notifier,
+          valueListenable: notifier,
           builder: (_, value, __) {
             return Switch(
               value: value,
               onChanged: (value) {
                 source.toggleHighlightOnTap();
-                _notifier.value = source.highlightOnTap;
+                notifier.value = source.highlightOnTap;
               },
             );
           },

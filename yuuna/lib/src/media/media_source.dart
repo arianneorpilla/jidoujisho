@@ -137,7 +137,6 @@ abstract class MediaSource {
   /// resources or refresh media history.
   Future<void> onSourceExit({
     required AppModel appModel,
-    required BuildContext context,
     required WidgetRef ref,
   }) async {}
 
@@ -164,7 +163,6 @@ abstract class MediaSource {
     required AppModel appModel,
   }) async {
     appModel.openMedia(
-      context: context,
       ref: ref,
       mediaSource: this,
     );

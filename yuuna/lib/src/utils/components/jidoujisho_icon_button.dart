@@ -142,17 +142,6 @@ class _JidoujishoIconButtonState extends State<JidoujishoIconButton> {
       child: InkWell(
         enableFeedback: enabled,
         customBorder: widget.shapeBorder,
-        child: ColoredBox(
-          color: widget.backgroundColor ?? Colors.transparent,
-          child: Padding(
-            padding: widget.padding ?? const EdgeInsets.all(8),
-            child: Icon(
-              widget.icon,
-              size: widget.size,
-              color: enabled ? enabledColor : disabledColor,
-            ),
-          ),
-        ),
         onTap: enabled
             ? () async {
                 if (widget.busy) {
@@ -176,6 +165,17 @@ class _JidoujishoIconButtonState extends State<JidoujishoIconButton> {
               }
             : null,
         onTapDown: widget.onTapDown,
+        child: ColoredBox(
+          color: widget.backgroundColor ?? Colors.transparent,
+          child: Padding(
+            padding: widget.padding ?? const EdgeInsets.all(8),
+            child: Icon(
+              widget.icon,
+              size: widget.size,
+              color: enabled ? enabledColor : disabledColor,
+            ),
+          ),
+        ),
       ),
     );
   }

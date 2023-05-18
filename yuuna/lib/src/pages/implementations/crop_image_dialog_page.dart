@@ -62,8 +62,8 @@ class _CropImageDialogPageState extends BasePageState<CropImageDialogPage> {
 
   Widget buildCropButton() {
     return TextButton(
-      child: Text(t.dialog_crop),
       onPressed: executeCrop,
+      child: Text(t.dialog_crop),
     );
   }
 
@@ -75,6 +75,7 @@ class _CropImageDialogPageState extends BasePageState<CropImageDialogPage> {
   }
 
   void executeCrop() async {
+    final navigator = Navigator.of(context);
     Directory appDirDoc = await getApplicationSupportDirectory();
     String cropImagePath = '${appDirDoc.path}/crop';
     Directory cropImageDir = Directory(cropImagePath);
@@ -96,6 +97,6 @@ class _CropImageDialogPageState extends BasePageState<CropImageDialogPage> {
     imageFile.writeAsBytesSync(bytes);
 
     widget.onCrop(imageFile);
-    Navigator.pop(context);
+    navigator.pop();
   }
 }

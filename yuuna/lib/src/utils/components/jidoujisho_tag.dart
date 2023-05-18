@@ -47,6 +47,17 @@ class JidoujishoTag extends StatelessWidget {
     return Padding(
       padding: Spacing.of(context).insets.onlyRight.small,
       child: InkWell(
+        onTap: message != null
+            ? () {
+                Fluttertoast.showToast(
+                  backgroundColor: backgroundColor,
+                  textColor: foregroundColor,
+                  msg: message!,
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                );
+              }
+            : null,
         child: Container(
           color: backgroundColor,
           padding: Spacing.of(context).insets.all.small,
@@ -91,17 +102,6 @@ class JidoujishoTag extends StatelessWidget {
             ],
           ),
         ),
-        onTap: message != null
-            ? () {
-                Fluttertoast.showToast(
-                  backgroundColor: backgroundColor,
-                  textColor: foregroundColor,
-                  msg: message!,
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.BOTTOM,
-                );
-              }
-            : null,
       ),
     );
   }

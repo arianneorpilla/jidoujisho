@@ -75,7 +75,6 @@ class CameraEnhancement extends ImageEnhancement {
   @override
   Future<List<NetworkToFileImage>> fetchImages({
     required AppModel appModel,
-    required BuildContext context,
     String? searchTerm,
   }) async {
     throw UnimplementedError();

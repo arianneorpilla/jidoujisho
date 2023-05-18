@@ -145,6 +145,7 @@ class ReaderMokuroSource extends ReaderMediaSource {
       {required BuildContext context,
       required WidgetRef ref,
       required AppModel appModel}) {
+    final navigator = Navigator.of(context);
     return FloatingSearchBarAction(
       child: JidoujishoIconButton(
         size: Theme.of(context).textTheme.titleLarge?.fontSize,
@@ -168,7 +169,7 @@ class ReaderMokuroSource extends ReaderMediaSource {
                   ),
                 );
 
-                Navigator.pop(context);
+                navigator.pop();
               },
             ),
           );
@@ -212,19 +213,22 @@ class ReaderMokuroSource extends ReaderMediaSource {
         .map((e) => e.replaceAll('file://', ''))
         .toList();
 
-    Iterable<String>? filePaths = await FilesystemPicker.open(
-      allowedExtensions: ['.html'],
-      context: context,
-      rootDirectories: rootDirectories,
-      fsType: FilesystemType.file,
-      title: '',
-      pickText: t.dialog_select,
-      cancelText: t.dialog_cancel,
-      themeData: Theme.of(context),
-      folderIconColor: Theme.of(context).colorScheme.primary,
-      usedFiles: usedFiles,
-      currentActiveFile: appModel.currentMediaItem?.mediaIdentifier,
-    );
+    Iterable<String>? filePaths;
+    if (context.mounted) {
+      filePaths = await FilesystemPicker.open(
+        allowedExtensions: ['.html'],
+        context: context,
+        rootDirectories: rootDirectories,
+        fsType: FilesystemType.file,
+        title: '',
+        pickText: t.dialog_select,
+        cancelText: t.dialog_cancel,
+        themeData: Theme.of(context),
+        folderIconColor: Theme.of(context).colorScheme.primary,
+        usedFiles: usedFiles,
+        currentActiveFile: appModel.currentMediaItem?.mediaIdentifier,
+      );
+    }
 
     if (filePaths == null || filePaths.isEmpty) {
       return;
@@ -264,7 +268,6 @@ class ReaderMokuroSource extends ReaderMediaSource {
           Fluttertoast.showToast(msg: t.invalid_mokuro_file);
         } else {
           appModel.openMedia(
-            context: context,
             item: item,
             ref: ref,
             mediaSource: this,

@@ -8,7 +8,6 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:local_assets_server/local_assets_server.dart';
-import 'package:pretty_json/pretty_json.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
@@ -183,7 +182,7 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
         error: error,
         stack: stack,
         refresh: () {
-          ref.refresh(ttuServerProvider(appModel.targetLanguage));
+          ref.invalidate(ttuServerProvider(appModel.targetLanguage));
         },
       ),
     );
@@ -445,7 +444,8 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
     try {
       messageJson = jsonDecode(message.message);
     } catch (e) {
-      debugPrint(prettyJson(message.toJson()));
+      JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+      debugPrint(encoder.convert(message.toJson()));
 
       return;
     }

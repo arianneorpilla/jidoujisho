@@ -92,8 +92,8 @@ class _NetworkStreamDialogPageState
 
   Widget buildPlayButton() {
     return TextButton(
-      child: Text(t.dialog_play),
       onPressed: executePlay,
+      child: Text(t.dialog_play),
     );
   }
 

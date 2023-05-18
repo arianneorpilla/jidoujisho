@@ -52,7 +52,7 @@ class _ReaderTtuSourceHistoryPageState<T extends HistoryReaderPage>
             _timer ??= Timer.periodic(const Duration(seconds: 1), (_) {
               _tryAgainCountdownNotifier.value -= 1;
               if (_tryAgainCountdownNotifier.value <= 0) {
-                ref.refresh(ttuServerProvider(appModel.targetLanguage));
+                ref.invalidate(ttuServerProvider(appModel.targetLanguage));
                 _timer?.cancel();
                 _timer = null;
               }
@@ -75,7 +75,7 @@ class _ReaderTtuSourceHistoryPageState<T extends HistoryReaderPage>
             error: error,
             stack: stack,
             refresh: () {
-              ref.refresh(ttuServerProvider(appModel.targetLanguage));
+              ref.invalidate(ttuServerProvider(appModel.targetLanguage));
             },
           );
         });
@@ -91,7 +91,7 @@ class _ReaderTtuSourceHistoryPageState<T extends HistoryReaderPage>
         error: error,
         stack: stack,
         refresh: () {
-          ref.refresh(ttuBooksProvider(appModel.targetLanguage));
+          ref.invalidate(ttuBooksProvider(appModel.targetLanguage));
         },
       ),
       loading: buildLoading,

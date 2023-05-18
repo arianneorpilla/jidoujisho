@@ -67,7 +67,6 @@ abstract class BaseHistoryPageState<T extends BaseHistoryPage>
           MediaSource mediaSource = item.getMediaSource(appModel: appModel);
 
           await appModel.openMedia(
-            context: context,
             ref: ref,
             mediaSource: mediaSource,
             item: item,

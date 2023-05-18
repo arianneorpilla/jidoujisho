@@ -37,7 +37,6 @@ class CardCreatorAction extends QuickAction {
       Map<Field, String> newTextFields = {};
       for (Field field in appModel.activeFields) {
         String? newTextField = field.onCreatorOpenAction(
-          context: context,
           ref: ref,
           appModel: appModel,
           creatorModel: creatorModel,
@@ -84,7 +83,6 @@ class CardCreatorAction extends QuickAction {
       Map<Field, String> newTextFields = {};
       for (Field field in appModel.activeFields) {
         String? newTextField = field.onCreatorOpenAction(
-          context: context,
           ref: ref,
           appModel: appModel,
           creatorModel: creatorModel,

@@ -110,8 +110,8 @@ class _LyricsDialogPageState extends BasePageState<LyricsDialogPage> {
 
   Widget buildSearchButton() {
     return TextButton(
-      child: Text(t.dialog_search),
       onPressed: executeSearch,
+      child: Text(t.dialog_search),
     );
   }
 

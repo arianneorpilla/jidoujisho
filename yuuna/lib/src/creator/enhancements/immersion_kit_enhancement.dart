@@ -111,7 +111,6 @@ class ImmersionKitEnhancement extends Enhancement {
 
     String searchTerm = creatorModel.getFieldController(field).text;
     List<ImmersionKitResult> exampleSentences = await searchForSentences(
-      context: context,
       appModel: appModel,
       searchTerm: searchTerm,
     );
@@ -182,7 +181,6 @@ class ImmersionKitEnhancement extends Enhancement {
 
   /// Search the Massif API for example sentences and return a list of results.
   Future<List<ImmersionKitResult>> searchForSentences({
-    required BuildContext context,
     required AppModel appModel,
     required String searchTerm,
   }) async {

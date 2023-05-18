@@ -180,8 +180,8 @@ class _ForvoAudioDialogPageState extends BasePageState<ForvoAudioDialogPage> {
 
   Widget buildSelectButton() {
     return TextButton(
-      child: Text(t.dialog_select),
       onPressed: executeSelect,
+      child: Text(t.dialog_select),
     );
   }
 
