@@ -49,11 +49,10 @@ class FuriganaField extends Field {
 
     StringBuffer buffer = StringBuffer();
     for (RubyTextData rubyData in rubyDatas) {
-      buffer.write(rubyData.text);
       if (rubyData.ruby != null && rubyData.ruby!.trim().isNotEmpty) {
-        buffer.write('[${rubyData.ruby}]');
+        buffer.write(' ${rubyData.text}[${rubyData.ruby}]');
       } else {
-        buffer.write('[ ]');
+        buffer.write(rubyData.text);
       }
     }
 
