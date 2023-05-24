@@ -5,6 +5,8 @@ package app.lrorpilla.yuuna;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import androidx.annotation.NonNull;
 import android.net.Uri;
 
@@ -106,10 +108,12 @@ public class MainActivity extends AudioServiceActivity {
         }
     }
 
-    private boolean checkForDuplicates(String key) {
+    private boolean checkForDuplicates(ArrayList<String> models, String key) {
         final AddContentApi api = new AddContentApi(context);
-        for (Long modelId : api.getModelList().keySet()) {
-            List<NoteInfo> notes = api.findDuplicateNotes(modelId, key);
+        for (int i = 0; i < models.size(); i++) {
+            String model = models.get(i);
+            Long mid = mAnkiDroid.findModelIdByName(model, 1);
+            List<NoteInfo> notes = api.findDuplicateNotes(mid, key);
             if (!notes.isEmpty()) {
                 return true;
             }
@@ -152,6 +156,7 @@ public class MainActivity extends AudioServiceActivity {
                     final String key = call.argument("key");
                     final ArrayList<String> fields = call.argument("fields"); 
                     final ArrayList<String> tags = call.argument("tags"); 
+                    final ArrayList<String> models = call.argument("models"); 
 
                     final String filename = call.argument("filename");
                     final String preferredName = call.argument("preferredName");
@@ -165,7 +170,12 @@ public class MainActivity extends AudioServiceActivity {
                             result.success("Added note");
                             break;
                         case "checkForDuplicates":
-                            result.success(checkForDuplicates(key));
+                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                result.success(checkForDuplicates(models, key));
+                            }
+                            });
                             break;
                         case "getDecks":
                             result.success(api.getDeckList());

@@ -133,6 +133,7 @@ class ReaderChatgptSource extends ReaderMediaSource {
           onPressed: () async {
             Navigator.pop(context);
             await appModel.clearMessages();
+
             mediaType.refreshTab();
           },
         ),

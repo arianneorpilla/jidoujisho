@@ -47,9 +47,21 @@ class _ReaderChatgptPageState extends BaseSourcePageState<ReaderChatgptPage> {
 
   final ValueNotifier<String> _progressNotifier = ValueNotifier<String>('');
 
+  /// Refresh the page and respond to history changes.
+  void refresh() {
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    source.mediaType.tabRefreshNotifier.removeListener(refresh);
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
+    source.mediaType.tabRefreshNotifier.addListener(refresh);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).unfocus();
     });

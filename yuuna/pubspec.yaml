@@ -1,7 +1,7 @@
 name: yuuna
 description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
-version: 2.7.1+88
+version: 2.7.2+90
 environment:
   sdk: ">=3.0.0<4.0.0"
   flutter: "^3.10.0"
@@ -128,6 +128,7 @@ dependencies:
     git:
       url: https://github.com/lrorpilla/ve_dart
       ref: c366bb1ae24f6fad4f5c7e3a1efad5f2b8122e58
+  visibility_detector: ^0.4.0+2
   wakelock: ^0.6.1+2
   web_socket_channel: ^2.3.0
   youtube_explode_dart: ^1.12.4

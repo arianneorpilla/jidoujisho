@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/pages.dart';
@@ -72,6 +73,8 @@ class _DictionaryDialogPageState extends BasePageState {
               buildDebounceDelayField(),
               buildDictionaryFontSizeField(),
               buildMaximumTermsField(),
+              const Space.normal(),
+              buildManageDuplicateChecks(),
             ],
           ),
         ),
@@ -203,5 +206,69 @@ class _DictionaryDialogPageState extends BasePageState {
         labelText: t.maximum_terms,
       ),
     );
+  }
+
+  Color get activeButtonColor =>
+      Theme.of(context).unselectedWidgetColor.withOpacity(0.1);
+  Color get inactiveButtonColor =>
+      Theme.of(context).unselectedWidgetColor.withOpacity(0.05);
+  Color get activeTextColor => Theme.of(context).appBarTheme.foregroundColor!;
+  Color get inactiveTextColor => Theme.of(context).unselectedWidgetColor;
+
+  Widget buildManageDuplicateChecks() {
+    return InkWell(
+      onTap: showDuplicateChecksPage,
+      child: Container(
+        padding: Spacing.of(context).insets.vertical.normal,
+        alignment: Alignment.center,
+        width: double.infinity,
+        color: activeButtonColor,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.checklist_sharp,
+              size: textTheme.titleSmall?.fontSize,
+              color: activeTextColor,
+            ),
+            const Space.small(),
+            Text(
+              t.manage_duplicate_checks,
+              style: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: activeTextColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void showDuplicateChecksPage() async {
+    if (mounted) {
+      List<String> duplicateCheckModels = appModel.duplicateCheckModels;
+      List<String> models = await appModel.getModelList();
+      Map<String, bool> items = Map<String, bool>.fromEntries(
+          models.map((e) => MapEntry(e, duplicateCheckModels.contains(e))));
+      showDialog(
+        context: context,
+        builder: (context) => SwitchSettingsPage<String>(
+          items: items,
+          generateLabel: (item) => item,
+          onSave: (selection) {
+            List<String> newDuplicateCheckModels = selection.entries
+                .where((e) => e.value)
+                .map((e) => e.key)
+                .toList();
+            appModel.setDuplicateCheckModels(newDuplicateCheckModels);
+
+            if (!duplicateCheckModels.equals(newDuplicateCheckModels)) {
+              appModel.refresh();
+            }
+          },
+        ),
+      );
+    }
   }
 }

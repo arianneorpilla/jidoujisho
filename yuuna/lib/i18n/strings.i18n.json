@@ -398,11 +398,11 @@
           "other": "Retrying in $n seconds..."
         }
       },
-    
     "view_replies": {
         "reply": {
           "one": "SHOW $n REPLY",
           "other": "SHOW $n REPLIES"
         }
-      }
+      },
+      "manage_duplicate_checks": "Manage Duplicate Checks"
   }

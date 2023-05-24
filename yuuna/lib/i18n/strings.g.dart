@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 370
+/// Strings: 371
 ///
-/// Built on 2023-05-17 at 11:06 UTC
+/// Built on 2023-05-24 at 07:48 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -517,6 +517,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get info_standard_update_content => 'The standard profile now uses the『jidoujisho Kinomoto』 card type.\n\nYour legacy standard profile remains available for backwards compatibility.';
 	late final _StringsRetryingInEn retrying_in = _StringsRetryingInEn._(_root);
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
+	String get manage_duplicate_checks => 'Manage Duplicate Checks';
 }
 
 // Path: retrying_in
@@ -925,6 +926,7 @@ extension on _StringsEn {
 				one: 'SHOW ${n} REPLY',
 				other: 'SHOW ${n} REPLIES',
 			);
+			case 'manage_duplicate_checks': return 'Manage Duplicate Checks';
 			default: return null;
 		}
 	}

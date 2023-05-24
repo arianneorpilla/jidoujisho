@@ -96,8 +96,9 @@ final appProvider = ChangeNotifierProvider<AppModel>((ref) {
 });
 
 /// Provides color for all quick actions.
-final quickActionColorProvider = FutureProvider.autoDispose
-    .family<Map<String, Color?>, DictionaryHeading>((ref, heading) async {
+final quickActionColorProvider =
+    FutureProvider.family<Map<String, Color?>, DictionaryHeading>(
+        (ref, heading) async {
   AppModel appModel = ref.watch(appProvider);
   List<Future<Color?>> futures = appModel.quickActions.values.map((e) async {
     return e.getIconColor(
@@ -127,6 +128,10 @@ final pipSearchResultProvider =
 
   return result;
 });
+
+/// A global [Provider] for maintaining visible once state.
+final visibleOnceProvider =
+    StateProvider.family<bool, DictionaryHeading>((ref, heading) => false);
 
 /// A global [Provider] for listening to search term changes in PIP mode.
 final pipSearchTermProvider = StateProvider<String>((ref) => '');
@@ -1964,6 +1969,7 @@ class AppModel with ChangeNotifier {
     return await methodChannel.invokeMethod(
       'checkForDuplicates',
       <String, dynamic>{
+        'models': duplicateCheckModels,
         'key': key,
       },
     );
@@ -3465,5 +3471,17 @@ class AppModel with ChangeNotifier {
   /// Set the saved value that the user has set for the [TagsField].
   void setSavedTags(String value) async {
     await _preferences.put('saved_tags', value);
+  }
+
+  /// Get the list of model names that will be checked for duplicates.
+  List<String> get duplicateCheckModels {
+    return _preferences.get('duplicate_check_models', defaultValue: [
+      AnkiMapping.standardModelName,
+    ]);
+  }
+
+  /// Set the list of model names that will be checked for duplicates.
+  void setDuplicateCheckModels(List<String> value) async {
+    await _preferences.put('duplicate_check_models', value);
   }
 }

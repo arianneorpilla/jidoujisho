@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:spaces/spaces.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/pages.dart';
@@ -170,28 +171,42 @@ class _DictionaryTermActionsRow extends ConsumerStatefulWidget {
 
 class _DictionaryTermActionsRowState
     extends ConsumerState<_DictionaryTermActionsRow> {
-  Map<String, Color?>? _lastColors;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
+  VisibilityInfo? visibilityInfo;
 
   @override
   Widget build(BuildContext context) {
     AppModel appModel = ref.read(appProvider);
     CreatorModel creatorModel = ref.read(creatorProvider);
+    bool visibleOnce = ref.watch(visibleOnceProvider(widget.heading));
 
-    AsyncValue<Map<String, Color?>> colors =
-        ref.watch(quickActionColorProvider(widget.heading));
     Map<String, Color?> defaultColors = Map<String, Color?>.fromEntries(
         appModel.quickActions.values.map((e) => MapEntry(e.uniqueKey, null)));
 
-    _lastColors ??= defaultColors;
+    if (!visibleOnce) {
+      return VisibilityDetector(
+        key: UniqueKey(),
+        onVisibilityChanged: (info) {
+          visibilityInfo = info;
+          if (info.visibleFraction > 0) {
+            ref.watch(visibleOnceProvider(widget.heading).notifier).state =
+                true;
+          }
+        },
+        child: buildRow(
+          context: context,
+          appModel: appModel,
+          creatorModel: creatorModel,
+          ref: ref,
+          colors: defaultColors,
+        ),
+      );
+    }
+
+    AsyncValue<Map<String, Color?>> colors =
+        ref.watch(quickActionColorProvider(widget.heading));
 
     return colors.when(
       data: (colors) {
-        _lastColors = colors;
         return buildRow(
           context: context,
           appModel: appModel,
@@ -205,14 +220,14 @@ class _DictionaryTermActionsRowState
         appModel: appModel,
         creatorModel: creatorModel,
         ref: ref,
-        colors: _lastColors!,
+        colors: defaultColors,
       ),
       error: (_, __) => buildRow(
         context: context,
         appModel: appModel,
         creatorModel: creatorModel,
         ref: ref,
-        colors: _lastColors!,
+        colors: defaultColors,
       ),
     );
   }
