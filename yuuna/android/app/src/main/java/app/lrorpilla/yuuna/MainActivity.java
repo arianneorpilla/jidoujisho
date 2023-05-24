@@ -113,6 +113,9 @@ public class MainActivity extends AudioServiceActivity {
         for (int i = 0; i < models.size(); i++) {
             String model = models.get(i);
             Long mid = mAnkiDroid.findModelIdByName(model, 1);
+            if (mid == null) {
+                continue;
+            }
             List<NoteInfo> notes = api.findDuplicateNotes(mid, key);
             if (!notes.isEmpty()) {
                 return true;
