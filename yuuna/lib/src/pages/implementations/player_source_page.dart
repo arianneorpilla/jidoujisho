@@ -195,13 +195,12 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   PlayerMediaSource get source => widget.source as PlayerMediaSource;
 
-  /// Hide the dictionary and dispose of the current result.
+  /// Executed on dictionary dismiss.
   @override
-  void clearDictionaryResult({bool hideInstantly = true}) {
+  void onDictionaryDismiss() {
     if (appModel.isPlayerDefinitionFocusMode) {
       dialogSmartResume(
         isSmartFocus: true,
-        hideInstantly: hideInstantly,
       );
     }
 
@@ -689,6 +688,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     clearDictionaryResult();
 
     bool exporting = false;
+    bool shouldResume = !_dialogSmartPaused;
     if (!appModel.isTranscriptPlayerMode) {
       await dialogSmartPause();
     }
@@ -743,7 +743,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 Navigator.pop(context);
                 exporting = true;
                 await exportMultipleSubtitles(index);
-                await dialogSmartResume();
+                if (shouldResume) {
+                  await dialogSmartResume();
+                }
               },
             ),
           ),
@@ -760,7 +762,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     }
 
     if (!exporting) {
-      await dialogSmartResume();
+      if (shouldResume) {
+        await dialogSmartResume();
+      }
+
       await Future.delayed(const Duration(milliseconds: 5), () {});
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     }
@@ -1168,6 +1173,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         icon: Icons.perm_media,
         tooltip: t.pick_video_file,
         onTap: () async {
+          bool shouldResume = !_dialogSmartPaused;
           dialogSmartPause();
 
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -1188,7 +1194,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             await SystemChrome.setEnabledSystemUIMode(
                 SystemUiMode.immersiveSticky);
 
-            dialogSmartResume();
+            if (shouldResume) {
+              await dialogSmartResume();
+            }
           }
         },
       ),
@@ -1377,6 +1385,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         action: () async {
           clearDictionaryResult();
 
+          bool shouldResume = !_dialogSmartPaused;
+
           await dialogSmartPause();
 
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -1436,13 +1446,16 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           await SystemChrome.setEnabledSystemUIMode(
               SystemUiMode.immersiveSticky);
 
-          await dialogSmartResume();
+          if (shouldResume) {
+            await dialogSmartResume();
+          }
         },
       ),
       JidoujishoBottomSheetOption(
         label: t.player_option_subtitle_appearance,
         icon: Icons.text_fields,
         action: () async {
+          bool shouldResume = !_dialogSmartPaused;
           await dialogSmartPause();
           await showDialog(
             context: context,
@@ -1450,7 +1463,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               notifier: _subtitleOptionsNotifier,
             ),
           );
-          await dialogSmartResume();
+
+          if (shouldResume) {
+            await dialogSmartResume();
+          }
         },
       ),
       JidoujishoBottomSheetOption(
@@ -1471,9 +1487,12 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         label: t.player_option_load_subtitles,
         icon: Icons.upload_file,
         action: () async {
+          bool shouldResume = !_dialogSmartPaused;
           await dialogSmartPause();
           await importExternalSubtitle();
-          await dialogSmartResume();
+          if (shouldResume) {
+            await dialogSmartResume();
+          }
         },
       ),
     ]);
@@ -1523,13 +1542,16 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         label: t.player_option_blur_options,
         icon: Icons.blur_circular_sharp,
         action: () async {
+          bool shouldResume = !_dialogSmartPaused;
           await dialogSmartPause();
           await showDialog(
             context: context,
             builder: (context) => const BlurOptionsDialogPage(),
           );
           _blurOptionsNotifier.value = appModel.blurOptions;
-          await dialogSmartResume();
+          if (shouldResume) {
+            await dialogSmartResume();
+          }
         },
       ),
       JidoujishoBottomSheetOption(
@@ -1769,9 +1791,12 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             );
           }
 
+          bool shouldResume = !_dialogSmartPaused;
           await dialogSmartPause();
           await openCardCreator(subtitles);
-          await dialogSmartResume();
+          if (shouldResume) {
+            await dialogSmartResume();
+          }
         },
       ),
     ];
@@ -1919,7 +1944,15 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             _selectableTextController.selection.end > index;
 
     if (wholeWordCondition && currentResult != null) {
-      clearDictionaryResult(hideInstantly: false);
+      if (appModel.isPlayerDefinitionFocusMode) {
+        dialogSmartResume(
+          isSmartFocus: true,
+          hideInstantly: false,
+        );
+      }
+
+      _selectableTextController.clearSelection();
+      clearDictionaryResult();
       return;
     } else {
       String searchTerm = appModel.targetLanguage.getSearchTermFromIndex(
@@ -1927,6 +1960,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         index: index,
       );
 
+      _selectableTextController.clearSelection();
       setSearchTerm(
         searchTerm: searchTerm,
         text: text,

@@ -158,10 +158,7 @@ class JidoujishoSelectableTextController {
 
     _textSpanEditingController!.value =
         _textSpanEditingController!.value.copyWith(
-      selection: const TextSelection(
-        baseOffset: -1,
-        extentOffset: -1,
-      ),
+      selection: const TextSelection.collapsed(offset: -1),
     );
   }
 }

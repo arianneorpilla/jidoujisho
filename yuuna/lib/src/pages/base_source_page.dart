@@ -202,6 +202,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
         Flexible(
           child: buildDictionaryResult(),
         ),
+        const Space.semiBig(),
         const Flexible(
           child: SizedBox.shrink(),
         ),
@@ -217,6 +218,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
         const Flexible(
           child: SizedBox.shrink(),
         ),
+        const Space.semiBig(),
         Flexible(
           child: buildDictionaryResult(),
         ),
@@ -232,6 +234,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
         Flexible(
           child: buildDictionaryResult(),
         ),
+        const Space.semiBig(),
         const Flexible(
           child: SizedBox.shrink(),
         ),
@@ -247,6 +250,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
         const Flexible(
           child: SizedBox.shrink(),
         ),
+        const Space.semiBig(),
         Flexible(
           child: buildDictionaryResult(),
         ),
@@ -263,6 +267,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
           flex: 3,
           child: buildDictionaryResult(),
         ),
+        const Space.semiBig(),
         const Flexible(
           child: SizedBox.shrink(),
         ),
@@ -290,7 +295,7 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
       onDismissed: (dismissDirection) {},
       onUpdate: (details) {
         if (details.reached) {
-          clearDictionaryResult();
+          onDictionaryDismiss();
         }
       },
       dismissThresholds: const {DismissDirection.horizontal: 0.05},
@@ -307,6 +312,11 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
         ),
       ),
     );
+  }
+
+  /// Executed on dictionary dismiss.
+  void onDictionaryDismiss() {
+    clearDictionaryResult();
   }
 
   /// In progress indicator for dictionary searching.

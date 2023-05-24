@@ -805,6 +805,7 @@ class _PlayerTranscriptPageState
                                   (appModel.currentMediaSource
                                           as PlayerMediaSource)
                                       .setTranscriptSubtitle(subtitle);
+                                  bool shouldResume = !_dialogSmartPaused;
                                   dialogSmartPause();
 
                                   await appModel.openCreator(
@@ -821,7 +822,9 @@ class _PlayerTranscriptPageState
                                     ref: ref,
                                   );
 
-                                  dialogSmartResume();
+                                  if (shouldResume) {
+                                    dialogSmartResume();
+                                  }
                                 },
                                 allowCopy: true,
                                 allowSelectAll: false,
@@ -898,6 +901,7 @@ class _PlayerTranscriptPageState
           (appModel.currentMediaSource as PlayerMediaSource)
               .setTranscriptSubtitle(subtitle);
 
+          bool shouldResume = !_dialogSmartPaused;
           dialogSmartPause();
 
           await appModel.openCreator(
@@ -914,7 +918,9 @@ class _PlayerTranscriptPageState
             ref: ref,
           );
 
-          dialogSmartResume();
+          if (shouldResume) {
+            dialogSmartResume();
+          }
         },
       ),
     );
