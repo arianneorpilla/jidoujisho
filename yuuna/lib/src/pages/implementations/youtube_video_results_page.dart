@@ -64,6 +64,14 @@ class _YoutubeVideoResultsPageState
       pagingController: widget.pagingController,
       key: UniqueKey(),
       builderDelegate: PagedChildBuilderDelegate<MediaItem>(
+        noItemsFoundIndicatorBuilder: (context) {
+          return Center(
+            child: JidoujishoPlaceholderMessage(
+              icon: Icons.search_off,
+              message: t.no_search_results,
+            ),
+          );
+        },
         firstPageProgressIndicatorBuilder: (context) {
           return buildLoading();
         },

@@ -16,7 +16,7 @@ class ReaderChatgptSource extends ReaderMediaSource {
           uniqueKey: 'reader_chatgpt',
           sourceName: 'ChatGPT',
           description:
-              'Allows the user to login to OpenAI and access its unofficial REST API.',
+              'Allows the user to interact with an AI language model with an official API key from OpenAI.',
           icon: Icons.chat_outlined,
           implementsSearch: false,
           implementsHistory: false,
