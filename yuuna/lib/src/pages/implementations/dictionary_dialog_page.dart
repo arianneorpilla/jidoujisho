@@ -542,17 +542,33 @@ class _DictionaryDialogPageState extends BasePageState with ChangeNotifier {
             ),
           ),
         ),
-        ChangeNotifierBuilder(
-          notifier: _formatNotifier,
-          builder: (_, __, ___) => JidoujishoDropdown<DictionaryFormat>(
-            options: appModel.dictionaryFormats.values.toList(),
-            initialOption: appModel.lastSelectedDictionaryFormat,
-            generateLabel: (format) => format.name,
-            onChanged: (format) {
-              appModel.setLastSelectedDictionaryFormat(format!);
-              _formatNotifier.notifyListeners();
-            },
-          ),
+        Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            ChangeNotifierBuilder(
+              notifier: _formatNotifier,
+              builder: (_, __, ___) => JidoujishoDropdown<DictionaryFormat>(
+                options: appModel.dictionaryFormats.values.toList(),
+                initialOption: appModel.lastSelectedDictionaryFormat,
+                generateLabel: (format) => format.name,
+                onChanged: (format) {
+                  appModel.setLastSelectedDictionaryFormat(format!);
+                  _formatNotifier.notifyListeners();
+                },
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              decoration: BoxDecoration(
+                border: Border.fromBorderSide(
+                  BorderSide(
+                    width: 0.5,
+                    color: Theme.of(context).unselectedWidgetColor,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
