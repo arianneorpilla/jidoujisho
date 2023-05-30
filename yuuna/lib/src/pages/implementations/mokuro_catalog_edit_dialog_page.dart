@@ -79,7 +79,7 @@ class _MokuroCatalogEditDialogPageState
     );
   }
 
-  void executeSave() {
+  void executeSave() async {
     String name = _nameController.text.trim();
     String url = _urlController.text.trim();
     if (name.isEmpty || url.isEmpty) {
@@ -97,7 +97,7 @@ class _MokuroCatalogEditDialogPageState
       return;
     }
 
-    appModel.addCatalog(catalog);
+    await appModel.addCatalog(catalog);
 
     Navigator.pop(context);
   }

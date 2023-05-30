@@ -52,6 +52,17 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
     }
 
     AsyncValue<bool> permissionGranted = ref.watch(lyricsPermissionsProvider);
+    ref.watch(lyricsStreamProvider);
+
+    if (source.isOverride) {
+      return buildLyricsWhen(
+        track: NowPlaying.instance.track,
+        parameters: JidoujishoLyricsParameters(
+          artist: source.overrideArtist!,
+          title: source.overrideTitle!,
+        ),
+      );
+    }
 
     return permissionGranted.when(
       loading: buildLoading,
@@ -118,16 +129,6 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
         },
       ),
       data: (track) {
-        if (source.isOverride) {
-          return buildLyricsWhen(
-            track: NowPlaying.instance.track,
-            parameters: JidoujishoLyricsParameters(
-              artist: source.overrideArtist!,
-              title: source.overrideTitle!,
-            ),
-          );
-        }
-
         if (track.artist == null || track.title == null) {
           return buildNoCurrentMedia();
         }

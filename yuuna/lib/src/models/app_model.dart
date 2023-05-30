@@ -1618,12 +1618,12 @@ class AppModel with ChangeNotifier {
 
   /// Add a selected catalog to the database.
   Future<void> addCatalog(MokuroCatalog catalog) async {
-    await _database.writeTxn(() async {
+    await _database.writeTxnSync(() async {
       if (catalog.id != null &&
           _database.mokuroCatalogs.getSync(catalog.id!) != null) {
-        await _database.mokuroCatalogs.delete(catalog.id!);
+        _database.mokuroCatalogs.deleteSync(catalog.id!);
       }
-      await _database.mokuroCatalogs.put(catalog);
+      _database.mokuroCatalogs.putSync(catalog);
     });
   }
 

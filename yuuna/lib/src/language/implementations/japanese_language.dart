@@ -660,9 +660,9 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
           groupBy<DictionaryFrequency, Dictionary>(
               bFrequencies, (frequency) => frequency.dictionary.value!);
       Map<Dictionary, double> aValues = aFrequenciesByDictionary
-          .map((k, v) => MapEntry(k, v.map((e) => e.value).max));
+          .map((k, v) => MapEntry(k, v.map((e) => e.value).min));
       Map<Dictionary, double> bValues = bFrequenciesByDictionary
-          .map((k, v) => MapEntry(k, v.map((e) => e.value).max));
+          .map((k, v) => MapEntry(k, v.map((e) => e.value).min));
 
       Set<Dictionary> sharedDictionaries =
           aValues.keys.toSet().intersection(bValues.keys.toSet());
@@ -670,17 +670,12 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
       if (sharedDictionaries.isNotEmpty) {
         for (Dictionary dictionary in sharedDictionaries) {
           int freqCompare =
-              bValues[dictionary]!.compareTo(aValues[dictionary]!);
+              aValues[dictionary]!.compareTo(bValues[dictionary]!);
           if (freqCompare != 0) {
             return freqCompare;
           }
         }
       } else {
-        int freqSumCompare = bValues.values.sum.compareTo(aValues.values.sum);
-        if (freqSumCompare != 0) {
-          return freqSumCompare;
-        }
-
         int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
         if (popularityCompare != 0) {
           return popularityCompare;

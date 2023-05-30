@@ -427,7 +427,7 @@ class _DictionaryTermFreqList extends ConsumerWidget {
     frequenciesByDictionary.sort((a, b) => a.key.order.compareTo(b.key.order));
     for (MapEntry<Dictionary, List<DictionaryFrequency>> entries
         in frequenciesByDictionary) {
-      entries.value.sort((a, b) => b.value.compareTo(a.value));
+      entries.value.sort((a, b) => a.value.compareTo(b.value));
     }
 
     List<Widget> children =
