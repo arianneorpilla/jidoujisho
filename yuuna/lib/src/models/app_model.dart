@@ -1237,6 +1237,11 @@ class AppModel with ChangeNotifier {
   }
 
   /// Get the target language from persisted preferences.
+  DictionaryFormat getDictionaryFormat(Dictionary dictionary) {
+    return dictionaryFormats[dictionary.formatKey]!;
+  }
+
+  /// Get the target language from persisted preferences.
   DictionaryFormat get lastSelectedDictionaryFormat {
     String firstDictionaryFormatName = dictionaryFormats.values.first.uniqueKey;
     String lastDictionaryFormatName = _preferences.get(

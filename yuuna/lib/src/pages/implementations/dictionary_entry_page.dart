@@ -73,67 +73,89 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
             top: Spacing.of(context).spaces.small,
             left: Spacing.of(context).spaces.normal,
           ),
-          child: JidoujishoSelectableText(
-            widget.entry.compactDefinitions,
-            style: TextStyle(
-                fontSize: appModel.dictionaryFontSize,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white
-                    : Colors.black),
-            controller: _selectableTextController,
-            selectionControls: JidoujishoTextSelectionControls(
-              searchAction: widget.onSearch,
-              stashAction: widget.onStash,
-              shareAction: widget.onShare,
-              allowCopy: true,
-              allowSelectAll: true,
-              allowCut: true,
-              allowPaste: true,
-            ),
-            onSelectionChanged: (selection, cause) async {
-              if (appModel.targetLanguage.isSpaceDelimited) {
-                return;
+          child: ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: widget.entry.definitions.length,
+            itemBuilder: (context, index) {
+              String definition = widget.entry.definitions[index];
+              Dictionary dictionary = widget.entry.dictionary.value!;
+              DictionaryFormat format =
+                  appModel.getDictionaryFormat(dictionary);
+              if (format.shouldUseCustomDefinitionWidget(definition)) {
+                return format.customDefinitionWidget(
+                  context: context,
+                  ref: ref,
+                  definition: definition,
+                );
               }
 
-              if (cause == SelectionChangedCause.doubleTap && !_isSearching) {
-                _isSearching = true;
-                try {
-                  String searchTerm = widget.entry.compactDefinitions
-                      .substring(selection.baseOffset);
+              return JidoujishoSelectableText(
+                definition,
+                style: TextStyle(
+                    fontSize: appModel.dictionaryFontSize,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black),
+                controller: _selectableTextController,
+                selectionControls: JidoujishoTextSelectionControls(
+                  searchAction: widget.onSearch,
+                  stashAction: widget.onStash,
+                  shareAction: widget.onShare,
+                  allowCopy: true,
+                  allowSelectAll: true,
+                  allowCut: true,
+                  allowPaste: true,
+                ),
+                onSelectionChanged: (selection, cause) async {
+                  if (appModel.targetLanguage.isSpaceDelimited) {
+                    return;
+                  }
 
-                  int whitespaceOffset =
-                      searchTerm.length - searchTerm.trimLeft().length;
-                  int offsetIndex = appModel.targetLanguage.getStartingIndex(
-                        text: widget.entry.compactDefinitions,
-                        index: selection.baseOffset,
-                      ) +
-                      whitespaceOffset;
-                  int length = appModel.targetLanguage.getGuessHighlightLength(
-                    searchTerm: searchTerm,
-                  );
+                  if (cause == SelectionChangedCause.doubleTap &&
+                      !_isSearching) {
+                    _isSearching = true;
+                    try {
+                      String searchTerm = widget.entry.compactDefinitions
+                          .substring(selection.baseOffset);
 
-                  _selectableTextController.setSelection(
-                    offsetIndex,
-                    offsetIndex + length,
-                  );
+                      int whitespaceOffset =
+                          searchTerm.length - searchTerm.trimLeft().length;
+                      int offsetIndex =
+                          appModel.targetLanguage.getStartingIndex(
+                                text: widget.entry.compactDefinitions,
+                                index: selection.baseOffset,
+                              ) +
+                              whitespaceOffset;
+                      int length =
+                          appModel.targetLanguage.getGuessHighlightLength(
+                        searchTerm: searchTerm,
+                      );
 
-                  DictionarySearchResult result =
-                      await appModel.searchDictionary(
-                    searchTerm: searchTerm,
-                    searchWithWildcards: false,
-                  );
+                      _selectableTextController.setSelection(
+                        offsetIndex,
+                        offsetIndex + length,
+                      );
 
-                  length = appModel.targetLanguage.getFinalHighlightLength(
-                    result: result,
-                    searchTerm: searchTerm,
-                  );
+                      DictionarySearchResult result =
+                          await appModel.searchDictionary(
+                        searchTerm: searchTerm,
+                        searchWithWildcards: false,
+                      );
 
-                  _selectableTextController.setSelection(
-                      offsetIndex, offsetIndex + length);
-                } finally {
-                  _isSearching = false;
-                }
-              }
+                      length = appModel.targetLanguage.getFinalHighlightLength(
+                        result: result,
+                        searchTerm: searchTerm,
+                      );
+
+                      _selectableTextController.setSelection(
+                          offsetIndex, offsetIndex + length);
+                    } finally {
+                      _isSearching = false;
+                    }
+                  }
+                },
+              );
             },
           ),
         ),

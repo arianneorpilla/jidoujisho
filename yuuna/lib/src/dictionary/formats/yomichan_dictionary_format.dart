@@ -4,9 +4,16 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_archive/flutter_archive.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html_table/flutter_html_table.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
+import 'package:recase/recase.dart';
+import 'package:spaces/spaces.dart';
 import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/models.dart';
 import 'package:yuuna/utils.dart';
+import 'package:html/dom.dart' as dom;
 
 /// A dictionary format for archives following the latest Yomichan bank schema.
 /// Example dictionaries for this format may be downloaded from the Yomichan
@@ -37,6 +44,89 @@ class YomichanFormat extends DictionaryFormat {
   static YomichanFormat get instance => _instance;
 
   static final YomichanFormat _instance = YomichanFormat._privateConstructor();
+
+  /// Used to allow a format to render its dictionary entries with a custom
+  /// widget.
+  @override
+  Widget? customDefinitionWidget({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String definition,
+  }) {
+    AppModel appModel = ref.watch(appProvider);
+
+    Map<String, dynamic> definitionMap = jsonDecode(definition);
+    return Padding(
+      padding: Spacing.of(context).insets.onlyLeft.normal,
+      child: SelectionArea(
+        child: Html(
+          doNotRenderTheseTags: const {'img'},
+          data: _processNested(definitionMap['content']),
+          extensions: const [TableHtmlExtension()],
+          style: {
+            '*': Style(
+              margin: Margins.zero,
+              padding: HtmlPaddings.zero,
+              fontSize: FontSize(
+                appModel.dictionaryFontSize,
+              ),
+            ),
+          },
+        ),
+      ),
+    );
+  }
+
+  /// If true, uses the [customDefinitionWidget] instead.
+  @override
+  bool shouldUseCustomDefinitionWidget(String definition) {
+    try {
+      dynamic definitionMap = jsonDecode(definition);
+      return definitionMap is Map &&
+          definitionMap['type'] == 'structured-content';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  String _processNested(dynamic content) {
+    if (content is Map) {
+      return _getNodeHtml(
+        tag: content['tag'],
+        content: _processNested(content['content']),
+        style: _getStyle(
+          content['style'] ?? {},
+        ),
+      );
+    } else if (content is List) {
+      return content.map(_processNested).join();
+    }
+
+    return content;
+  }
+
+  Map<String, String> _getStyle(Map<String, dynamic> styleMap) {
+    return Map<String, String>.fromEntries(
+      styleMap.entries.map(
+        (e) => MapEntry(
+          ReCase(e.key).paramCase,
+          e.value.toString(),
+        ),
+      ),
+    );
+  }
+
+  String _getNodeHtml({
+    required String content,
+    String? tag,
+    Map<String, String> style = const {},
+  }) {
+    dom.Element element = dom.Element.tag(tag);
+    element.attributes.addAll(style);
+    element.innerHtml = content;
+
+    return tag == null ? element.innerHtml : element.outerHtml;
+  }
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
@@ -94,8 +184,7 @@ Future<Map<DictionaryHeading, List<DictionaryEntry>>>
               if (data['type'] == 'image') {
                 return '';
               } else if (data['type'] == 'structured-content') {
-                structuredContentCount++;
-                return '';
+                return jsonEncode(e);
               } else {
                 return e.toString().trim();
               }
@@ -105,8 +194,11 @@ Future<Map<DictionaryHeading, List<DictionaryEntry>>>
           }).toList();
         } else if (item[5] is Map) {
           Map<String, dynamic> data = Map<String, dynamic>.from(item[5]);
-          if (data['type'] != 'image' && data['type'] != 'structured-content') {
+          if (data['type'] != 'image') {
             definitions.add(item[5].toString().trim());
+          }
+          if (data['type'] == 'structured-content') {
+            definitions.add(jsonEncode(item[5]));
           }
         } else {
           definitions.add(item[5].toString().trim());

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:flutter/widgets.dart';
 
@@ -105,4 +106,19 @@ abstract class DictionaryFormat {
   /// parameters.
   Future<Map<DictionaryHeading, List<DictionaryFrequency>>> Function(
       PrepareDictionaryParams params) prepareFrequencies;
+
+  /// Used to allow a format to render its dictionary entries with a custom
+  /// widget.
+  Widget? customDefinitionWidget({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String definition,
+  }) {
+    return null;
+  }
+
+  /// If true, uses the [customDefinitionWidget] instead.
+  bool shouldUseCustomDefinitionWidget(String definition) {
+    return false;
+  }
 }
