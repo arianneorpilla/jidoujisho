@@ -147,4 +147,14 @@ class ReaderBrowserSource extends ReaderMediaSource with ChangeNotifier {
   /// Get the last used server address.
   String get lastAddress =>
       getPreference<String>(key: 'last_address', defaultValue: '');
+
+  /// Set the cached favicon URL.
+  Future<void> setCachedFaviconUrl(String url, String faviconUrl) async {
+    await setPreference<String>(key: 'favicon_url/$url', value: faviconUrl);
+  }
+
+  /// Get the cached favicon URL.
+  String? getCachedFaviconUrl(String url) {
+    return getPreference<String?>(key: 'favicon_url/$url', defaultValue: null);
+  }
 }

@@ -15,11 +15,21 @@ import 'package:yuuna/utils.dart';
 
 /// Provider for getting the best favicon.
 final faviconProvider =
-    FutureProvider.family<Favicon?, String>((ref, url) async {
+    FutureProvider.family<String?, String>((ref, url) async {
+  String? cachedFaviconUrl =
+      ReaderBrowserSource.instance.getCachedFaviconUrl(url);
+  if (cachedFaviconUrl != null) {
+    return cachedFaviconUrl;
+  }
+
   Favicon? favicon = await FaviconFinder.getBest(url);
   favicon ??= await FaviconFinder.getBest(Uri.parse(url).host);
 
-  return favicon;
+  if (favicon != null) {
+    ReaderBrowserSource.instance.setCachedFaviconUrl(url, favicon.url);
+  }
+
+  return favicon?.url;
 });
 
 /// The media page used for unimplemented sources.
@@ -265,18 +275,18 @@ class BookmarkButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    AsyncValue<Favicon?> favicon = ref.watch(faviconProvider(bookmark.url));
+    AsyncValue<String?> favicon = ref.watch(faviconProvider(bookmark.url));
     Widget faviconWidget = favicon.when(
-      data: (favicon) {
-        if (favicon != null) {
-          if (favicon.url.endsWith('svg')) {
+      data: (url) {
+        if (url != null) {
+          if (url.endsWith('svg')) {
             return CachedNetworkSVGImage(
-              favicon.url,
+              url,
               errorWidget: fallback,
             );
           } else {
             return CachedNetworkImage(
-              imageUrl: favicon.url,
+              imageUrl: url,
               errorWidget: (_, __, ___) => fallback,
             );
           }
