@@ -83,6 +83,8 @@ class _BrowserHistoryPageState extends BaseHistoryPageState {
   Widget buildReadingList() {
     List<MediaItem> items =
         appModel.getMediaSourceHistory(mediaSource: mediaSource);
+    items.sort((a, b) => b.position.compareTo(a.position));
+
     if (items.isEmpty) {
       return buildPlaceholder();
     } else {
@@ -155,18 +157,6 @@ class _BrowserHistoryPageState extends BaseHistoryPageState {
               ),
             );
           }),
-          LinearProgressIndicator(
-            value: (item.position / item.duration).isNaN ||
-                    (item.position / item.duration) == double.infinity ||
-                    (item.position == 0 && item.duration == 0)
-                ? 0
-                : ((item.position / item.duration) > 0.97)
-                    ? 1
-                    : (item.position / item.duration),
-            backgroundColor: Colors.white.withOpacity(0.6),
-            valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
-            minHeight: 2,
-          ),
         ],
       ),
     );

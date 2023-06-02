@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
@@ -48,6 +49,12 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
         .toList();
 
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.item != null && widget.item!.position != 0) {
+        widget.item!.position = DateTime.now().millisecondsSinceEpoch;
+        appModel.addMediaItem(widget.item!);
+      }
+    });
   }
 
   bool _controllerInitialised = false;
@@ -178,9 +185,12 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
   }
 
   Widget buildReadingListButton() {
-    return ValueListenableBuilder<Uri?>(
-      valueListenable: _uriNotifier,
-      builder: (context, value, child) {
+    return MultiValueListenableBuilder(
+      valueListenables: [
+        _uriNotifier,
+        _titleNotifier,
+      ],
+      builder: (context, values, child) {
         String mediaIdentifier = Uri.decodeFull(
             _uriNotifier.value?.removeFragment().toString() ?? '');
 
@@ -196,9 +206,11 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
                 child: Tooltip(
                   message: t.add_to_reading_list,
                   child: InkWell(
-                    onTap: () => inReadingList
-                        ? existsReadingListAction(mediaIdentifier)
-                        : addReadingListAction(mediaIdentifier),
+                    onTap: _titleNotifier.value == null
+                        ? null
+                        : () => inReadingList
+                            ? existsReadingListAction(mediaIdentifier)
+                            : addReadingListAction(mediaIdentifier),
                     child: Container(
                       width: 30,
                       height: 30,
@@ -208,7 +220,11 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
                       ),
                       child: Icon(
                         Icons.bookmark_outline,
-                        color: inReadingList ? theme.colorScheme.primary : null,
+                        color: _titleNotifier.value == null
+                            ? theme.disabledColor
+                            : inReadingList
+                                ? theme.colorScheme.primary
+                                : null,
                         size: 20,
                       ),
                     ),
@@ -268,6 +284,8 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
         bookmark,
         base64Image: base64Image,
       );
+
+      item.position = DateTime.now().millisecondsSinceEpoch;
 
       appModel.addMediaItem(item);
 
@@ -444,12 +462,7 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
       },
       initialOptions: InAppWebViewGroupOptions(
         crossPlatform: InAppWebViewOptions(
-          verticalScrollBarEnabled: false,
-          horizontalScrollBarEnabled: false,
           userAgent: userAgent,
-        ),
-        android: AndroidInAppWebViewOptions(
-          initialScale: MediaQuery.of(context).size.width ~/ 1.5,
         ),
       ),
       initialUrlRequest:
