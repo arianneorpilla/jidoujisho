@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 371
+/// Strings: 384
 ///
-/// Built on 2023-05-24 at 07:48 UTC
+/// Built on 2023-06-02 at 15:07 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -195,6 +195,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get dialog_pop => 'POP';
 	String get dialog_save => 'SAVE';
 	String get dialog_set => 'SET';
+	String get dialog_browse => 'BROWSE';
 	String get dialog_channel => 'CHANNEL';
 	String get dialog_directory => 'DIRECTORY';
 	String get dialog_crop => 'CROP';
@@ -351,8 +352,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get replay => 'Replay';
 	String get audio_subtitles => 'Audio/Subtitles';
 	String get player_option_shadowing => 'Shadowing Mode';
-	String get player_option_definition_focus => 'Definition Focus Mode';
-	String get player_option_subtitle_focus => 'Subtitle Focus Mode';
+	String get player_option_change_mode => 'Change Playback Mode';
 	String get player_option_listening_comprehension => 'Listening Comprehension Mode';
 	String get player_option_drag_to_select => 'Use Drag to Select Subtitle Selection';
 	String get player_option_tap_to_select => 'Use Tap to Select Subtitle Selection';
@@ -475,7 +475,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get pick_file => 'Pick File';
 	String get open_url => 'Open URL';
 	String get catalogs => 'Catalogs';
-	String get catalog_name => 'Catalog Name';
+	String get name => 'Name';
 	String get url => 'URL';
 	String get duplicate_catalog => 'A catalog with this URL already exists.';
 	String get no_catalogs_listed => 'No catalogs listed';
@@ -518,6 +518,19 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	late final _StringsRetryingInEn retrying_in = _StringsRetryingInEn._(_root);
 	late final _StringsViewRepliesEn view_replies = _StringsViewRepliesEn._(_root);
 	String get manage_duplicate_checks => 'Manage Duplicate Checks';
+	String get playback_normal => 'Normal Playback Mode';
+	String get playback_condensed => 'Condensed Playback Mode';
+	String get playback_auto_pause => 'Subtitle Pause Mode';
+	String get player_hardware_acceleration => 'Hardware acceleration';
+	String get player_use_opensles => 'OpenSL ES audio';
+	String get go_forward => 'Go Forward';
+	String get browse => 'Browse';
+	String get bookmark => 'Bookmark';
+	String get add_bookmark => 'Add Bookmark';
+	String get add_to_reading_list => 'Add To Reading List';
+	String get reading_list_empty => 'Reading list is empty';
+	String get reading_list_add_toast => 'Added to reading list.';
+	String get reading_list_remove_toast => 'Removed from the reading list.';
 }
 
 // Path: retrying_in
@@ -598,6 +611,7 @@ extension on _StringsEn {
 			case 'dialog_pop': return 'POP';
 			case 'dialog_save': return 'SAVE';
 			case 'dialog_set': return 'SET';
+			case 'dialog_browse': return 'BROWSE';
 			case 'dialog_channel': return 'CHANNEL';
 			case 'dialog_directory': return 'DIRECTORY';
 			case 'dialog_crop': return 'CROP';
@@ -754,8 +768,7 @@ extension on _StringsEn {
 			case 'replay': return 'Replay';
 			case 'audio_subtitles': return 'Audio/Subtitles';
 			case 'player_option_shadowing': return 'Shadowing Mode';
-			case 'player_option_definition_focus': return 'Definition Focus Mode';
-			case 'player_option_subtitle_focus': return 'Subtitle Focus Mode';
+			case 'player_option_change_mode': return 'Change Playback Mode';
 			case 'player_option_listening_comprehension': return 'Listening Comprehension Mode';
 			case 'player_option_drag_to_select': return 'Use Drag to Select Subtitle Selection';
 			case 'player_option_tap_to_select': return 'Use Tap to Select Subtitle Selection';
@@ -878,7 +891,7 @@ extension on _StringsEn {
 			case 'pick_file': return 'Pick File';
 			case 'open_url': return 'Open URL';
 			case 'catalogs': return 'Catalogs';
-			case 'catalog_name': return 'Catalog Name';
+			case 'name': return 'Name';
 			case 'url': return 'URL';
 			case 'duplicate_catalog': return 'A catalog with this URL already exists.';
 			case 'no_catalogs_listed': return 'No catalogs listed';
@@ -927,6 +940,19 @@ extension on _StringsEn {
 				other: 'SHOW ${n} REPLIES',
 			);
 			case 'manage_duplicate_checks': return 'Manage Duplicate Checks';
+			case 'playback_normal': return 'Normal Playback Mode';
+			case 'playback_condensed': return 'Condensed Playback Mode';
+			case 'playback_auto_pause': return 'Subtitle Pause Mode';
+			case 'player_hardware_acceleration': return 'Hardware acceleration';
+			case 'player_use_opensles': return 'OpenSL ES audio';
+			case 'go_forward': return 'Go Forward';
+			case 'browse': return 'Browse';
+			case 'bookmark': return 'Bookmark';
+			case 'add_bookmark': return 'Add Bookmark';
+			case 'add_to_reading_list': return 'Add To Reading List';
+			case 'reading_list_empty': return 'Reading list is empty';
+			case 'reading_list_add_toast': return 'Added to reading list.';
+			case 'reading_list_remove_toast': return 'Removed from the reading list.';
 			default: return null;
 		}
 	}

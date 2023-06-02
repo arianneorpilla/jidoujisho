@@ -46,6 +46,11 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     required AppModel appModel,
   }) {
     return [
+      buildSettingsButton(
+        appModel: appModel,
+        context: context,
+        ref: ref,
+      ),
       buildPickVideoButton(
         context: context,
         ref: ref,
@@ -307,11 +312,12 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     List<String> audioParams = [
       '--audio-language=${appModel.targetLanguage.languageCode},${appModel.appLocale.languageCode}',
       '--sub-track=99999',
-      '--aout=opensles',
+      if (appModel.playerUseOpenSLES) '--aout=opensles'
     ];
 
     return VlcPlayerController.file(
       File(item.mediaIdentifier),
+      hwAcc: appModel.playerHardwareAcceleration ? HwAcc.auto : HwAcc.disabled,
       options: VlcPlayerOptions(
         advanced: VlcAdvancedOptions(advancedParams),
         audio: VlcAudioOptions(audioParams),

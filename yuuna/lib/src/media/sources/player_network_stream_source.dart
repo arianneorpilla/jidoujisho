@@ -52,6 +52,11 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
     required AppModel appModel,
   }) {
     return [
+      buildSettingsButton(
+        appModel: appModel,
+        context: context,
+        ref: ref,
+      ),
       FloatingSearchBarAction(
         child: JidoujishoIconButton(
           size: Theme.of(context).textTheme.titleLarge?.fontSize,
@@ -151,11 +156,12 @@ class PlayerNetworkStreamSource extends PlayerMediaSource {
     List<String> audioParams = [
       '--audio-language=${appModel.targetLanguage.languageCode},${appModel.appLocale.languageCode}',
       '--sub-track=99999',
-      '--aout=opensles',
+      if (appModel.playerUseOpenSLES) '--aout=opensles',
     ];
 
     return VlcPlayerController.network(
       dataSource,
+      hwAcc: appModel.playerHardwareAcceleration ? HwAcc.auto : HwAcc.disabled,
       options: VlcPlayerOptions(
         advanced: VlcAdvancedOptions(advancedParams),
         audio: VlcAudioOptions(audioParams),

@@ -66,8 +66,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   final ValueNotifier<bool> _isMenuHidden = ValueNotifier<bool>(false);
 
   late final ValueNotifier<Subtitle?> _currentSubtitle;
-  final ValueNotifier<Subtitle?> _currentSubtitleMemory =
-      ValueNotifier<Subtitle?>(null);
+
   final ValueNotifier<Subtitle?> _shadowingSubtitle =
       ValueNotifier<Subtitle?>(null);
   final ValueNotifier<Subtitle?> _listeningSubtitle =
@@ -173,9 +172,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   bool _dialogSmartPaused = false;
   bool _dialogSmartFocusFlag = false;
 
-  bool _autoPauseFlag = false;
-  Subtitle? _autoPauseSubtitle;
-
   /// Subtitle delay. May be temporarily different from saved value.
   Duration get subtitleDelay =>
       Duration(milliseconds: _subtitleOptionsNotifier.value.subtitleDelay);
@@ -198,11 +194,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   /// Executed on dictionary dismiss.
   @override
   void onDictionaryDismiss() {
-    if (appModel.isPlayerDefinitionFocusMode) {
-      dialogSmartResume(
-        isSmartFocus: true,
-      );
-    }
+    dialogSmartResume(
+      isSmartFocus: true,
+    );
 
     _selectableTextController.clearSelection();
     super.clearDictionaryResult();
@@ -330,6 +324,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   double _lastAspectRatio = 1;
 
+  Subtitle? _autoPauseMemory;
+
   /// This is called each time the player ticks.
   void listener() async {
     if (!mounted) {
@@ -380,20 +376,39 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       }
 
       if (_currentSubtitle.value != newSubtitle) {
-        // if (!_sliderBeingDragged &&
-        //     !_autoPauseFlag &&
+        if (_currentSubtitle.value != null &&
+            newSubtitle == null &&
+            appModel.playbackMode == PlaybackMode.condensedPlayback &&
+            !_sliderBeingDragged &&
+            _subtitleItem.controller.subtitles.length >
+                _currentSubtitle.value!.index &&
+            !_preventSpamSkip) {
+          int index = _currentSubtitle.value!.index;
+          _preventSpamSkip = true;
+          _playerController.seekTo(
+              _subtitleItem.controller.subtitles[index].start - subtitleDelay);
 
-        //     _currentSubtitle.value != null) {
-        //   _autoPauseSubtitle = _currentSubtitle.value;
-        //   _autoPauseFlag = true;
-        //   dialogSmartPause();
-        //   return;
-        // }
+          Future.delayed(const Duration(seconds: 1), () {
+            _preventSpamSkip = false;
+          });
+        }
 
-        _currentSubtitle.value = newSubtitle;
-        // For remembering the last subtitle even if it has disappeared.
-        if (newSubtitle != null) {
-          _currentSubtitleMemory.value = newSubtitle;
+        if (appModel.playbackMode == PlaybackMode.autoPausePlayback &&
+            _autoPauseNotifier.value == null &&
+            _autoPauseNotifier.value != _currentSubtitle.value &&
+            !_sliderBeingDragged &&
+            _currentSubtitle.value != null &&
+            _autoPauseMemory != _currentSubtitle.value) {
+          dialogSmartPause();
+          _autoPauseMemory = _currentSubtitle.value;
+          _autoPauseNotifier.value = _currentSubtitle.value;
+        }
+
+        if (_autoPauseNotifier.value != null) {
+          _currentSubtitle.value = _autoPauseNotifier.value;
+        } else {
+          _currentSubtitle.value = newSubtitle;
+          // For remembering the last subtitle even if it has disappeared.
         }
       }
 
@@ -414,6 +429,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 _shadowingSubtitle.value!.end - subtitleDelay + allowance) {
           _playerController.seekTo(
               _shadowingSubtitle.value!.start + subtitleDelay - allowance);
+
           _bufferingNotifier.value = true;
         }
       }
@@ -437,6 +453,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       }
     }
   }
+
+  bool _preventSpamSkip = false;
+
+  final ValueNotifier<Subtitle?> _autoPauseNotifier =
+      ValueNotifier<Subtitle?>(null);
 
   /// This prepares the subtitles included with the video for use.
   void initialiseEmbeddedSubtitles(VlcPlayerController controller) async {
@@ -711,6 +732,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               title: widget.item!.title,
               subtitles: _subtitleItem.controller.subtitles,
               currentSubtitle: _currentSubtitle,
+              autoPauseNotifier: _autoPauseNotifier,
               subtitleOptions: _subtitleOptionsNotifier.value,
               controller: _playerController,
               nearestSubtitle: getNearestSubtitle(),
@@ -726,6 +748,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 await _playerController.seekTo(
                     _subtitleItem.controller.subtitles[index].start -
                         subtitleDelay);
+                _autoPauseNotifier.value = null;
                 _bufferingNotifier.value = true;
                 _listeningSubtitle.value =
                     _subtitleItem.controller.subtitles[index];
@@ -742,6 +765,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               onLongPress: (index) async {
                 Navigator.pop(context);
                 exporting = true;
+
                 await exportMultipleSubtitles(index);
                 if (shouldResume) {
                   await dialogSmartResume();
@@ -815,6 +839,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
               await _playerController.seekTo(
                   _positionNotifier.value - const Duration(seconds: 10));
+              _autoPauseNotifier.value = null;
+              _autoPauseMemory = null;
               _bufferingNotifier.value = true;
               _listeningSubtitle.value = getNearestSubtitle();
 
@@ -840,6 +866,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
               await _playerController.seekTo(
                   _positionNotifier.value + const Duration(seconds: 10));
+              _autoPauseNotifier.value = null;
+              _autoPauseMemory = null;
               _bufferingNotifier.value = true;
               _listeningSubtitle.value = getNearestSubtitle();
 
@@ -1085,6 +1113,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  bool _sliderBeingDragged = false;
+
   /// Shows the slider representing duration and position.
   Widget buildSlider() {
     return MultiValueListenableBuilder(
@@ -1114,10 +1144,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 ? 1.0
                 : _playerController.value.duration.inSeconds.toDouble(),
             onChangeStart: (value) {
-              _autoPauseSubtitle = null;
-              _autoPauseFlag = false;
               _dialogSmartPaused = false;
               _dialogSmartFocusFlag = false;
+              _sliderBeingDragged = true;
 
               cancelHideTimer();
             },
@@ -1129,6 +1158,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                   }
                 });
               }
+              _sliderBeingDragged = false;
               _bufferingNotifier.value = true;
             },
             onChanged: validPosition
@@ -1138,6 +1168,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                     sliderValue = progress.floor().toDouble();
                     _playerController.setTime(sliderValue.toInt() * 1000);
                     _listeningSubtitle.value = getNearestSubtitle();
+                    _autoPauseNotifier.value = null;
+                    _autoPauseMemory = null;
                   }
                 : null,
           ),
@@ -1401,6 +1433,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 title: widget.item!.title,
                 subtitles: _subtitleItem.controller.subtitles,
                 controller: _playerController,
+                autoPauseNotifier: _autoPauseNotifier,
                 playingNotifier: _playingNotifier,
                 endedNotifier: _endedNotifier,
                 nearestSubtitle: getNearestSubtitle(),
@@ -1688,16 +1721,53 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
+  /// List of options when changing playback modes.
+  List<JidoujishoBottomSheetOption> getPlaybackModeOptions() {
+    Map<PlaybackMode, String> playbackModeByLabel = {
+      PlaybackMode.normalPlayback: t.playback_normal,
+      PlaybackMode.condensedPlayback: t.playback_condensed,
+      PlaybackMode.autoPausePlayback: t.playback_auto_pause,
+    };
+
+    Map<PlaybackMode, IconData> playbackModeByIcon = {
+      PlaybackMode.normalPlayback: Icons.play_arrow,
+      PlaybackMode.condensedPlayback: Icons.skip_next,
+      PlaybackMode.autoPausePlayback: Icons.pause,
+    };
+
+    return [
+      ...PlaybackMode.values.map(
+        (mode) => JidoujishoBottomSheetOption(
+          label: playbackModeByLabel[mode]!,
+          icon: playbackModeByIcon[mode]!,
+          active: appModel.playbackMode == mode,
+          action: () {
+            appModel.setPlaybackMode(mode);
+            _autoPauseNotifier.value == null;
+            refreshSubtitleWidget();
+          },
+        ),
+      ),
+    ];
+  }
+
   /// This lists the options available when the bottom-right option is tapped.
   List<JidoujishoBottomSheetOption> getOptions() {
     List<JidoujishoBottomSheetOption> options = [
       JidoujishoBottomSheetOption(
-        label: t.player_option_definition_focus,
-        icon: appModel.isPlayerDefinitionFocusMode
-            ? Icons.flash_on
-            : Icons.flash_off,
-        active: appModel.isPlayerDefinitionFocusMode,
-        action: appModel.togglePlayerDefinitionFocusMode,
+        label: t.player_option_change_mode,
+        icon: Icons.play_circle_outline,
+        action: () async {
+          await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            useRootNavigator: true,
+            builder: (context) => JidoujishoBottomSheet(
+              options: getPlaybackModeOptions(),
+            ),
+          );
+          refreshSubtitleWidget();
+        },
       ),
       JidoujishoBottomSheetOption(
         label: t.player_option_listening_comprehension,
@@ -1850,9 +1920,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         }
 
         String subtitleText = currentSubtitle.data;
-        if (_autoPauseFlag) {
-          subtitleText = _autoPauseSubtitle!.data;
-        }
+
         String regex = _subtitleOptionsNotifier.value.regexFilter;
         if (regex.isNotEmpty) {
           subtitleText = subtitleText.replaceAll(RegExp(regex), '');
@@ -1944,12 +2012,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             _selectableTextController.selection.end > index;
 
     if (wholeWordCondition && currentResult != null) {
-      if (appModel.isPlayerDefinitionFocusMode) {
-        dialogSmartResume(
-          isSmartFocus: true,
-          hideInstantly: false,
-        );
-      }
+      dialogSmartResume(
+        isSmartFocus: true,
+        hideInstantly: false,
+      );
 
       _selectableTextController.clearSelection();
       clearDictionaryResult();
@@ -2044,9 +2110,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
     _selectableTextController.setSelection(offsetIndex, offsetIndex + length);
     if (searchTerm.isNotEmpty) {
-      if (appModel.isPlayerDefinitionFocusMode) {
-        dialogSmartPause();
-      }
+      dialogSmartPause();
     }
 
     searchDictionaryResult(
@@ -2162,7 +2226,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   /// This plays or pauses the player.
   Future<void> playPause() async {
-    _autoPauseFlag = false;
+    _autoPauseNotifier.value = null;
+
     _dialogSmartPaused = false;
 
     final isFinished = _playerController.value.isEnded;
@@ -2196,6 +2261,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             _isMenuHidden.value = true;
 
             await _playerController.seekTo(Duration.zero);
+            _autoPauseNotifier.value = null;
+            _autoPauseMemory = null;
             _bufferingNotifier.value = true;
           });
         } else {
@@ -2267,8 +2334,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     bool isSmartFocus = false,
     bool hideInstantly = true,
   }) async {
-    _autoPauseFlag = false;
-
+    _autoPauseNotifier.value = null;
     if (_dialogSmartFocusFlag && !isSmartFocus) {
       return;
     }
