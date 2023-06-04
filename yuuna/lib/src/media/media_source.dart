@@ -413,10 +413,10 @@ abstract class MediaSource {
     );
 
     File thumbnailFile = File(filename);
+    thumbnailFile.createSync(recursive: true);
     if (clearOverrideImage) {
       thumbnailFile.deleteSync();
     } else if (file != null) {
-      thumbnailFile.createSync(recursive: true);
       file.copySync(filename);
     }
   }
