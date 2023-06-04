@@ -78,7 +78,7 @@ class InstantExportAction extends QuickAction {
           );
           continue;
         }
-        if (field is AudioField && mediaSource.overridesAutoAudio) {
+        if (field is AudioSentenceField && mediaSource.overridesAutoAudio) {
           await field.setAudio(
             appModel: appModel,
             creatorModel: creatorModel,

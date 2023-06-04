@@ -60,6 +60,11 @@ export 'src/pages/implementations/mokuro_settings_dialog_page.dart';
 export 'src/pages/implementations/loading_page.dart';
 export 'src/pages/implementations/chatgpt_settings_dialog_page.dart';
 export 'src/pages/implementations/switch_settings_page.dart';
+export 'src/pages/implementations/player_settings_dialog_page.dart';
+export 'src/pages/implementations/browser_history_page.dart';
+export 'src/pages/implementations/browser_source_page.dart';
+export 'src/pages/implementations/browser_dialog_page.dart';
+export 'src/pages/implementations/browser_bookmark_dialog_page.dart';
 
 export 'src/pages/base_page.dart';
 export 'src/pages/base_history_page.dart';

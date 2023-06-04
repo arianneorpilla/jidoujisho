@@ -1,26 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 
-/// The content of the dialog when editing a new Mokuro catalog.
-class MokuroCatalogEditDialogPage extends BasePage {
+/// The content of the dialog when editing a new [BrowserBookmark].
+class BrowserBookmarkDialogPage extends BasePage {
   /// Create an instance of this page.
-  const MokuroCatalogEditDialogPage({
-    this.catalog,
+  const BrowserBookmarkDialogPage({
+    this.bookmark,
+    this.onUpdate,
     super.key,
   });
 
   /// Not null if editing a catalog.
-  final MokuroCatalog? catalog;
+  final BrowserBookmark? bookmark;
+
+  /// On delete or save.
+  final Function()? onUpdate;
 
   @override
-  BasePageState createState() => _MokuroCatalogEditDialogPageState();
+  BasePageState createState() => _BrowserBookmarkDialogPageState();
 }
 
-class _MokuroCatalogEditDialogPageState
-    extends BasePageState<MokuroCatalogEditDialogPage> {
+class _BrowserBookmarkDialogPageState
+    extends BasePageState<BrowserBookmarkDialogPage> {
   late final TextEditingController _nameController;
   late final TextEditingController _urlController;
 
@@ -28,8 +31,8 @@ class _MokuroCatalogEditDialogPageState
   void initState() {
     super.initState();
 
-    _nameController = TextEditingController(text: widget.catalog?.name);
-    _urlController = TextEditingController(text: widget.catalog?.url);
+    _nameController = TextEditingController(text: widget.bookmark?.name);
+    _urlController = TextEditingController(text: widget.bookmark?.url);
   }
 
   @override
@@ -41,7 +44,10 @@ class _MokuroCatalogEditDialogPageState
     );
   }
 
-  List<Widget> get actions => [buildSaveButton()];
+  List<Widget> get actions => [
+        if (widget.bookmark != null) buildDeleteButton(),
+        buildSaveButton(),
+      ];
 
   Widget buildContent() {
     return SingleChildScrollView(
@@ -72,11 +78,32 @@ class _MokuroCatalogEditDialogPageState
     );
   }
 
+  Widget buildDeleteButton() {
+    return TextButton(
+      child: Text(
+        t.dialog_delete,
+        style: TextStyle(color: theme.colorScheme.primary),
+      ),
+      onPressed: executeDelete,
+    );
+  }
+
   Widget buildSaveButton() {
     return TextButton(
       child: Text(t.dialog_save),
       onPressed: executeSave,
     );
+  }
+
+  void executeDelete() async {
+    if (widget.bookmark != null && widget.bookmark!.id != null) {
+      appModel.deleteBookmark(widget.bookmark!);
+      widget.onUpdate?.call();
+    }
+
+    if (mounted) {
+      Navigator.pop(context);
+    }
   }
 
   void executeSave() async {
@@ -86,19 +113,17 @@ class _MokuroCatalogEditDialogPageState
       return;
     }
 
-    MokuroCatalog catalog = MokuroCatalog(
+    BrowserBookmark bookmark = BrowserBookmark(
       name: name,
       url: url,
-      order: widget.catalog?.order ?? appModel.nextCatalogOrder,
-      id: widget.catalog?.id,
+      id: widget.bookmark?.id,
     );
-    if (appModel.catalogUrlHasDuplicate(catalog)) {
-      Fluttertoast.showToast(msg: t.duplicate_catalog);
-      return;
+
+    await appModel.addBookmark(bookmark);
+    widget.onUpdate?.call();
+
+    if (mounted) {
+      Navigator.pop(context);
     }
-
-    await appModel.addCatalog(catalog);
-
-    Navigator.pop(context);
   }
 }

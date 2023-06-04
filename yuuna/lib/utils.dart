@@ -26,6 +26,7 @@ export 'src/utils/player/player_payload.dart';
 export 'src/utils/player/blur_options.dart';
 export 'src/utils/player/subtitle_options.dart';
 export 'src/utils/player/youtube_quality.dart';
+export 'src/utils/player/playback_mode.dart';
 
 export 'src/utils/misc/jidoujisho_color.dart';
 export 'src/utils/misc/jidoujisho_time_format.dart';
@@ -36,3 +37,4 @@ export 'src/utils/misc/message_item.dart';
 export 'src/utils/misc/mokuro_catalog.dart';
 export 'src/utils/misc/mokuro_payload.dart';
 export 'src/utils/misc/dialog_content.dart';
+export 'src/utils/misc/browser_bookmark.dart';

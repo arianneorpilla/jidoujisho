@@ -26,6 +26,7 @@ class PlayerTranscriptPage extends BaseSourcePage {
     required this.subtitles,
     required this.currentSubtitle,
     required this.nearestSubtitle,
+    required this.autoPauseNotifier,
     required this.subtitleOptions,
     required this.controller,
     required this.playingNotifier,
@@ -46,6 +47,9 @@ class PlayerTranscriptPage extends BaseSourcePage {
 
   /// Subtitle to be highlighted.
   final ValueNotifier<Subtitle?> currentSubtitle;
+
+  /// Subtitle from auto pause.
+  final ValueNotifier<Subtitle?> autoPauseNotifier;
 
   /// Nearest subtitle if no initial subtitle.
   final Subtitle? nearestSubtitle;
@@ -276,6 +280,7 @@ class _PlayerTranscriptPageState
           Duration(milliseconds: widget.subtitleOptions.subtitleDelay);
 
       widget.controller.seekTo(offsetStart);
+      widget.autoPauseNotifier.value = null;
     } else {
       Fluttertoast.showToast(msg: t.no_search_results);
     }
@@ -425,6 +430,7 @@ class _PlayerTranscriptPageState
                 tooltip: t.replay,
                 icon: Icons.replay,
                 onTap: () async {
+                  widget.autoPauseNotifier.value = null;
                   await widget.controller.stop();
                   await widget.controller.play();
                   await Future.delayed(const Duration(seconds: 2), () async {
@@ -442,6 +448,7 @@ class _PlayerTranscriptPageState
                   widget.controller.pause();
                 } else {
                   widget.controller.play();
+                  widget.autoPauseNotifier.value = null;
                 }
               },
             );
@@ -615,8 +622,7 @@ class _PlayerTranscriptPageState
         offsetIndex + length,
       );
       if (searchTerm.isNotEmpty) {
-        if (appModel.isPlayerDefinitionFocusMode &&
-            appModel.isTranscriptPlayerMode) {
+        if (appModel.isTranscriptPlayerMode) {
           dialogSmartPause();
         }
       }
@@ -664,8 +670,7 @@ class _PlayerTranscriptPageState
     (appModel.currentMediaSource as PlayerMediaSource)
         .clearTranscriptSubtitle();
 
-    if (appModel.isPlayerDefinitionFocusMode &&
-        appModel.isTranscriptPlayerMode) {
+    if (appModel.isTranscriptPlayerMode) {
       dialogSmartResume();
     }
   }
@@ -721,6 +726,7 @@ class _PlayerTranscriptPageState
                 onTap: () async {
                   if (appModel.isTranscriptPlayerMode && !widget.alignMode) {
                     widget.controller.setTime(offsetStart.inMilliseconds);
+                    widget.autoPauseNotifier.value = null;
                     widget.controller.play();
                     return;
                   }
@@ -872,7 +878,7 @@ class _PlayerTranscriptPageState
           if (appModel.isTranscriptPlayerMode && !widget.alignMode) {
             await widget.controller.pause();
             await widget.controller.seekTo(offsetStart);
-
+            widget.autoPauseNotifier.value = null;
             await widget.controller.play();
             return;
           }
