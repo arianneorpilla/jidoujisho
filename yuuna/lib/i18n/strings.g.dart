@@ -3,7 +3,7 @@
 /// Locales: 1
 /// Strings: 384
 ///
-/// Built on 2023-06-02 at 15:07 UTC
+/// Built on 2023-06-04 at 10:18 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -520,7 +520,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get manage_duplicate_checks => 'Manage Duplicate Checks';
 	String get playback_normal => 'Normal Playback Mode';
 	String get playback_condensed => 'Condensed Playback Mode';
-	String get playback_auto_pause => 'Subtitle Pause Mode';
+	String get playback_auto_pause => 'Subtitle Pause Playback Mode';
 	String get player_hardware_acceleration => 'Hardware acceleration';
 	String get player_use_opensles => 'OpenSL ES audio';
 	String get go_forward => 'Go Forward';
@@ -942,7 +942,7 @@ extension on _StringsEn {
 			case 'manage_duplicate_checks': return 'Manage Duplicate Checks';
 			case 'playback_normal': return 'Normal Playback Mode';
 			case 'playback_condensed': return 'Condensed Playback Mode';
-			case 'playback_auto_pause': return 'Subtitle Pause Mode';
+			case 'playback_auto_pause': return 'Subtitle Pause Playback Mode';
 			case 'player_hardware_acceleration': return 'Hardware acceleration';
 			case 'player_use_opensles': return 'OpenSL ES audio';
 			case 'go_forward': return 'Go Forward';

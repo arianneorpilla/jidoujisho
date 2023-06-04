@@ -404,10 +404,10 @@
           "other": "SHOW $n REPLIES"
         }
       },
-      "manage_duplicate_checks": "Manage Duplicate Checks",
-      "playback_normal": "Normal Playback Mode",
-      "playback_condensed": "Condensed Playback Mode",
-    "playback_auto_pause": "Subtitle Pause Mode",
+    "manage_duplicate_checks": "Manage Duplicate Checks",
+    "playback_normal": "Normal Playback Mode",
+    "playback_condensed": "Condensed Playback Mode",
+    "playback_auto_pause": "Subtitle Pause Playback Mode",
     "player_hardware_acceleration": "Hardware acceleration",
     "player_use_opensles": "OpenSL ES audio",
     "go_forward": "Go Forward",
