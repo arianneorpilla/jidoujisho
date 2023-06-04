@@ -194,6 +194,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
         appModel: appModel,
         item: item,
         file: thumbnailFile,
+        clearOverrideImage: true,
       );
     }
 

@@ -694,7 +694,11 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
 
   Future<void> unselectWebViewTextSelection(
       InAppWebViewController webViewController) async {
-    String source = 'window.getSelection().removeAllRanges();';
+    String source = '''
+if (!window.getSelection().isCollapsed) {
+  window.getSelection().removeAllRanges();
+}
+''';
     await webViewController.evaluateJavascript(source: source);
   }
 

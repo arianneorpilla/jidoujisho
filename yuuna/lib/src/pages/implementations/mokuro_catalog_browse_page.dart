@@ -734,7 +734,11 @@ document.getElementById('pageIdxDisplay').style.color = 'white';
 
   Future<void> unselectWebViewTextSelection(
       InAppWebViewController webViewController) async {
-    String source = 'window.getSelection().removeAllRanges();';
+    String source = '''
+if (!window.getSelection().isCollapsed) {
+  window.getSelection().removeAllRanges();
+}
+''';
     await webViewController.evaluateJavascript(source: source);
   }
 

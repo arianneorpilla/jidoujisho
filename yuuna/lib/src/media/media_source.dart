@@ -405,6 +405,7 @@ abstract class MediaSource {
     required AppModel appModel,
     required MediaItem item,
     required File? file,
+    required bool clearOverrideImage,
   }) async {
     String filename = getOverrideThumbnailFilename(
       appModel: appModel,
@@ -412,10 +413,10 @@ abstract class MediaSource {
     );
 
     File thumbnailFile = File(filename);
-    thumbnailFile.createSync(recursive: true);
-    if (file == null) {
+    if (clearOverrideImage) {
       thumbnailFile.deleteSync();
-    } else {
+    } else if (file != null) {
+      thumbnailFile.createSync(recursive: true);
       file.copySync(filename);
     }
   }
@@ -430,6 +431,7 @@ abstract class MediaSource {
       appModel: appModel,
       item: item,
       file: null,
+      clearOverrideImage: true,
     );
   }
 

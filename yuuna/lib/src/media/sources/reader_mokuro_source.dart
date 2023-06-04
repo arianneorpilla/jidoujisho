@@ -249,6 +249,7 @@ class ReaderMokuroSource extends ReaderMediaSource {
           allowFileAccessFromFileURLs: true,
           allowUniversalAccessFromFileURLs: true,
         ),
+        android: AndroidInAppWebViewOptions(),
       ),
       initialUrlRequest: URLRequest(
         url: Uri.parse(

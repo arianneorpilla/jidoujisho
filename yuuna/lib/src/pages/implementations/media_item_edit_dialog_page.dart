@@ -30,6 +30,7 @@ class _MediaItemEditDialogPageState
   ImageProvider? _coverImageProvider;
 
   File? _newFile;
+  bool _clearOverrideImage = false;
 
   final TextEditingController _nameOverrideController = TextEditingController();
   final TextEditingController _coverOverrideController =
@@ -73,73 +74,82 @@ class _MediaItemEditDialogPageState
   }
 
   Widget buildContent() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox(width: double.maxFinite, height: 1),
-        TextField(
-          controller: _nameOverrideController,
-          maxLines: null,
-          decoration: InputDecoration(
-            suffixIcon: JidoujishoIconButton(
-              tooltip: t.undo,
-              isWideTapArea: true,
-              icon: Icons.undo,
-              onTap: () async {
-                _nameOverrideController.text = widget.item.title;
-                FocusScope.of(context).unfocus();
-              },
+    return ClipRect(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(width: double.maxFinite, height: 1),
+          TextField(
+            controller: _nameOverrideController,
+            maxLines: null,
+            decoration: InputDecoration(
+              suffixIcon: JidoujishoIconButton(
+                tooltip: t.undo,
+                isWideTapArea: true,
+                icon: Icons.undo,
+                onTap: () async {
+                  _nameOverrideController.text = widget.item.title;
+                  FocusScope.of(context).unfocus();
+                },
+              ),
             ),
           ),
-        ),
-        TextField(
-          readOnly: true,
-          controller: _coverOverrideController,
-          style: const TextStyle(color: Colors.transparent),
-          decoration: InputDecoration(
-            floatingLabelBehavior: FloatingLabelBehavior.always,
-            suffixIcon: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Expanded(
-                  child: Padding(
-                    child: Image(
-                        image: _coverImageProvider ?? _defaultImageProvider!),
-                    padding: Spacing.of(context).insets.all.small,
+          TextField(
+            readOnly: true,
+            controller: _coverOverrideController,
+            style: const TextStyle(color: Colors.transparent),
+            decoration: InputDecoration(
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              suffixIcon: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Expanded(
+                    child: Padding(
+                      child: Image(
+                          image: _coverImageProvider ?? _defaultImageProvider!,
+                          fit: BoxFit.fitHeight),
+                      padding: Spacing.of(context).insets.all.small,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 5),
-                JidoujishoIconButton(
-                  tooltip: t.pick_image,
-                  isWideTapArea: true,
-                  icon: Icons.file_upload,
-                  onTap: () async {
-                    ImagePicker imagePicker = ImagePicker();
-                    final pickedFile = await imagePicker.pickImage(
-                        source: ImageSource.gallery);
-                    _newFile = File(pickedFile!.path);
-                    _coverImageProvider = FileImage(_newFile!);
+                  const SizedBox(width: 5),
+                  JidoujishoIconButton(
+                    tooltip: t.pick_image,
+                    isWideTapArea: true,
+                    icon: Icons.file_upload,
+                    onTap: () async {
+                      ImagePicker imagePicker = ImagePicker();
+                      final pickedFile = await imagePicker.pickImage(
+                          source: ImageSource.gallery);
+                      if (pickedFile != null) {
+                        _newFile = File(pickedFile.path);
+                        _coverImageProvider = FileImage(_newFile!);
+                        if (_newFile != null) {
+                          _clearOverrideImage = false;
+                        }
+                      }
 
-                    setState(() {});
-                  },
-                ),
-                JidoujishoIconButton(
-                  tooltip: t.undo,
-                  isWideTapArea: true,
-                  icon: Icons.undo,
-                  onTap: () async {
-                    _newFile = null;
-                    _coverImageProvider = null;
+                      setState(() {});
+                    },
+                  ),
+                  JidoujishoIconButton(
+                    tooltip: t.undo,
+                    isWideTapArea: true,
+                    icon: Icons.undo,
+                    onTap: () async {
+                      _newFile = null;
+                      _coverImageProvider = null;
+                      _clearOverrideImage = true;
 
-                    setState(() {});
-                  },
-                ),
-              ],
+                      setState(() {});
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -167,20 +177,22 @@ class _MediaItemEditDialogPageState
   }
 
   void executeSave() async {
-    await mediaSource.setOverrideTitleFromMediaItem(
-      item: widget.item,
-      title: _nameOverrideController.text,
-    );
-    if (_newFile != null) {
+    if (_nameOverrideController.text.trim().isNotEmpty) {
+      await mediaSource.setOverrideTitleFromMediaItem(
+        item: widget.item,
+        title: _nameOverrideController.text,
+      );
+
       await mediaSource.setOverrideThumbnailFromMediaItem(
         appModel: appModel,
         item: widget.item,
         file: _newFile,
+        clearOverrideImage: _clearOverrideImage,
       );
-    }
 
-    Navigator.pop(context);
-    Navigator.pop(context);
-    mediaSource.mediaType.refreshTab();
+      Navigator.pop(context);
+      Navigator.pop(context);
+      mediaSource.mediaType.refreshTab();
+    }
   }
 }
