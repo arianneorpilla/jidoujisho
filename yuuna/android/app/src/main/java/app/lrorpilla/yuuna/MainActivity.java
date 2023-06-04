@@ -176,7 +176,9 @@ public class MainActivity extends AudioServiceActivity {
                             new Handler(Looper.getMainLooper()).post(new Runnable() {
                             @Override
                             public void run() {
-                                result.success(checkForDuplicates(models, key));
+                                if (!mAnkiDroid.shouldRequestPermission()) {
+                                    result.success(checkForDuplicates(models, key));
+                                }
                             }
                             });
                             break;

@@ -2015,13 +2015,19 @@ class AppModel with ChangeNotifier {
   /// Given a value and a model name, checks if there are cards that have a
   /// first field with a matching value.
   Future<bool> checkForDuplicates(String key) async {
-    return await methodChannel.invokeMethod(
-      'checkForDuplicates',
-      <String, dynamic>{
-        'models': duplicateCheckModels,
-        'key': key,
-      },
-    );
+    try {
+      final result = await methodChannel.invokeMethod(
+        'checkForDuplicates',
+        <String, dynamic>{
+          'models': duplicateCheckModels,
+          'key': key,
+        },
+      );
+
+      return result;
+    } on PlatformException {
+      return false;
+    }
   }
 
   /// Add a note with certain [creatorFieldValues] and a [mapping] of fields to
