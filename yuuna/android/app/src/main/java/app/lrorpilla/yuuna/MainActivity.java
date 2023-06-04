@@ -173,14 +173,17 @@ public class MainActivity extends AudioServiceActivity {
                             result.success("Added note");
                             break;
                         case "checkForDuplicates":
-                            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (!mAnkiDroid.shouldRequestPermission()) {
+                            if (mAnkiDroid.shouldRequestPermission()) {
+                                result.success(false);
+                                return;
+                            } else {
+                                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                @Override
+                                public void run() {
                                     result.success(checkForDuplicates(models, key));
                                 }
+                                });
                             }
-                            });
                             break;
                         case "getDecks":
                             result.success(api.getDeckList());
