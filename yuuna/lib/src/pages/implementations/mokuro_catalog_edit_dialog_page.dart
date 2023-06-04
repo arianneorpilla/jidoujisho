@@ -96,9 +96,10 @@ class _MokuroCatalogEditDialogPageState
       Fluttertoast.showToast(msg: t.duplicate_catalog);
       return;
     }
+    final navigator = Navigator.of(context);
 
     await appModel.addCatalog(catalog);
 
-    Navigator.pop(context);
+    navigator.pop();
   }
 }

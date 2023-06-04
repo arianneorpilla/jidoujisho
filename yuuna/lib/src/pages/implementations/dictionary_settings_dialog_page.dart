@@ -251,24 +251,26 @@ class _DictionaryDialogPageState extends BasePageState {
       List<String> models = await appModel.getModelList();
       Map<String, bool> items = Map<String, bool>.fromEntries(
           models.map((e) => MapEntry(e, duplicateCheckModels.contains(e))));
-      showDialog(
-        context: context,
-        builder: (context) => SwitchSettingsPage<String>(
-          items: items,
-          generateLabel: (item) => item,
-          onSave: (selection) {
-            List<String> newDuplicateCheckModels = selection.entries
-                .where((e) => e.value)
-                .map((e) => e.key)
-                .toList();
-            appModel.setDuplicateCheckModels(newDuplicateCheckModels);
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => SwitchSettingsPage<String>(
+            items: items,
+            generateLabel: (item) => item,
+            onSave: (selection) {
+              List<String> newDuplicateCheckModels = selection.entries
+                  .where((e) => e.value)
+                  .map((e) => e.key)
+                  .toList();
+              appModel.setDuplicateCheckModels(newDuplicateCheckModels);
 
-            if (!duplicateCheckModels.equals(newDuplicateCheckModels)) {
-              appModel.refresh();
-            }
-          },
-        ),
-      );
+              if (!duplicateCheckModels.equals(newDuplicateCheckModels)) {
+                appModel.refresh();
+              }
+            },
+          ),
+        );
+      }
     }
   }
 }

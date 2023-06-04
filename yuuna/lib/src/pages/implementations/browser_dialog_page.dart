@@ -93,8 +93,8 @@ class _BrowserDialogPageState extends BasePageState<BrowserDialogPage> {
 
   Widget buildBrowseButton() {
     return TextButton(
-      child: Text(t.dialog_browse),
       onPressed: executeBrowse,
+      child: Text(t.dialog_browse),
     );
   }
 

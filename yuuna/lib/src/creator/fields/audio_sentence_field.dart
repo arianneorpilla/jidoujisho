@@ -265,7 +265,6 @@ class AudioSentenceField extends AudioExportField {
         if (playerState == null ||
             playerState.processingState == ProcessingState.completed) {
           sliderValue = 0;
-          max = 1.0;
         }
 
         return Expanded(

@@ -108,7 +108,6 @@ class AudioField extends AudioExportField {
   /// Set up audio for new file.
   Future<void> initialiseAudio(File file) async {
     _audioPlayer = AudioPlayer();
-
     await _audioPlayer.setFilePath(file.path);
     await _audioPlayer.pause();
     _positionNotifier.value = _audioPlayer.position;
@@ -264,7 +263,6 @@ class AudioField extends AudioExportField {
         if (playerState == null ||
             playerState.processingState == ProcessingState.completed) {
           sliderValue = 0;
-          max = 0;
         }
 
         return Expanded(
