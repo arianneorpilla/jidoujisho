@@ -1856,7 +1856,7 @@ class AppModel with ChangeNotifier {
 
   /// Shows the AnkiDroid API message. Called when an Anki-related API get call
   /// fails.
-  void showAnkidroidApiMessage() async {
+  Future<void> showAnkidroidApiMessage() async {
     await requestAnkidroidPermissions();
 
     await showDialog(
@@ -1971,7 +1971,7 @@ class AppModel with ChangeNotifier {
       decks.sort((a, b) => a.compareTo(b));
       return decks;
     } catch (e) {
-      showAnkidroidApiMessage();
+      await showAnkidroidApiMessage();
       rethrow;
     }
   }
@@ -1987,7 +1987,7 @@ class AppModel with ChangeNotifier {
       models.sort((a, b) => a.compareTo(b));
       return models;
     } catch (e) {
-      showAnkidroidApiMessage();
+      await showAnkidroidApiMessage();
       rethrow;
     }
   }
@@ -2015,13 +2015,18 @@ class AppModel with ChangeNotifier {
   /// Given a value and a model name, checks if there are cards that have a
   /// first field with a matching value.
   Future<bool> checkForDuplicates(String key) async {
-    return await methodChannel.invokeMethod(
-      'checkForDuplicates',
-      <String, dynamic>{
-        'models': duplicateCheckModels,
-        'key': key,
-      },
-    );
+    try {
+      final result = await methodChannel.invokeMethod(
+        'checkForDuplicates',
+        <String, dynamic>{
+          'models': duplicateCheckModels,
+          'key': key,
+        },
+      );
+      return result;
+    } catch (e) {
+      return false;
+    }
   }
 
   /// Add a note with certain [creatorFieldValues] and a [mapping] of fields to
