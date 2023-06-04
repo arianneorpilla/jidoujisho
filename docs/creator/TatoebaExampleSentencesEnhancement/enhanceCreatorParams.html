@@ -113,6 +113,7 @@ Future&lt;void&gt; enhanceCreatorParams({
       String firstResult = selection.removeAt(0);
       creatorModel
           .setSentenceAndCloze(JidoujishoTextSelection(text: firstResult));
+      creatorModel.getFieldController(ContextField.instance).clear();
       for (String result in selection) {
         creatorModel.appendSentenceAndCloze(result);
       }
@@ -200,7 +201,7 @@ Future&lt;void&gt; enhanceCreatorParams({
 <footer>
   <span class="no-break">
     yuuna
-      2.7.0+84
+      2.8.0+93
   </span>
 
   

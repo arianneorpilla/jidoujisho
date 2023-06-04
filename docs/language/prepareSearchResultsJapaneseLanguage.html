@@ -458,9 +458,9 @@ Credits to Matthew Chan for their port of the Yomichan parser to Dart.</p>
           groupBy&lt;DictionaryFrequency, Dictionary&gt;(
               bFrequencies, (frequency) =&gt; frequency.dictionary.value!);
       Map&lt;Dictionary, double&gt; aValues = aFrequenciesByDictionary
-          .map((k, v) =&gt; MapEntry(k, v.map((e) =&gt; e.value).max));
+          .map((k, v) =&gt; MapEntry(k, v.map((e) =&gt; e.value).min));
       Map&lt;Dictionary, double&gt; bValues = bFrequenciesByDictionary
-          .map((k, v) =&gt; MapEntry(k, v.map((e) =&gt; e.value).max));
+          .map((k, v) =&gt; MapEntry(k, v.map((e) =&gt; e.value).min));
 
       Set&lt;Dictionary&gt; sharedDictionaries =
           aValues.keys.toSet().intersection(bValues.keys.toSet());
@@ -468,17 +468,12 @@ Credits to Matthew Chan for their port of the Yomichan parser to Dart.</p>
       if (sharedDictionaries.isNotEmpty) {
         for (Dictionary dictionary in sharedDictionaries) {
           int freqCompare =
-              bValues[dictionary]!.compareTo(aValues[dictionary]!);
+              aValues[dictionary]!.compareTo(bValues[dictionary]!);
           if (freqCompare != 0) {
             return freqCompare;
           }
         }
       } else {
-        int freqSumCompare = bValues.values.sum.compareTo(aValues.values.sum);
-        if (freqSumCompare != 0) {
-          return freqSumCompare;
-        }
-
         int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
         if (popularityCompare != 0) {
           return popularityCompare;
@@ -594,7 +589,7 @@ Credits to Matthew Chan for their port of the Yomichan parser to Dart.</p>
 <footer>
   <span class="no-break">
     yuuna
-      2.7.0+84
+      2.8.0+93
   </span>
 
   

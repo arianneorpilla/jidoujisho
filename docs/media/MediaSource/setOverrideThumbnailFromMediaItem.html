@@ -62,7 +62,8 @@
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
 <span class="name ">setOverrideThumbnailFromMediaItem</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="setOverrideThumbnailFromMediaItem-param-appModel">{<span>required</span> <span class="type-annotation"><a href="../../models/AppModel-class.html">AppModel</a></span> <span class="parameter-name">appModel</span>, </span></li>
 <li><span class="parameter" id="setOverrideThumbnailFromMediaItem-param-item"><span>required</span> <span class="type-annotation"><a href="../../media/MediaItem-class.html">MediaItem</a></span> <span class="parameter-name">item</span>, </span></li>
-<li><span class="parameter" id="setOverrideThumbnailFromMediaItem-param-file"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-io/File-class.html">File</a>?</span> <span class="parameter-name">file</span>}</span></li>
+<li><span class="parameter" id="setOverrideThumbnailFromMediaItem-param-file"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-io/File-class.html">File</a>?</span> <span class="parameter-name">file</span>, </span></li>
+<li><span class="parameter" id="setOverrideThumbnailFromMediaItem-param-clearOverrideImage"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">clearOverrideImage</span>}</span></li>
 </ol>)
 
       
@@ -82,6 +83,7 @@ deletes the override thumbnail.</p>
   required AppModel appModel,
   required MediaItem item,
   required File? file,
+  required bool clearOverrideImage,
 }) async {
   String filename = getOverrideThumbnailFilename(
     appModel: appModel,
@@ -90,9 +92,9 @@ deletes the override thumbnail.</p>
 
   File thumbnailFile = File(filename);
   thumbnailFile.createSync(recursive: true);
-  if (file == null) {
+  if (clearOverrideImage) {
     thumbnailFile.deleteSync();
-  } else {
+  } else if (file != null) {
     file.copySync(filename);
   }
 }</code></pre>
@@ -203,7 +205,7 @@ deletes the override thumbnail.</p>
 <footer>
   <span class="no-break">
     yuuna
-      2.7.0+84
+      2.8.0+93
   </span>
 
   
