@@ -89,7 +89,8 @@
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.4">2.4</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.5">2.5</a> · 
   <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.6.0">2.6</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.7.0">2.7</a></b>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.7.0">2.7</a> ·
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.8.0">2.8</a></b>
 </p>
 
 
