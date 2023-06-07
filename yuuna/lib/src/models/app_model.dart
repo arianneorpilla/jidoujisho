@@ -115,21 +115,6 @@ final quickActionColorProvider =
   }));
 });
 
-/// A global [Provider] for listening to search results in PIP mode.
-final pipSearchResultProvider =
-    FutureProvider<DictionarySearchResult?>((ref) async {
-  AppModel appModel = ref.watch(appProvider);
-  int currentPosition = ref.watch(pipSearchPositionProvider);
-  String searchTerm = ref.watch(pipSearchTermProvider);
-  DictionarySearchResult result = await appModel.searchDictionary(
-    searchTerm: searchTerm.substring(currentPosition),
-    searchWithWildcards: false,
-  );
-  appModel.addToDictionaryHistory(result: result);
-
-  return result;
-});
-
 /// A global [Provider] for maintaining visible once state.
 final visibleOnceProvider =
     StateProvider.family<bool, DictionaryHeading>((ref, heading) => false);
@@ -1745,7 +1730,7 @@ class AppModel with ChangeNotifier {
     DictionarySearchResult? result =
         _database.dictionarySearchResults.getSync(id);
 
-    if (result != null) {
+    if (result != null && result.headingIds.isNotEmpty) {
       _dictionarySearchCache['$searchTerm/$overrideMaximumTerms'] = result;
       return result;
     } else {

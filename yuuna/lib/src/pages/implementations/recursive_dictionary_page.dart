@@ -180,11 +180,18 @@ class _RecursiveDictionaryPageState
   }
 
   bool _showMore = false;
+  String lastQuery = '';
 
   void search(
     String query, {
     int? overrideMaximumTerms,
   }) async {
+    if (lastQuery == query && overrideMaximumTerms == null) {
+      return;
+    } else {
+      lastQuery = query;
+    }
+
     overrideMaximumTerms ??= appModel.maximumTerms;
 
     if (mounted) {

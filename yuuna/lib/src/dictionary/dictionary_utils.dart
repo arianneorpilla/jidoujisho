@@ -364,6 +364,7 @@ void preloadResultSync(int id) {
   DictionarySearchResult result = database.dictionarySearchResults.getSync(id)!;
 
   result.headings.loadSync();
+
   for (DictionaryHeading heading in result.headings) {
     heading.entries.loadSync();
     for (DictionaryEntry entry in heading.entries) {

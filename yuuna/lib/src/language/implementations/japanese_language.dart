@@ -612,9 +612,10 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
     searchTerm: searchTerm,
     bestLength: bestLength,
   );
-  unsortedResult.headings.addAll(headings);
 
   late int resultId;
+  unsortedResult.headings.addAll(headings);
+
   database.writeTxnSync(() async {
     database.dictionarySearchResults.deleteBySearchTermSync(searchTerm);
     resultId = database.dictionarySearchResults.putSync(unsortedResult);
@@ -720,7 +721,9 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
   );
 
   database.writeTxnSync(() async {
-    resultId = database.dictionarySearchResults.putSync(result);
+    result.headings.addAll(headings);
+    resultId =
+        database.dictionarySearchResults.putSync(result, saveLinks: false);
 
     int countInSameHistory = database.dictionarySearchResults.countSync();
 

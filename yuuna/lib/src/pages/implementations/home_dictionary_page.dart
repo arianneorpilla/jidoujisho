@@ -159,11 +159,18 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
   }
 
   bool _showMore = false;
+  String lastQuery = '';
 
   void search(
     String query, {
     int? overrideMaximumTerms,
   }) async {
+    if (lastQuery == query && overrideMaximumTerms == null) {
+      return;
+    } else {
+      lastQuery = query;
+    }
+
     overrideMaximumTerms ??= appModel.maximumTerms;
 
     if (mounted) {
@@ -400,6 +407,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
         return const SizedBox.shrink();
       }
     }
+
     if (_result == null || _result!.headings.isEmpty) {
       return buildNoSearchResultsPlaceholderMessage();
     }

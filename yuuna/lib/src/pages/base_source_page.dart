@@ -135,6 +135,12 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     required JidoujishoPopupPosition position,
     int? overrideMaximumTerms,
   }) async {
+    if (_lastSearchTerm == searchTerm && overrideMaximumTerms == null) {
+      return;
+    } else {
+      _lastSearchTerm = searchTerm;
+    }
+
     overrideMaximumTerms ??= appModel.maximumTerms;
 
     late DictionarySearchResult dictionaryResult;
