@@ -81,7 +81,7 @@ class _BrowserSettingsDialogPageState extends BasePageState {
   }
 
   Widget buildExtendPageSwitch() {
-    ValueNotifier<bool> _notifier =
+    ValueNotifier<bool> notifier =
         ValueNotifier<bool>(source.extendPageBeyondNavigationBar);
 
     return Row(
@@ -90,13 +90,13 @@ class _BrowserSettingsDialogPageState extends BasePageState {
           child: Text(t.extend_page_beyond_navbar),
         ),
         ValueListenableBuilder<bool>(
-          valueListenable: _notifier,
+          valueListenable: notifier,
           builder: (_, value, __) {
             return Switch(
               value: value,
               onChanged: (value) {
                 source.toggleExtendPageBeyondNavigationBar();
-                _notifier.value = source.extendPageBeyondNavigationBar;
+                notifier.value = source.extendPageBeyondNavigationBar;
               },
             );
           },
@@ -106,7 +106,7 @@ class _BrowserSettingsDialogPageState extends BasePageState {
   }
 
   Widget buildHighlightOnTapSwitch() {
-    ValueNotifier<bool> _notifier = ValueNotifier<bool>(source.highlightOnTap);
+    ValueNotifier<bool> notifier = ValueNotifier<bool>(source.highlightOnTap);
 
     return Row(
       children: [
@@ -114,13 +114,13 @@ class _BrowserSettingsDialogPageState extends BasePageState {
           child: Text(t.highlight_on_tap),
         ),
         ValueListenableBuilder<bool>(
-          valueListenable: _notifier,
+          valueListenable: notifier,
           builder: (_, value, __) {
             return Switch(
               value: value,
               onChanged: (value) {
                 source.toggleHighlightOnTap();
-                _notifier.value = source.highlightOnTap;
+                notifier.value = source.highlightOnTap;
               },
             );
           },
