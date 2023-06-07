@@ -10,10 +10,10 @@ class MokuroSettingsDialogPage extends BasePage {
   const MokuroSettingsDialogPage({super.key});
 
   @override
-  BasePageState createState() => _DictionaryDialogPageState();
+  BasePageState createState() => _MokuroSettingsDialogPageState();
 }
 
-class _DictionaryDialogPageState extends BasePageState {
+class _MokuroSettingsDialogPageState extends BasePageState {
   ReaderMokuroSource get source => ReaderMokuroSource.instance;
 
   @override

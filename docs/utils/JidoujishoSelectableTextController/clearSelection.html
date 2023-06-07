@@ -82,10 +82,7 @@
 
   _textSpanEditingController!.value =
       _textSpanEditingController!.value.copyWith(
-    selection: const TextSelection(
-      baseOffset: -1,
-      extentOffset: -1,
-    ),
+    selection: const TextSelection.collapsed(offset: -1),
   );
 }</code></pre>
 </section>
@@ -147,7 +144,7 @@
 <footer>
   <span class="no-break">
     yuuna
-      2.7.0+84
+      2.8.0+93
   </span>
 
   

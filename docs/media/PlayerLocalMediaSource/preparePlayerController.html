@@ -108,11 +108,12 @@ Future&lt;VlcPlayerController&gt; preparePlayerController({
   List&lt;String&gt; audioParams = [
     &#39;--audio-language=${appModel.targetLanguage.languageCode},${appModel.appLocale.languageCode}&#39;,
     &#39;--sub-track=99999&#39;,
-    &#39;--aout=opensles&#39;,
+    if (appModel.playerUseOpenSLES) &#39;--aout=opensles&#39;
   ];
 
   return VlcPlayerController.file(
     File(item.mediaIdentifier),
+    hwAcc: appModel.playerHardwareAcceleration ? HwAcc.auto : HwAcc.disabled,
     options: VlcPlayerOptions(
       advanced: VlcAdvancedOptions(advancedParams),
       audio: VlcAudioOptions(audioParams),
@@ -176,6 +177,7 @@ Future&lt;VlcPlayerController&gt; preparePlayerController({
           <li class="inherited"><a href="../../media/PlayerMediaSource/buildHistoryPage.html">buildHistoryPage</a></li>
           <li><a href="../../media/PlayerLocalMediaSource/buildLaunchPage.html">buildLaunchPage</a></li>
           <li><a href="../../media/PlayerLocalMediaSource/buildPickVideoButton.html">buildPickVideoButton</a></li>
+          <li class="inherited"><a href="../../media/PlayerMediaSource/buildSettingsButton.html">buildSettingsButton</a></li>
           <li class="inherited"><a href="../../media/MediaSource/clearCurrentSentence.html">clearCurrentSentence</a></li>
           <li class="inherited"><a href="../../media/MediaSource/clearExtraData.html">clearExtraData</a></li>
           <li class="inherited"><a href="../../media/MediaSource/clearOverrideValues.html">clearOverrideValues</a></li>
@@ -238,7 +240,7 @@ Future&lt;VlcPlayerController&gt; preparePlayerController({
 <footer>
   <span class="no-break">
     yuuna
-      2.7.0+84
+      2.8.0+93
   </span>
 
   

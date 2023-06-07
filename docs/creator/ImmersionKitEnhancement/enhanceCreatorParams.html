@@ -123,6 +123,8 @@ Future&lt;void&gt; enhanceCreatorParams({
 
       ImmersionKitResult firstResult = selection.removeAt(0);
       creatorModel.setSentenceAndCloze(firstResult.selection);
+      creatorModel.getFieldController(ContextField.instance).text =
+          firstResult.source;
       for (ImmersionKitResult result in selection) {
         creatorModel.appendSentenceAndCloze(result.text);
       }
@@ -245,7 +247,7 @@ Future&lt;void&gt; enhanceCreatorParams({
 <footer>
   <span class="no-break">
     yuuna
-      2.7.0+84
+      2.8.0+93
   </span>
 
   

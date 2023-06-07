@@ -58,7 +58,7 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/1.0.3/riverpod/AutoDisposeFutureProviderFamily-class.html">AutoDisposeFutureProviderFamily</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-ui/Color-class.html">Color</a>?</span>&gt;</span></span>, <span class="type-parameter"><a href="../dictionary/DictionaryHeading-class.html">DictionaryHeading</a></span>&gt;</span>
+          <a href="https://pub.dev/documentation/riverpod/1.0.3/riverpod/FutureProviderFamily-class.html">FutureProviderFamily</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-ui/Color-class.html">Color</a>?</span>&gt;</span></span>, <span class="type-parameter"><a href="../dictionary/DictionaryHeading-class.html">DictionaryHeading</a></span>&gt;</span>
           <span class="name ">quickActionColorProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -71,8 +71,9 @@
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final quickActionColorProvider = FutureProvider.autoDispose
-    .family&lt;Map&lt;String, Color?&gt;, DictionaryHeading&gt;((ref, heading) async {
+  <pre class="language-dart"><code class="language-dart">final quickActionColorProvider =
+    FutureProvider.family&lt;Map&lt;String, Color?&gt;, DictionaryHeading&gt;(
+        (ref, heading) async {
   AppModel appModel = ref.watch(appProvider);
   List&lt;Future&lt;Color?&gt;&gt; futures = appModel.quickActions.values.map((e) async {
     return e.getIconColor(
@@ -127,6 +128,7 @@
         <li><a href="../models/pipSearchResultProvider.html">pipSearchResultProvider</a></li>
         <li><a href="../models/pipSearchTermProvider.html">pipSearchTermProvider</a></li>
         <li><a href="../models/quickActionColorProvider.html">quickActionColorProvider</a></li>
+        <li><a href="../models/visibleOnceProvider.html">visibleOnceProvider</a></li>
 
 
 
@@ -143,7 +145,7 @@
 <footer>
   <span class="no-break">
     yuuna
-      2.7.0+84
+      2.8.0+93
   </span>
 
   

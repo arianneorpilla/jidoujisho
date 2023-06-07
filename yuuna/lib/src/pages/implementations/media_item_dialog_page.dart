@@ -79,29 +79,32 @@ class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
             ],
           ),
           const Space.normal(),
-          FadeInImage(
-            placeholder: MemoryImage(kTransparentImage),
-            imageErrorBuilder: (_, __, ___) {
-              if (widget.item.extraUrl != null) {
-                return FadeInImage(
-                  placeholder: MemoryImage(kTransparentImage),
-                  imageErrorBuilder: (_, __, ___) => const SizedBox.expand(),
-                  image: mediaSource.getDisplayThumbnailFromMediaItem(
-                    appModel: appModel,
-                    item: widget.item,
-                    fallbackUrl: widget.item.extraUrl,
-                  ),
-                  fit: BoxFit.fitWidth,
-                );
-              } else {
-                return const SizedBox.expand();
-              }
-            },
-            image: mediaSource.getDisplayThumbnailFromMediaItem(
-              appModel: appModel,
-              item: widget.item,
+          AspectRatio(
+            aspectRatio: mediaSource.aspectRatio,
+            child: FadeInImage(
+              placeholder: MemoryImage(kTransparentImage),
+              imageErrorBuilder: (_, __, ___) {
+                if (widget.item.extraUrl != null) {
+                  return FadeInImage(
+                    placeholder: MemoryImage(kTransparentImage),
+                    imageErrorBuilder: (_, __, ___) => const SizedBox.expand(),
+                    image: mediaSource.getDisplayThumbnailFromMediaItem(
+                      appModel: appModel,
+                      item: widget.item,
+                      fallbackUrl: widget.item.extraUrl,
+                    ),
+                    fit: BoxFit.fitWidth,
+                  );
+                } else {
+                  return const SizedBox.expand();
+                }
+              },
+              image: mediaSource.getDisplayThumbnailFromMediaItem(
+                appModel: appModel,
+                item: widget.item,
+              ),
+              fit: BoxFit.fitWidth,
             ),
-            fit: BoxFit.fitWidth,
           ),
         ],
       ),

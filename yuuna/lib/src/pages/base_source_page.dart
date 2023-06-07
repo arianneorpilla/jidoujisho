@@ -67,6 +67,8 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   final ValueNotifier<DictionarySearchResult?> _dictionaryResultNotifier =
       ValueNotifier<DictionarySearchResult?>(null);
 
+  String? _lastSearchTerm;
+
   /// Notifies the progress bar whether or not to refresh.
   final ValueNotifier<bool> _isSearchingNotifier = ValueNotifier<bool>(false);
 
@@ -120,6 +122,8 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
         false;
   }
 
+  bool _showMore = false;
+
   /// Action to perform within the source page upon closing the media.
   Future<void> onSourcePagePop() async {}
 
@@ -129,17 +133,29 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   Future<void> searchDictionaryResult({
     required String searchTerm,
     required JidoujishoPopupPosition position,
+    int? overrideMaximumTerms,
   }) async {
+    overrideMaximumTerms ??= appModel.maximumTerms;
+
     late DictionarySearchResult dictionaryResult;
     _popupPositionNotifier.value = position;
+
     try {
       _isSearchingNotifier.value = true;
       dictionaryResult = await appModel.searchDictionary(
         searchTerm: searchTerm,
         searchWithWildcards: false,
+        overrideMaximumTerms: overrideMaximumTerms,
       );
+      if (searchTerm != _lastSearchTerm && resultScrollController.hasClients) {
+        resultScrollController
+            .jumpTo(resultScrollController.initialScrollOffset);
+      }
+
+      _lastSearchTerm = searchTerm;
 
       appModel.addToDictionaryHistory(result: dictionaryResult);
+      _showMore = dictionaryResult.headings.length < overrideMaximumTerms;
       _dictionaryResultNotifier.value = dictionaryResult;
     } finally {
       _isSearchingNotifier.value = false;
@@ -150,6 +166,8 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
   void clearDictionaryResult() async {
     _dictionaryResultNotifier.value = null;
     _popupPositionNotifier.value = null;
+    _lastSearchTerm = null;
+    _showMore = false;
     appModel.currentMediaSource?.clearCurrentSentence();
     appModel.currentMediaSource?.clearExtraData();
   }
@@ -348,6 +366,9 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
     );
   }
 
+  /// Scroll controller for the search result.
+  final ScrollController resultScrollController = ScrollController();
+
   /// Displays the dictionary entries.
   Widget buildSearchResult() {
     return ValueListenableBuilder(
@@ -377,16 +398,63 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
         }
 
         return DictionaryResultPage(
+          scrollController: resultScrollController,
           cardColor: appModel.overrideDictionaryColor,
           opacity: dictionaryEntryOpacity,
-          key: ValueKey(_dictionaryResultNotifier.value),
           onSearch: onSearch,
           onStash: onStash,
           onShare: onShare,
           result: _dictionaryResultNotifier.value!,
           spaceBeforeFirstResult: false,
+          footerWidget: footerWidget,
         );
       },
+    );
+  }
+
+  /// Show more widget.
+  Widget? get footerWidget {
+    if (_showMore) {
+      return null;
+    }
+
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: Spacing.of(context).insets.all.small,
+        child: Tooltip(
+          message: t.show_more,
+          child: InkWell(
+            onTap: _isSearchingNotifier.value
+                ? null
+                : () async {
+                    searchDictionaryResult(
+                      searchTerm: _lastSearchTerm!,
+                      position: _popupPositionNotifier.value!,
+                      overrideMaximumTerms:
+                          _dictionaryResultNotifier.value!.headingIds.length +
+                              appModel.maximumTerms,
+                    );
+                  },
+            child: Container(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white.withOpacity(0.05)
+                  : Colors.black.withOpacity(0.05),
+              width: double.maxFinite,
+              child: Padding(
+                padding: Spacing.of(context).insets.all.normal,
+                child: Text(
+                  t.show_more,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: (textTheme.labelMedium?.fontSize)! * 0.9,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 

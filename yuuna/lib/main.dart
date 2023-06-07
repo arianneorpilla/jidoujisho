@@ -76,11 +76,16 @@ void main() {
       ),
     );
   }, (exception, stack) {
-    /// Printror details to the console.
+    /// Print error details to the console.
+
     final details = FlutterErrorDetails(exception: exception, stack: stack);
 
     /// Log the error.
-    FlutterLogs.logError('jidoujisho', 'Error', details.toString());
+    FlutterLogs.logError(
+      'jidoujisho',
+      details.exceptionAsString(),
+      stack.toString(),
+    );
   });
 }
 

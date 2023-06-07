@@ -1045,8 +1045,8 @@ class AppModel with ChangeNotifier {
       BrowserBookmark(name: 'Google', url: 'https://google.com/'),
       BrowserBookmark(name: 'DuckDuckGo', url: 'https://duckduckgo.com/'),
       BrowserBookmark(name: 'Wikipedia', url: 'https://wikipedia.org/'),
-      BrowserBookmark(name: 'Wikipedia', url: 'https://wikipedia.org/'),
       BrowserBookmark(name: 'Syosetu', url: 'https://syosetu.com/'),
+      BrowserBookmark(name: 'Kurashiru', url: 'https://kurashiru.com/'),
       BrowserBookmark(name: 'NHK News', url: 'https://www3.nhk.or.jp/news/'),
       BrowserBookmark(name: 'BBC News', url: 'https://www.bbc.com/news'),
     ];
@@ -1694,10 +1694,12 @@ class AppModel with ChangeNotifier {
   Future<DictionarySearchResult> searchDictionary({
     required String searchTerm,
     required bool searchWithWildcards,
+    int? overrideMaximumTerms,
     bool useCache = true,
   }) async {
-    if (_dictionarySearchCache[searchTerm] != null && useCache) {
-      return _dictionarySearchCache[searchTerm]!;
+    if (_dictionarySearchCache['$searchTerm/$overrideMaximumTerms'] != null &&
+        useCache) {
+      return _dictionarySearchCache['$searchTerm/$overrideMaximumTerms']!;
     }
 
     searchTerm = searchTerm.replaceAll('\n', ' ');
@@ -1718,7 +1720,7 @@ class AppModel with ChangeNotifier {
       searchTerm: searchTerm,
       directoryPath: _databaseDirectory.path,
       maximumDictionarySearchResults: maximumDictionarySearchResults,
-      maximumDictionaryTermsInResult: maximumTerms,
+      maximumDictionaryTermsInResult: overrideMaximumTerms ?? maximumTerms,
       searchWithWildcards: searchWithWildcards,
       enabledDictionaryIds: [],
       sendPort: receivePort.sendPort,
@@ -1744,7 +1746,7 @@ class AppModel with ChangeNotifier {
         _database.dictionarySearchResults.getSync(id);
 
     if (result != null) {
-      _dictionarySearchCache[searchTerm] = result;
+      _dictionarySearchCache['$searchTerm/$overrideMaximumTerms'] = result;
       return result;
     } else {
       return DictionarySearchResult(searchTerm: searchTerm);
@@ -1856,7 +1858,7 @@ class AppModel with ChangeNotifier {
 
   /// Shows the AnkiDroid API message. Called when an Anki-related API get call
   /// fails.
-  void showAnkidroidApiMessage() async {
+  Future<void> showAnkidroidApiMessage() async {
     await requestAnkidroidPermissions();
 
     await showDialog(
@@ -1972,7 +1974,7 @@ class AppModel with ChangeNotifier {
       decks.sort((a, b) => a.compareTo(b));
       return decks;
     } catch (e) {
-      showAnkidroidApiMessage();
+      await showAnkidroidApiMessage();
       rethrow;
     }
   }
@@ -1988,7 +1990,7 @@ class AppModel with ChangeNotifier {
       models.sort((a, b) => a.compareTo(b));
       return models;
     } catch (e) {
-      showAnkidroidApiMessage();
+      await showAnkidroidApiMessage();
       rethrow;
     }
   }
@@ -2016,13 +2018,18 @@ class AppModel with ChangeNotifier {
   /// Given a value and a model name, checks if there are cards that have a
   /// first field with a matching value.
   Future<bool> checkForDuplicates(String key) async {
-    return await methodChannel.invokeMethod(
-      'checkForDuplicates',
-      <String, dynamic>{
-        'models': duplicateCheckModels,
-        'key': key,
-      },
-    );
+    try {
+      final result = await methodChannel.invokeMethod(
+        'checkForDuplicates',
+        <String, dynamic>{
+          'models': duplicateCheckModels,
+          'key': key,
+        },
+      );
+      return result;
+    } catch (e) {
+      return false;
+    }
   }
 
   /// Add a note with certain [creatorFieldValues] and a [mapping] of fields to

@@ -31,6 +31,7 @@ class InstantExportAction extends QuickAction {
     required DictionaryHeading heading,
     required String? dictionaryName,
   }) async {
+    await appModel.getModelList();
     CreatorModel creatorModel = ref.read(instantExportProvider);
 
     Map<Field, String> newTextFields = {};

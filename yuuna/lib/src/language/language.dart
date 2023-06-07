@@ -150,7 +150,7 @@ abstract class Language {
 
   /// Returns a list of sentences for a block of text.
   List<String> getSentences(String text) {
-    RegExp regex = RegExp(r'.{1,}?([。.」?？!！]+|\n)');
+    RegExp regex = RegExp(r'.{1,}?([。.?？!！]+|\n)');
 
     Iterable<Match> matches = regex.allMatches(text);
 

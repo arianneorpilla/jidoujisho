@@ -99,8 +99,13 @@ class Dictionary {
   }
 
   @override
-  bool operator ==(Object other) => other is Dictionary && id == other.id;
+  bool operator ==(Object other) => other is Dictionary && name == other.name;
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => Object.hash(id, name);
+
+  @override
+  toString() {
+    return 'Dictionary(name: $name, format: $formatKey)';
+  }
 }

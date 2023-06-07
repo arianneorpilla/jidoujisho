@@ -19,6 +19,7 @@ class DictionaryResultPage extends BasePage {
     this.opacity = 1,
     this.updateHistory = true,
     this.spaceBeforeFirstResult = true,
+    this.footerWidget,
     super.key,
   });
 
@@ -48,6 +49,9 @@ class DictionaryResultPage extends BasePage {
 
   /// Allows controlling the scroll position of the page.
   final ScrollController? scrollController;
+
+  /// Optional footer for use for showing more.
+  final Widget? footerWidget;
 
   @override
   BasePageState<DictionaryResultPage> createState() =>
@@ -141,6 +145,7 @@ class _DictionaryResultPageState extends BasePageState<DictionaryResultPage> {
                         dictionaryNamesByOrder: dictionaryNamesByOrder,
                       ))
                   .toList(),
+              if (widget.footerWidget != null) widget.footerWidget!,
             ],
           ),
         ),

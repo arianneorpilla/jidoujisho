@@ -65,6 +65,7 @@ export 'src/pages/implementations/browser_history_page.dart';
 export 'src/pages/implementations/browser_source_page.dart';
 export 'src/pages/implementations/browser_dialog_page.dart';
 export 'src/pages/implementations/browser_bookmark_dialog_page.dart';
+export 'src/pages/implementations/browser_settings_dialog_page.dart';
 
 export 'src/pages/base_page.dart';
 export 'src/pages/base_history_page.dart';

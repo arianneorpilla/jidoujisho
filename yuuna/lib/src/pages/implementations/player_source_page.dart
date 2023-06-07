@@ -384,13 +384,21 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 _currentSubtitle.value!.index &&
             !_preventSpamSkip) {
           int index = _currentSubtitle.value!.index;
-          _preventSpamSkip = true;
-          _playerController.seekTo(
-              _subtitleItem.controller.subtitles[index].start - subtitleDelay);
 
-          Future.delayed(const Duration(seconds: 1), () {
-            _preventSpamSkip = false;
-          });
+          Duration seekDuration =
+              _subtitleItem.controller.subtitles[index].start - subtitleDelay;
+
+          if ((_positionNotifier.value - seekDuration).abs() >
+              const Duration(seconds: 2)) {
+            _preventSpamSkip = true;
+            _playerController.seekTo(
+                _subtitleItem.controller.subtitles[index].start -
+                    subtitleDelay);
+
+            Future.delayed(const Duration(seconds: 1), () {
+              _preventSpamSkip = false;
+            });
+          }
         }
 
         if (appModel.playbackMode == PlaybackMode.autoPausePlayback &&

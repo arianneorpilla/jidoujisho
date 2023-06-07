@@ -29,6 +29,26 @@ class ShareAction extends QuickAction {
     required DictionaryHeading heading,
     required String? dictionaryName,
   }) async {
+    List<Dictionary> dictionaries = appModel.dictionaries;
+
+    Map<String, bool> dictionaryNamesByHidden = Map<String, bool>.fromEntries(
+        dictionaries
+            .map((e) => MapEntry(e.name, e.isHidden(appModel.targetLanguage))));
+    Map<String, int> dictionaryNamesByOrder = Map<String, int>.fromEntries(
+        dictionaries.map((e) => MapEntry(e.name, e.order)));
+
+    List<DictionaryEntry> entries = heading.entries
+        .where(
+            (entry) => !dictionaryNamesByHidden[entry.dictionary.value!.name]!)
+        .toList();
+    if (dictionaryName != null) {
+      entries = [
+        ...entries.where((e) => dictionaryName == e.dictionary.value!.name)
+      ];
+    }
+    entries.sort((a, b) => dictionaryNamesByOrder[a.dictionary.value!.name]!
+        .compareTo(dictionaryNamesByOrder[b.dictionary.value!.name]!));
+
     StringBuffer buffer = StringBuffer();
     buffer.write(heading.term);
     if (heading.reading.isNotEmpty) {
@@ -37,9 +57,10 @@ class ShareAction extends QuickAction {
     buffer.write('\n\n');
     buffer.write(
       MeaningField.flattenMeanings(
-          entries: heading.entries.toList(),
-          prependDictionaryNames:
-              appModel.lastSelectedMapping.prependDictionaryNames ?? false),
+        entries: entries,
+        prependDictionaryNames:
+            appModel.lastSelectedMapping.prependDictionaryNames ?? false,
+      ),
     );
 
     String shareText = buffer.toString();

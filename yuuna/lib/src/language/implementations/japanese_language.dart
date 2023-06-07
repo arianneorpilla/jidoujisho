@@ -624,9 +624,6 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
 
   List<Dictionary> dictionaries = database.dictionarys.where().findAllSync();
 
-  Map<String, int> dictionaryNamesByOrder = Map<String, int>.fromEntries(
-      dictionaries.map((e) => MapEntry(e.name, e.order)));
-
   headings.sort((a, b) {
     if (a.term == b.term ||
         (a.reading.isNotEmpty && b.reading.isNotEmpty) &&
@@ -647,11 +644,9 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
       List<DictionaryFrequency> aFrequencies = a.frequencies.toList();
       List<DictionaryFrequency> bFrequencies = b.frequencies.toList();
       aFrequencies.sort((a, b) =>
-          dictionaryNamesByOrder[a.dictionary.value!.name]!
-              .compareTo(dictionaryNamesByOrder[b.dictionary.value!.name]!));
+          a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
       bFrequencies.sort((a, b) =>
-          dictionaryNamesByOrder[a.dictionary.value!.name]!
-              .compareTo(dictionaryNamesByOrder[b.dictionary.value!.name]!));
+          a.dictionary.value!.order.compareTo(b.dictionary.value!.order));
 
       Map<Dictionary, List<DictionaryFrequency>> aFrequenciesByDictionary =
           groupBy<DictionaryFrequency, Dictionary>(
@@ -667,12 +662,23 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
       Set<Dictionary> sharedDictionaries =
           aValues.keys.toSet().intersection(bValues.keys.toSet());
 
-      if (sharedDictionaries.isNotEmpty) {
-        for (Dictionary dictionary in sharedDictionaries) {
-          int freqCompare =
-              aValues[dictionary]!.compareTo(bValues[dictionary]!);
-          if (freqCompare != 0) {
-            return freqCompare;
+      if (aValues.keys.isNotEmpty || bValues.keys.isNotEmpty) {
+        for (Dictionary dictionary in dictionaries) {
+          if (aValues[dictionary] == null && bValues[dictionary] != null) {
+            return 1;
+          } else if (aValues[dictionary] != null &&
+              bValues[dictionary] == null) {
+            return -1;
+          }
+        }
+
+        if (sharedDictionaries.isNotEmpty) {
+          for (Dictionary dictionary in sharedDictionaries) {
+            int freqCompare =
+                aValues[dictionary]!.compareTo(bValues[dictionary]!);
+            if (freqCompare != 0) {
+              return freqCompare;
+            }
           }
         }
       } else {

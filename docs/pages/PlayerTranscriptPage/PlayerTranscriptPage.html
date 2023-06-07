@@ -62,6 +62,7 @@
 <li><span class="parameter" id="-param-subtitles"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter">Subtitle</span>&gt;</span></span> <span class="parameter-name">subtitles</span>, </span></li>
 <li><span class="parameter" id="-param-currentSubtitle"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/ValueNotifier-class.html">ValueNotifier</a><span class="signature">&lt;<wbr><span class="type-parameter">Subtitle?</span>&gt;</span></span> <span class="parameter-name">currentSubtitle</span>, </span></li>
 <li><span class="parameter" id="-param-nearestSubtitle"><span>required</span> <span class="type-annotation">Subtitle?</span> <span class="parameter-name">nearestSubtitle</span>, </span></li>
+<li><span class="parameter" id="-param-autoPauseNotifier"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/ValueNotifier-class.html">ValueNotifier</a><span class="signature">&lt;<wbr><span class="type-parameter">Subtitle?</span>&gt;</span></span> <span class="parameter-name">autoPauseNotifier</span>, </span></li>
 <li><span class="parameter" id="-param-subtitleOptions"><span>required</span> <span class="type-annotation"><a href="../../utils/SubtitleOptions-class.html">SubtitleOptions</a></span> <span class="parameter-name">subtitleOptions</span>, </span></li>
 <li><span class="parameter" id="-param-controller"><span>required</span> <span class="type-annotation">VlcPlayerController</span> <span class="parameter-name">controller</span>, </span></li>
 <li><span class="parameter" id="-param-playingNotifier"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/ValueNotifier-class.html">ValueNotifier</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span> <span class="parameter-name">playingNotifier</span>, </span></li>
@@ -93,6 +94,7 @@
   required this.subtitles,
   required this.currentSubtitle,
   required this.nearestSubtitle,
+  required this.autoPauseNotifier,
   required this.subtitleOptions,
   required this.controller,
   required this.playingNotifier,
@@ -135,6 +137,7 @@
           <a href="../../pages/PlayerTranscriptPage-class.html#instance-properties">Properties</a>
         </li>
           <li><a href="../../pages/PlayerTranscriptPage/alignMode.html">alignMode</a></li>
+          <li><a href="../../pages/PlayerTranscriptPage/autoPauseNotifier.html">autoPauseNotifier</a></li>
           <li><a href="../../pages/PlayerTranscriptPage/controller.html">controller</a></li>
           <li><a href="../../pages/PlayerTranscriptPage/currentSubtitle.html">currentSubtitle</a></li>
           <li><a href="../../pages/PlayerTranscriptPage/endedNotifier.html">endedNotifier</a></li>
@@ -181,7 +184,7 @@
 <footer>
   <span class="no-break">
     yuuna
-      2.7.0+84
+      2.8.0+93
   </span>
 
   

@@ -113,11 +113,10 @@ String? onCreatorOpenAction({
 
   StringBuffer buffer = StringBuffer();
   for (RubyTextData rubyData in rubyDatas) {
-    buffer.write(rubyData.text);
     if (rubyData.ruby != null &amp;&amp; rubyData.ruby!.trim().isNotEmpty) {
-      buffer.write(&#39;[${rubyData.ruby}]&#39;);
+      buffer.write(&#39; ${rubyData.text}[${rubyData.ruby}]&#39;);
     } else {
-      buffer.write(&#39;[ ]&#39;);
+      buffer.write(rubyData.text);
     }
   }
 
@@ -191,7 +190,7 @@ String? onCreatorOpenAction({
 <footer>
   <span class="no-break">
     yuuna
-      2.7.0+84
+      2.8.0+93
   </span>
 
   

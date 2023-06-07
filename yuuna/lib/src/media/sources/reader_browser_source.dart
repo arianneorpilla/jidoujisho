@@ -72,8 +72,37 @@ class ReaderBrowserSource extends ReaderMediaSource with ChangeNotifier {
     required AppModel appModel,
   }) {
     return [
-      buildOpenLinkButton(context: context, ref: ref, appModel: appModel),
+      buildTweaksButton(
+        context: context,
+        ref: ref,
+        appModel: appModel,
+      ),
+      buildOpenLinkButton(
+        context: context,
+        ref: ref,
+        appModel: appModel,
+      ),
     ];
+  }
+
+  /// Tweaks bar action.
+  Widget buildTweaksButton(
+      {required BuildContext context,
+      required WidgetRef ref,
+      required AppModel appModel}) {
+    return FloatingSearchBarAction(
+      child: JidoujishoIconButton(
+        size: Theme.of(context).textTheme.titleLarge?.fontSize,
+        tooltip: t.tweaks,
+        icon: Icons.tune,
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (context) => const BrowserSettingsDialogPage(),
+          );
+        },
+      ),
+    );
   }
 
   /// Helper to generate a media item with parameters.
@@ -154,5 +183,62 @@ class ReaderBrowserSource extends ReaderMediaSource with ChangeNotifier {
   /// Get the cached favicon URL.
   String? getCachedFaviconUrl(String url) {
     return getPreference<String?>(key: 'favicon_url/$url', defaultValue: null);
+  }
+
+  /// Whether or not to add to extend the webpage beyond the navigation bar.
+  /// This may be helpful for devices that don't have difficulty accessing the
+  /// top bar (i.e. don't have a teardrop notch).
+  bool get extendPageBeyondNavigationBar {
+    return getPreference<bool>(
+        key: 'extend_page_beyond_navbar', defaultValue: false);
+  }
+
+  /// Toggles the extend navbar option.
+  void toggleExtendPageBeyondNavigationBar() async {
+    await setPreference<bool>(
+      key: 'extend_page_beyond_navbar',
+      value: !extendPageBeyondNavigationBar,
+    );
+  }
+
+  /// Whether the reader will highlight words on tap.
+  bool get highlightOnTap {
+    return getPreference<bool>(
+      key: 'highlight_on_tap',
+      defaultValue: true,
+    );
+  }
+
+  /// Toggles whether the reader will highlight words on tap.
+  void toggleHighlightOnTap() async {
+    await setPreference<bool>(
+      key: 'highlight_on_tap',
+      value: !highlightOnTap,
+    );
+  }
+
+  /// Whether the reader will highlight words on tap.
+  String get hostsText {
+    return getPreference<String>(
+      key: 'content_blocker_hosts',
+      defaultValue: '',
+    );
+  }
+
+  /// Toggles whether the reader will highlight words on tap.
+  void setHostsText(String value) async {
+    await setPreference<String>(
+      key: 'content_blocker_hosts',
+      value: value,
+    );
+  }
+
+  /// Get list of ad-block hosts.
+  List<String> getHostDomains() {
+    return hostsText
+        .split('\n')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
   }
 }
