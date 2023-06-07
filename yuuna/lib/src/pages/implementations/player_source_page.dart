@@ -2036,12 +2036,13 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       clearDictionaryResult();
       return;
     } else {
+      _selectableTextController.clearSelection();
+
       String searchTerm = appModel.targetLanguage.getSearchTermFromIndex(
         text: text,
         index: index,
       );
 
-      _selectableTextController.clearSelection();
       setSearchTerm(
         searchTerm: searchTerm,
         text: text,
@@ -2122,7 +2123,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     int length = appModel.targetLanguage.getGuessHighlightLength(
       searchTerm: searchTerm,
     );
-
     _selectableTextController.setSelection(offsetIndex, offsetIndex + length);
     if (searchTerm.isNotEmpty) {
       dialogSmartPause();
@@ -2137,7 +2137,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         searchTerm: searchTerm,
       );
 
-      _selectableTextController.setSelection(offsetIndex, offsetIndex + length);
       final range = TextRange(start: offsetIndex, end: offsetIndex + length);
 
       source.setCurrentSentence(
@@ -2146,6 +2145,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           range: range,
         ),
       );
+
+      Future.delayed(const Duration(milliseconds: 50), () {
+        _selectableTextController.setSelection(
+            offsetIndex, offsetIndex + length);
+      });
     });
   }
 
