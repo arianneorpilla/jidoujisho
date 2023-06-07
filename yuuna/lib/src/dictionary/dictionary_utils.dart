@@ -372,6 +372,9 @@ void preloadResultSync(int id) {
     }
     heading.pitches.loadSync();
     heading.frequencies.loadSync();
+    for (DictionaryFrequency frequency in heading.frequencies) {
+      frequency.dictionary.loadSync();
+    }
     heading.tags.loadSync();
   }
 }

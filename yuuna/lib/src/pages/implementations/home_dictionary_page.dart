@@ -158,14 +158,13 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
     }
   }
 
-  String lastQuery = '';
+  bool _showMore = false;
 
-  void search(String query) async {
-    if (lastQuery == query) {
-      return;
-    } else {
-      lastQuery = query;
-    }
+  void search(
+    String query, {
+    int? overrideMaximumTerms,
+  }) async {
+    overrideMaximumTerms ??= appModel.maximumTerms;
 
     if (mounted) {
       setState(() {
@@ -177,6 +176,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       _result = await appModel.searchDictionary(
         searchTerm: query,
         searchWithWildcards: true,
+        overrideMaximumTerms: overrideMaximumTerms,
       );
     } finally {
       if (_result != null) {
@@ -184,6 +184,7 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
           if (mounted) {
             setState(() {
               _isSearching = false;
+              _showMore = _result!.headings.length < overrideMaximumTerms!;
             });
           }
           Future.delayed(historyDelay, () async {
@@ -412,6 +413,50 @@ class _HomeDictionaryPageState<T extends BaseTabPage> extends BaseTabPageState {
       onStash: onStash,
       onShare: onShare,
       result: _result!,
+      footerWidget: footerWidget,
+    );
+  }
+
+  Widget? get footerWidget {
+    if (_showMore) {
+      return null;
+    }
+
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: Spacing.of(context).insets.all.small,
+        child: Tooltip(
+          message: t.show_more,
+          child: InkWell(
+            onTap: _isSearching
+                ? null
+                : () async {
+                    search(
+                      mediaType.floatingSearchBarController.query,
+                      overrideMaximumTerms:
+                          _result!.headingIds.length + appModel.maximumTerms,
+                    );
+                  },
+            child: Container(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white.withOpacity(0.05)
+                  : Colors.black.withOpacity(0.05),
+              width: double.maxFinite,
+              child: Padding(
+                padding: Spacing.of(context).insets.all.normal,
+                child: Text(
+                  t.show_more,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: (textTheme.labelMedium?.fontSize)! * 0.9,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 

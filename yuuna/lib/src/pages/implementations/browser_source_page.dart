@@ -398,7 +398,7 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
   }
 
   void creatorMenuAction() async {
-    String text = (await getSelectedText()).replaceAll('\\n', '\n');
+    String text = await getSelectedText();
 
     await unselectWebViewTextSelection(_controller);
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -437,6 +437,7 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
   Future<String> getSelectedText() async {
     return (await _controller.getSelectedText() ?? '')
         .replaceAll('\\n', '\n')
+        .replaceAll('\\t', '\t')
         .split('\n')
         .map((e) => e.trim())
         .join()
@@ -463,6 +464,9 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
       initialOptions: InAppWebViewGroupOptions(
         crossPlatform: InAppWebViewOptions(
           userAgent: userAgent,
+        ),
+        android: AndroidInAppWebViewOptions(
+          useShouldInterceptRequest: true,
         ),
       ),
       initialUrlRequest:
@@ -510,6 +514,8 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
         backgroundColor: Colors.black,
         resizeToAvoidBottomInset: false,
         body: SafeArea(
+          top: !mediaSource.extendPageBeyondNavigationBar,
+          bottom: false,
           child: Stack(
             alignment: Alignment.topRight,
             fit: StackFit.expand,
@@ -648,14 +654,16 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
             searchTerm: searchTerm,
           );
 
-          await selectTextOnwards(
-            cursorX: x,
-            cursorY: y,
-            offsetIndex: offsetIndex,
-            length: length,
-            whitespaceOffset: whitespaceOffset,
-            isSpaceDelimited: isSpaceDelimited,
-          );
+          if (mediaSource.highlightOnTap) {
+            await selectTextOnwards(
+              cursorX: x,
+              cursorY: y,
+              offsetIndex: offsetIndex,
+              length: length,
+              whitespaceOffset: whitespaceOffset,
+              isSpaceDelimited: isSpaceDelimited,
+            );
+          }
 
           searchDictionaryResult(
             searchTerm: searchTerm,
@@ -666,14 +674,16 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
               searchTerm: searchTerm,
             );
 
-            selectTextOnwards(
-              cursorX: x,
-              cursorY: y,
-              offsetIndex: offsetIndex,
-              length: length,
-              whitespaceOffset: whitespaceOffset,
-              isSpaceDelimited: isSpaceDelimited,
-            );
+            if (mediaSource.highlightOnTap) {
+              selectTextOnwards(
+                cursorX: x,
+                cursorY: y,
+                offsetIndex: offsetIndex,
+                length: length,
+                whitespaceOffset: whitespaceOffset,
+                isSpaceDelimited: isSpaceDelimited,
+              );
+            }
 
             mediaSource.setCurrentSentence(
               selection: appModel.targetLanguage.getSentenceFromParagraph(

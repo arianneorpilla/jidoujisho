@@ -4,17 +4,24 @@ import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 
-/// The content of the dialog used for managing Mokuro reader web settings.
-class MokuroSettingsDialogPage extends BasePage {
+/// The content of the dialog used for managing browser settings.
+class BrowserSettingsDialogPage extends BasePage {
   /// Create an instance of this page.
-  const MokuroSettingsDialogPage({super.key});
+  const BrowserSettingsDialogPage({super.key});
 
   @override
-  BasePageState createState() => _MokuroSettingsDialogPageState();
+  BasePageState createState() => _BrowserSettingsDialogPageState();
 }
 
-class _MokuroSettingsDialogPageState extends BasePageState {
-  ReaderMokuroSource get source => ReaderMokuroSource.instance;
+class _BrowserSettingsDialogPageState extends BasePageState {
+  ReaderBrowserSource get source => ReaderBrowserSource.instance;
+  late final TextEditingController _hostsField;
+
+  @override
+  void initState() {
+    super.initState();
+    _hostsField = TextEditingController(text: source.hostsText);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,88 +69,14 @@ class _MokuroSettingsDialogPageState extends BasePageState {
             mainAxisSize: MainAxisSize.min,
             children: [
               buildHighlightOnTapSwitch(),
-              buildEnablePageTurningSwitch(),
-              buildInvertPageTurningSwitch(),
-              buildUseDarkThemeSwitch(),
               buildExtendPageSwitch(),
+              // const Space.small(),
+              // const JidoujishoDivider(),
+              // buildHostsField(),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget buildEnablePageTurningSwitch() {
-    ValueNotifier<bool> _notifier =
-        ValueNotifier<bool>(source.volumePageTurningEnabled);
-
-    return Row(
-      children: [
-        Expanded(
-          child: Text(t.volume_button_page_turning),
-        ),
-        ValueListenableBuilder<bool>(
-          valueListenable: _notifier,
-          builder: (_, value, __) {
-            return Switch(
-              value: value,
-              onChanged: (value) {
-                source.toggleVolumePageTurningEnabled();
-                _notifier.value = source.volumePageTurningEnabled;
-              },
-            );
-          },
-        )
-      ],
-    );
-  }
-
-  Widget buildInvertPageTurningSwitch() {
-    ValueNotifier<bool> _notifier =
-        ValueNotifier<bool>(source.volumePageTurningInverted);
-
-    return Row(
-      children: [
-        Expanded(
-          child: Text(t.invert_volume_buttons),
-        ),
-        ValueListenableBuilder<bool>(
-          valueListenable: _notifier,
-          builder: (_, value, __) {
-            return Switch(
-              value: value,
-              onChanged: (value) {
-                source.toggleVolumePageTurningInverted();
-                _notifier.value = source.volumePageTurningInverted;
-              },
-            );
-          },
-        )
-      ],
-    );
-  }
-
-  Widget buildUseDarkThemeSwitch() {
-    ValueNotifier<bool> _notifier = ValueNotifier<bool>(source.useDarkTheme);
-
-    return Row(
-      children: [
-        Expanded(
-          child: Text(t.use_dark_theme),
-        ),
-        ValueListenableBuilder<bool>(
-          valueListenable: _notifier,
-          builder: (_, value, __) {
-            return Switch(
-              value: value,
-              onChanged: (value) {
-                source.toggleUseDarkTheme();
-                _notifier.value = source.useDarkTheme;
-              },
-            );
-          },
-        )
-      ],
     );
   }
 
@@ -193,6 +126,31 @@ class _MokuroSettingsDialogPageState extends BasePageState {
           },
         )
       ],
+    );
+  }
+
+  Widget buildHostsField() {
+    return TextField(
+      autocorrect: false,
+      onChanged: source.setHostsText,
+      controller: _hostsField,
+      keyboardType: TextInputType.multiline,
+      minLines: 1,
+      maxLines: 5,
+      decoration: InputDecoration(
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+        suffixIcon: JidoujishoIconButton(
+          tooltip: t.clear,
+          size: 18,
+          onTap: () async {
+            _hostsField.clear();
+            source.setHostsText('');
+            FocusScope.of(context).unfocus();
+          },
+          icon: Icons.clear,
+        ),
+        labelText: t.ad_block_hosts,
+      ),
     );
   }
 }

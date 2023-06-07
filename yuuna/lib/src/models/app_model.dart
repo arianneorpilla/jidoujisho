@@ -1045,8 +1045,8 @@ class AppModel with ChangeNotifier {
       BrowserBookmark(name: 'Google', url: 'https://google.com/'),
       BrowserBookmark(name: 'DuckDuckGo', url: 'https://duckduckgo.com/'),
       BrowserBookmark(name: 'Wikipedia', url: 'https://wikipedia.org/'),
-      BrowserBookmark(name: 'Wikipedia', url: 'https://wikipedia.org/'),
       BrowserBookmark(name: 'Syosetu', url: 'https://syosetu.com/'),
+      BrowserBookmark(name: 'Kurashiru', url: 'https://kurashiru.com/'),
       BrowserBookmark(name: 'NHK News', url: 'https://www3.nhk.or.jp/news/'),
       BrowserBookmark(name: 'BBC News', url: 'https://www.bbc.com/news'),
     ];
@@ -1694,10 +1694,12 @@ class AppModel with ChangeNotifier {
   Future<DictionarySearchResult> searchDictionary({
     required String searchTerm,
     required bool searchWithWildcards,
+    int? overrideMaximumTerms,
     bool useCache = true,
   }) async {
-    if (_dictionarySearchCache[searchTerm] != null && useCache) {
-      return _dictionarySearchCache[searchTerm]!;
+    if (_dictionarySearchCache['$searchTerm/$overrideMaximumTerms'] != null &&
+        useCache) {
+      return _dictionarySearchCache['$searchTerm/$overrideMaximumTerms']!;
     }
 
     searchTerm = searchTerm.replaceAll('\n', ' ');
@@ -1718,7 +1720,7 @@ class AppModel with ChangeNotifier {
       searchTerm: searchTerm,
       directoryPath: _databaseDirectory.path,
       maximumDictionarySearchResults: maximumDictionarySearchResults,
-      maximumDictionaryTermsInResult: maximumTerms,
+      maximumDictionaryTermsInResult: overrideMaximumTerms ?? maximumTerms,
       searchWithWildcards: searchWithWildcards,
       enabledDictionaryIds: [],
       sendPort: receivePort.sendPort,
@@ -1744,7 +1746,7 @@ class AppModel with ChangeNotifier {
         _database.dictionarySearchResults.getSync(id);
 
     if (result != null) {
-      _dictionarySearchCache[searchTerm] = result;
+      _dictionarySearchCache['$searchTerm/$overrideMaximumTerms'] = result;
       return result;
     } else {
       return DictionarySearchResult(searchTerm: searchTerm);

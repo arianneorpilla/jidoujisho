@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 384
+/// Strings: 386
 ///
-/// Built on 2023-06-04 at 10:18 UTC
+/// Built on 2023-06-07 at 07:52 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -531,6 +531,8 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get reading_list_empty => 'Reading list is empty';
 	String get reading_list_add_toast => 'Added to reading list.';
 	String get reading_list_remove_toast => 'Removed from the reading list.';
+	String get ad_block_hosts => 'Ad-block hosts';
+	String get error_parsing_hosts_file => 'Error parsing hosts file.';
 }
 
 // Path: retrying_in
@@ -953,6 +955,8 @@ extension on _StringsEn {
 			case 'reading_list_empty': return 'Reading list is empty';
 			case 'reading_list_add_toast': return 'Added to reading list.';
 			case 'reading_list_remove_toast': return 'Removed from the reading list.';
+			case 'ad_block_hosts': return 'Ad-block hosts';
+			case 'error_parsing_hosts_file': return 'Error parsing hosts file.';
 			default: return null;
 		}
 	}

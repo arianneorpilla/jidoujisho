@@ -417,5 +417,7 @@
     "add_to_reading_list": "Add To Reading List",
     "reading_list_empty": "Reading list is empty",
     "reading_list_add_toast": "Added to reading list.",
-    "reading_list_remove_toast": "Removed from the reading list."
+    "reading_list_remove_toast": "Removed from the reading list.",
+    "ad_block_hosts": "Ad-block hosts",
+    "error_parsing_hosts_file": "Error parsing hosts file."
   }
