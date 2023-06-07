@@ -243,6 +243,7 @@ class _HomePageState extends BasePageState<HomePage>
     Color? color,
   }) {
     return PopupMenuItem<VoidCallback>(
+      value: action,
       child: Row(
         children: [
           if (icon != null)
@@ -258,7 +259,6 @@ class _HomePageState extends BasePageState<HomePage>
           ),
         ],
       ),
-      value: action,
     );
   }
 

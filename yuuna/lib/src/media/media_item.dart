@@ -1,6 +1,7 @@
+import 'dart:convert';
+
 import 'package:isar/isar.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:pretty_json/pretty_json.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 part 'media_item.g.dart';
@@ -124,7 +125,10 @@ class MediaItem {
   int get hashCode => toJson().hashCode;
 
   @override
-  String toString() => prettyJson(toJson());
+  String toString() {
+    JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+    return encoder.convert(this);
+  }
 
   /// Get the [MediaType] from a [MediaItem] from its serialised identifier.
   MediaType getMediaType({required AppModel appModel}) {

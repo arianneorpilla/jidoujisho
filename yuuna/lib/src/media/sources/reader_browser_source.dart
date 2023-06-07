@@ -45,7 +45,6 @@ class ReaderBrowserSource extends ReaderMediaSource with ChangeNotifier {
   @override
   Future<void> onSourceExit({
     required AppModel appModel,
-    required BuildContext context,
     required WidgetRef ref,
   }) async {
     changeNotifier.notifyListeners();
@@ -141,7 +140,6 @@ class ReaderBrowserSource extends ReaderMediaSource with ChangeNotifier {
           appModel.openMedia(
             item: item,
             mediaSource: this,
-            context: context,
             ref: ref,
           );
         },

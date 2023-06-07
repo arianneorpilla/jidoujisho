@@ -70,7 +70,7 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
         error: error,
         stack: stack,
         refresh: () {
-          ref.refresh(lyricsPermissionsProvider);
+          ref.invalidate(lyricsPermissionsProvider);
         },
       ),
       data: (permissionGranted) => buildPermissions(
@@ -125,7 +125,7 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
         error: error,
         stack: stack,
         refresh: () {
-          ref.refresh(lyricsStreamProvider);
+          ref.invalidate(lyricsStreamProvider);
         },
       ),
       data: (track) {
@@ -157,7 +157,7 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
         error: error,
         stack: stack,
         refresh: () {
-          ref.refresh(lyricsProvider(parameters));
+          ref.invalidate(lyricsProvider(parameters));
         },
       ),
       data: (lyrics) => buildLyrics(
@@ -269,7 +269,7 @@ class _ReaderLyricsPageState<ReaderLyricsPage> extends BaseSourcePageState {
   final FocusNode _lyricsFocusNode = FocusNode(skipTraversal: true);
 
   Widget buildLyricsText(String text) {
-    text = RemoveEmoji().removemoji(text);
+    text = RemoveEmoji().clean(text);
     return JidoujishoSelectableText.rich(
       TextSpan(children: getSubtitleSpans(text)),
       focusNode: _lyricsFocusNode,

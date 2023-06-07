@@ -217,31 +217,20 @@ class _AudioRecorderDialogPageState
         PlayerState? playerState = values.elementAt(2);
 
         double sliderValue = position.inMilliseconds.toDouble();
+        double max = duration.inMilliseconds.toDouble();
 
         if (playerState == null ||
             playerState.processingState == ProcessingState.completed) {
           sliderValue = 0;
+          max = 1.0;
         }
 
         return Expanded(
           child: Slider(
-              value: sliderValue,
-              max: (playerState == null ||
-                      playerState.processingState == ProcessingState.completed)
-                  ? 1.0
-                  : duration.inMilliseconds.toDouble(),
+              value: sliderValue <= max ? sliderValue : 0.0,
+              max: max,
               onChanged: (progress) {
-                if (playerState == null ||
-                    playerState.processingState == ProcessingState.completed) {
-                  sliderValue = progress.floor().toDouble();
-                  _audioPlayer.seek(Duration(
-                    milliseconds: sliderValue.toInt(),
-                  ));
-                } else {
-                  sliderValue = progress.floor().toDouble();
-                  _audioPlayer
-                      .seek(Duration(milliseconds: sliderValue.toInt()));
-                }
+                _audioPlayer.seek(Duration(milliseconds: progress.floor()));
               }),
         );
       },
@@ -358,8 +347,8 @@ class _AudioRecorderDialogPageState
 
   Widget buildSaveButton() {
     return TextButton(
-      child: Text(t.dialog_save),
       onPressed: executeSave,
+      child: Text(t.dialog_save),
     );
   }
 

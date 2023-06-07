@@ -51,43 +51,45 @@ class AudioRecorderEnhancement extends AudioEnhancement {
           Directory('$tempAudioPath/$tempTimestamp');
       tempTimestampDirectory.createSync(recursive: true);
       String tempFilePath = '${tempTimestampDirectory.path}/audio.mp3';
+      if (context.mounted) {
+        await showDialog<File?>(
+          context: context,
+          builder: (_) => AudioRecorderDialogPage(
+            filePath: tempFilePath,
+            onSave: (tempFile) {
+              String audioRecorderPath =
+                  '${appDirDoc.path}/${field.uniqueKey}/audioRecorder';
+              Directory audioRecorderDirectory = Directory(audioRecorderPath);
+              if (audioRecorderDirectory.existsSync()) {
+                audioRecorderDirectory.deleteSync(recursive: true);
+              }
+              audioRecorderDirectory.createSync(recursive: true);
 
-      await showDialog<File?>(
-        context: context,
-        builder: (context) => AudioRecorderDialogPage(
-          filePath: tempFilePath,
-          onSave: (tempFile) {
-            String audioRecorderPath =
-                '${appDirDoc.path}/${field.uniqueKey}/audioRecorder';
-            Directory audioRecorderDirectory = Directory(audioRecorderPath);
-            if (audioRecorderDirectory.existsSync()) {
-              audioRecorderDirectory.deleteSync(recursive: true);
-            }
-            audioRecorderDirectory.createSync(recursive: true);
+              String finalTimestamp =
+                  DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
+              Directory finalTimestampDirectory =
+                  Directory('$audioRecorderPath/$finalTimestamp');
+              String finalFilePath =
+                  '${finalTimestampDirectory.path}/audio.mp3';
 
-            String finalTimestamp =
-                DateFormat('yyyyMMddTkkmmss').format(DateTime.now());
-            Directory finalTimestampDirectory =
-                Directory('$audioRecorderPath/$finalTimestamp');
-            String finalFilePath = '${finalTimestampDirectory.path}/audio.mp3';
+              finalTimestampDirectory.createSync(recursive: true);
+              tempFile.copySync(finalFilePath);
 
-            finalTimestampDirectory.createSync(recursive: true);
-            tempFile.copySync(finalFilePath);
+              tempAudioDirectory.deleteSync(recursive: true);
 
-            tempAudioDirectory.deleteSync(recursive: true);
-
-            audioField.setAudio(
-              cause: cause,
-              appModel: appModel,
-              creatorModel: creatorModel,
-              newAutoCannotOverride: false,
-              generateAudio: () async {
-                return File(finalFilePath);
-              },
-            );
-          },
-        ),
-      );
+              audioField.setAudio(
+                cause: cause,
+                appModel: appModel,
+                creatorModel: creatorModel,
+                newAutoCannotOverride: false,
+                generateAudio: () async {
+                  return File(finalFilePath);
+                },
+              );
+            },
+          ),
+        );
+      }
     }
   }
 

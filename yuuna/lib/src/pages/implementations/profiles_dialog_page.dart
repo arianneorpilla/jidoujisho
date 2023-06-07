@@ -267,6 +267,9 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
           splashRadius: 20,
           padding: EdgeInsets.zero,
           tooltip: t.show_options,
+          color: Theme.of(context).popupMenuTheme.color,
+          onSelected: (value) => value(),
+          itemBuilder: (context) => getMenuItems(label),
           child: Container(
             height: 30,
             width: 30,
@@ -277,9 +280,6 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
               size: 24,
             ),
           ),
-          color: Theme.of(context).popupMenuTheme.color,
-          onSelected: (value) => value(),
-          itemBuilder: (context) => getMenuItems(label),
         ),
       ),
     );
@@ -292,6 +292,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
     Color? color,
   }) {
     return PopupMenuItem<VoidCallback>(
+      value: action,
       child: Row(
         children: [
           if (icon != null)
@@ -307,7 +308,6 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
           ),
         ],
       ),
-      value: action,
     );
   }
 
@@ -470,20 +470,20 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
   }
 
   Widget buildWrapImageAudio({required AnkiMapping mappingClone}) {
-    ValueNotifier<bool> _notifier =
+    ValueNotifier<bool> notifier =
         ValueNotifier<bool>(mappingClone.exportMediaTags ?? false);
 
     return Row(
       children: [
         Expanded(child: Text(t.wrap_image_audio)),
         ValueListenableBuilder<bool>(
-          valueListenable: _notifier,
+          valueListenable: notifier,
           builder: (_, value, __) {
             return Switch(
               value: value,
               onChanged: (value) {
                 mappingClone.exportMediaTags = value;
-                _notifier.value = value;
+                notifier.value = value;
               },
             );
           },
@@ -493,20 +493,20 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
   }
 
   Widget buildUseBrTags({required AnkiMapping mappingClone}) {
-    ValueNotifier<bool> _notifier =
+    ValueNotifier<bool> notifier =
         ValueNotifier<bool>(mappingClone.useBrTags ?? false);
 
     return Row(
       children: [
         Expanded(child: Text(t.use_br_tags)),
         ValueListenableBuilder<bool>(
-          valueListenable: _notifier,
+          valueListenable: notifier,
           builder: (_, value, __) {
             return Switch(
               value: value,
               onChanged: (value) {
                 mappingClone.useBrTags = value;
-                _notifier.value = value;
+                notifier.value = value;
               },
             );
           },
@@ -516,20 +516,20 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
   }
 
   Widget buildPrependDictionaryNames({required AnkiMapping mappingClone}) {
-    ValueNotifier<bool> _notifier =
+    ValueNotifier<bool> notifier =
         ValueNotifier<bool>(mappingClone.prependDictionaryNames ?? false);
 
     return Row(
       children: [
         Expanded(child: Text(t.prepend_dictionary_names)),
         ValueListenableBuilder<bool>(
-          valueListenable: _notifier,
+          valueListenable: notifier,
           builder: (_, value, __) {
             return Switch(
               value: value,
               onChanged: (value) {
                 mappingClone.prependDictionaryNames = value;
-                _notifier.value = value;
+                notifier.value = value;
               },
             );
           },
@@ -627,21 +627,23 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
     AnkiMapping mappingClone = mapping.copyWith();
     TextEditingController controller =
         TextEditingController(text: mapping.label);
+    final mediaQuery = MediaQuery.of(context);
+    final spacing = Spacing.of(context);
     List<String> modelFields = await appModel.getFieldList(mapping.model);
 
     Widget alertDialog = AlertDialog(
-      contentPadding: MediaQuery.of(context).orientation == Orientation.portrait
-          ? Spacing.of(context).insets.exceptBottom.big
-          : Spacing.of(context).insets.exceptBottom.normal.copyWith(
-                left: Spacing.of(context).spaces.semiBig,
-                right: Spacing.of(context).spaces.semiBig,
-              ),
-      actionsPadding: Spacing.of(context).insets.exceptBottom.normal.copyWith(
-            left: Spacing.of(context).spaces.normal,
-            right: Spacing.of(context).spaces.normal,
-            bottom: Spacing.of(context).spaces.normal,
-            top: Spacing.of(context).spaces.extraSmall,
-          ),
+      contentPadding: mediaQuery.orientation == Orientation.portrait
+          ? spacing.insets.exceptBottom.big
+          : spacing.insets.exceptBottom.normal.copyWith(
+              left: spacing.spaces.semiBig,
+              right: spacing.spaces.semiBig,
+            ),
+      actionsPadding: spacing.insets.exceptBottom.normal.copyWith(
+        left: spacing.spaces.normal,
+        right: spacing.spaces.normal,
+        bottom: spacing.spaces.normal,
+        top: spacing.spaces.extraSmall,
+      ),
       content: buildEditContent(
         modelFields: modelFields,
         mappingClone: mappingClone,
@@ -665,11 +667,12 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
         ),
       ],
     );
-
-    showDialog(
-      context: context,
-      builder: (context) => alertDialog,
-    );
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        builder: (context) => alertDialog,
+      );
+    }
   }
 
   Future<void> addNewMapping(
@@ -679,6 +682,8 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
       label: name,
       tags: [mapping.model],
     );
+
+    final navigator = Navigator.of(context);
 
     /// Error if the mapping attempts to rename the standard profile.
     if (mapping.label == AnkiMapping.standardProfileName &&
@@ -736,7 +741,7 @@ class _ProfilesDialogPageState extends BasePageState<ProfilesDialogPage>
     }
 
     appModel.addMapping(newMapping);
-    Navigator.pop(context);
+    navigator.pop();
 
     setState(() {});
   }

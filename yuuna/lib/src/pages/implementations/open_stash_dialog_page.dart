@@ -130,32 +130,32 @@ class _OpenStashDialogPage extends BasePageState<OpenStashDialogPage> {
 
   Widget buildClearButton() {
     return TextButton(
+      onPressed: executeClear,
       child: Text(
         t.dialog_clear,
         style: TextStyle(color: theme.colorScheme.primary),
       ),
-      onPressed: executeClear,
     );
   }
 
   Widget buildExportButton() {
     return TextButton(
-      child: Text(t.dialog_share),
       onPressed: executeExport,
+      child: Text(t.dialog_share),
     );
   }
 
   Widget buildSearchButton() {
     return TextButton(
-      child: Text(t.dialog_search),
       onPressed: executeSearch,
+      child: Text(t.dialog_search),
     );
   }
 
   Widget buildSelectButton() {
     return TextButton(
-      child: Text(t.dialog_select),
       onPressed: executeSelect,
+      child: Text(t.dialog_select),
     );
   }
 

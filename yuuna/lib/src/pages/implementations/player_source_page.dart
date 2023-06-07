@@ -749,10 +749,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               transcriptBackgroundNotifier: _transcriptBackgroundNotifier,
               alignMode: false,
               onTap: (index) async {
+                final navigator = Navigator.of(context);
                 await Future.delayed(const Duration(milliseconds: 5), () {});
                 await SystemChrome.setEnabledSystemUIMode(
                     SystemUiMode.immersiveSticky);
-                Navigator.pop(context);
+                navigator.pop();
                 await _playerController.seekTo(
                     _subtitleItem.controller.subtitles[index].start -
                         subtitleDelay);
@@ -1096,6 +1097,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         return Material(
           color: Colors.transparent,
           child: InkWell(
+            onTap: setShadowingSubtitle,
             child: Tooltip(
               message: t.shadowing_mode,
               child: Container(
@@ -1114,7 +1116,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 ),
               ),
             ),
-            onTap: setShadowingSubtitle,
           ),
         );
       },
@@ -1218,16 +1219,17 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
           await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
           await Future.delayed(const Duration(milliseconds: 5), () {});
-
-          await source.pickVideoFile(
-            appModel: appModel,
-            context: context,
-            ref: ref,
-            pushReplacement: true,
-            onFileSelected: (path) async {
-              await _playerController.stop();
-            },
-          );
+          if (context.mounted) {
+            await source.pickVideoFile(
+              appModel: appModel,
+              context: context,
+              ref: ref,
+              pushReplacement: true,
+              onFileSelected: (path) async {
+                await _playerController.stop();
+              },
+            );
+          }
 
           if (mounted) {
             await Future.delayed(const Duration(milliseconds: 5), () {});
@@ -1347,7 +1349,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
             appModel.openMedia(
               mediaSource: source,
-              context: context,
               ref: ref,
               item: widget.item,
               pushReplacement: true,
@@ -1371,16 +1372,17 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         Map<int, String> audioEmbeddedTracks =
             await _playerController.getAudioTracks();
         int audioTrack = await _playerController.getAudioTrack() ?? 0;
-
-        await showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          useRootNavigator: true,
-          builder: (context) => JidoujishoBottomSheet(
-            options: getAudioDialogOptions(
-                embeddedTracks: audioEmbeddedTracks, audioTrack: audioTrack),
-          ),
-        );
+        if (context.mounted) {
+          await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            useRootNavigator: true,
+            builder: (_) => JidoujishoBottomSheet(
+              options: getAudioDialogOptions(
+                  embeddedTracks: audioEmbeddedTracks, audioTrack: audioTrack),
+            ),
+          );
+        }
       },
     );
     List<JidoujishoBottomSheetOption> options = [];
@@ -1400,21 +1402,22 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           if (source is PlayerNetworkStreamSource) {
             Fluttertoast.showToast(msg: t.network_subtitles_warning);
           }
-
-          await showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            useRootNavigator: true,
-            builder: (context) => ValueListenableBuilder(
-              valueListenable: _subtitleItemNotifier,
-              builder: (context, _, child) {
-                return JidoujishoBottomSheet(
-                  scrollToExtent: false,
-                  options: getSubtitleDialogOptions(subtitleEmbeddedTracks),
-                );
-              },
-            ),
-          );
+          if (context.mounted) {
+            await showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              useRootNavigator: true,
+              builder: (_) => ValueListenableBuilder(
+                valueListenable: _subtitleItemNotifier,
+                builder: (_, __, child) {
+                  return JidoujishoBottomSheet(
+                    scrollToExtent: false,
+                    options: getSubtitleDialogOptions(subtitleEmbeddedTracks),
+                  );
+                },
+              ),
+            );
+          }
 
           refreshSubtitleWidget();
         },
@@ -1423,6 +1426,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         label: t.player_align_subtitle_transcript,
         icon: Icons.timer,
         action: () async {
+          final navigator = Navigator.of(context);
           clearDictionaryResult();
 
           bool shouldResume = !_dialogSmartPaused;
@@ -1434,7 +1438,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
           _transcriptOpenNotifier.value = true;
 
-          await Navigator.of(context).push(
+          await navigator.push(
             PageRouteBuilder(
               opaque: false,
               pageBuilder: (context, _, __) => PlayerTranscriptPage(
@@ -1498,12 +1502,14 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         action: () async {
           bool shouldResume = !_dialogSmartPaused;
           await dialogSmartPause();
-          await showDialog(
-            context: context,
-            builder: (context) => SubtitleOptionsDialogPage(
-              notifier: _subtitleOptionsNotifier,
-            ),
-          );
+          if (context.mounted) {
+            await showDialog(
+              context: context,
+              builder: (context) => SubtitleOptionsDialogPage(
+                notifier: _subtitleOptionsNotifier,
+              ),
+            );
+          }
 
           if (shouldResume) {
             await dialogSmartResume();
@@ -1548,15 +1554,16 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           if (await _playerController.getAudioTracksCount() == 0) {
             options.remove(audioOption);
           }
-
-          await showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            useRootNavigator: true,
-            builder: (context) => JidoujishoBottomSheet(
-              options: options,
-            ),
-          );
+          if (context.mounted) {
+            await showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              useRootNavigator: true,
+              builder: (_) => JidoujishoBottomSheet(
+                options: options,
+              ),
+            );
+          }
         },
       ),
     );
@@ -1585,10 +1592,12 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         action: () async {
           bool shouldResume = !_dialogSmartPaused;
           await dialogSmartPause();
-          await showDialog(
-            context: context,
-            builder: (context) => const BlurOptionsDialogPage(),
-          );
+          if (context.mounted) {
+            await showDialog(
+              context: context,
+              builder: (context) => const BlurOptionsDialogPage(),
+            );
+          }
           _blurOptionsNotifier.value = appModel.blurOptions;
           if (shouldResume) {
             await dialogSmartResume();
@@ -1799,7 +1808,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           await _playerController.stop();
 
           await appModel.openMedia(
-            context: context,
             ref: ref,
             mediaSource: widget.source,
             pushReplacement: true,
@@ -1822,7 +1830,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           await _playerController.stop();
 
           await appModel.openMedia(
-            context: context,
             ref: ref,
             mediaSource: widget.source,
             pushReplacement: true,

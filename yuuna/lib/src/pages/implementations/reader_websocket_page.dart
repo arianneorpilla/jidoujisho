@@ -230,7 +230,7 @@ class _ReaderWebsocketPageState
   }
 
   Widget buildMessage(String message) {
-    message = RemoveEmoji().removemoji(message);
+    message = RemoveEmoji().clean(message);
     final JidoujishoSelectableTextController controller =
         JidoujishoSelectableTextController();
 
@@ -241,6 +241,7 @@ class _ReaderWebsocketPageState
         right: Spacing.of(context).spaces.normal,
       ),
       child: Card(
+        shape: const RoundedRectangleBorder(),
         child: Padding(
           padding: Spacing.of(context).insets.all.normal,
           child: Row(
@@ -295,7 +296,6 @@ class _ReaderWebsocketPageState
             ],
           ),
         ),
-        shape: const RoundedRectangleBorder(),
       ),
     );
   }

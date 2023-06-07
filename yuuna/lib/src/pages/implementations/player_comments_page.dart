@@ -141,7 +141,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
         error: error,
         stack: stack,
         refresh: () {
-          ref.refresh(widget.comment != null
+          ref.invalidate(widget.comment != null
               ? repliesProvider(widget.comment!)
               : commentsProvider(widget.videoUrl));
         },
@@ -338,7 +338,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
     required Comment comment,
     bool headComment = false,
   }) {
-    String text = RemoveEmoji().removemoji(comment.text);
+    String text = RemoveEmoji().clean(comment.text);
     final JidoujishoSelectableTextController controller =
         JidoujishoSelectableTextController();
     String videoChannelId = source.getChannelIdFromVideo(widget.videoUrl);
@@ -353,6 +353,7 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
       ),
       child: Card(
         color: Theme.of(context).cardColor.withOpacity(0.5),
+        shape: const RoundedRectangleBorder(),
         child: Padding(
           padding: Spacing.of(context).insets.all.normal,
           child: Column(
@@ -490,7 +491,6 @@ class _PlayerCommentsPageState extends BaseSourcePageState<PlayerCommentsPage> {
             ],
           ),
         ),
-        shape: const RoundedRectangleBorder(),
       ),
     );
   }

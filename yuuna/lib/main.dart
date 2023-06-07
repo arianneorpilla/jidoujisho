@@ -303,7 +303,6 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp>
         appModel.navigatorKey.currentContext!, (route) => route.isFirst);
     if (mounted) {
       await appModel.openMedia(
-        context: context,
         ref: ref,
         mediaSource: PlayerYoutubeSource.instance,
         killOnPop: true,
@@ -328,7 +327,6 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp>
     Navigator.popUntil(
         appModel.navigatorKey.currentContext!, (route) => route.isFirst);
     await appModel.openMedia(
-      context: context,
       ref: ref,
       mediaSource: PlayerNetworkStreamSource.instance,
       killOnPop: true,

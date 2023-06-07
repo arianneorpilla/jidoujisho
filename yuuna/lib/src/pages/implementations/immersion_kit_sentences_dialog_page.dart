@@ -235,15 +235,15 @@ class _ImmersionKitSentencesDialogPageState
 
   Widget buildAppendButton() {
     return TextButton(
-      child: Text(t.dialog_append),
       onPressed: executeAppend,
+      child: Text(t.dialog_append),
     );
   }
 
   Widget buildSelectButton() {
     return TextButton(
-      child: Text(t.dialog_select),
       onPressed: executeSelect,
+      child: Text(t.dialog_select),
     );
   }
 

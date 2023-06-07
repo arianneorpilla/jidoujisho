@@ -73,8 +73,8 @@ class _MokuroLinkDialogPageState extends BasePageState<MokuroLinkDialogPage> {
 
   Widget buildReadButton() {
     return TextButton(
-      child: Text(t.dialog_read),
       onPressed: executeRead,
+      child: Text(t.dialog_read),
     );
   }
 

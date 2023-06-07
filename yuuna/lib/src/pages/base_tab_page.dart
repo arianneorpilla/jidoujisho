@@ -96,6 +96,7 @@ abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
       setState(() {});
     } else {
       if (!mediaSource.implementsSearch) {
+        final focusScope = FocusScope.of(context);
         await mediaSource.onSearchBarTap(
           context: context,
           ref: ref,
@@ -104,7 +105,7 @@ abstract class BaseTabPageState<T extends BaseTabPage> extends BasePageState {
         mediaType.floatingSearchBarController.clear();
         mediaType.floatingSearchBarController.close();
         setState(() {});
-        FocusScope.of(context).unfocus();
+        focusScope.unfocus();
       }
     }
   }

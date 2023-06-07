@@ -45,10 +45,10 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
   Widget build(BuildContext context) {
     AppModel appModel = ref.watch(appProvider);
 
-    final JidoujishoSelectableTextController _selectableTextController =
+    final JidoujishoSelectableTextController selectableTextController =
         JidoujishoSelectableTextController();
 
-    bool _isSearching = false;
+    bool isSearching = false;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -80,7 +80,7 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
                 color: Theme.of(context).brightness == Brightness.dark
                     ? Colors.white
                     : Colors.black),
-            controller: _selectableTextController,
+            controller: selectableTextController,
             selectionControls: JidoujishoTextSelectionControls(
               searchAction: widget.onSearch,
               stashAction: widget.onStash,
@@ -95,8 +95,8 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
                 return;
               }
 
-              if (cause == SelectionChangedCause.doubleTap && !_isSearching) {
-                _isSearching = true;
+              if (cause == SelectionChangedCause.doubleTap && !isSearching) {
+                isSearching = true;
                 try {
                   String searchTerm = widget.entry.compactDefinitions
                       .substring(selection.baseOffset);
@@ -112,7 +112,7 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
                     searchTerm: searchTerm,
                   );
 
-                  _selectableTextController.setSelection(
+                  selectableTextController.setSelection(
                     offsetIndex,
                     offsetIndex + length,
                   );
@@ -128,10 +128,10 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
                     searchTerm: searchTerm,
                   );
 
-                  _selectableTextController.setSelection(
+                  selectableTextController.setSelection(
                       offsetIndex, offsetIndex + length);
                 } finally {
-                  _isSearching = false;
+                  isSearching = false;
                 }
               }
             },
@@ -230,7 +230,7 @@ class _DictionaryEntryTagsWrap extends ConsumerWidget {
               dictionaryName: dictionary.name,
             );
 
-            ref.refresh(quickActionColorProvider(heading));
+            ref.invalidate(quickActionColorProvider(heading));
           },
           child: Row(
             children: [

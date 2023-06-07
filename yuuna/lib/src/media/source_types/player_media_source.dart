@@ -73,7 +73,6 @@ abstract class PlayerMediaSource extends MediaSource {
   @override
   Future<void> onSourceExit({
     required AppModel appModel,
-    required BuildContext context,
     required WidgetRef ref,
   }) async {
     await SystemChrome.setPreferredOrientations([
@@ -171,8 +170,8 @@ abstract class PlayerMediaSource extends MediaSource {
       String command =
           '-ss $timestamp -y -i "$inputPath" -frames:v 1 -q:v 2 "$outputPath"';
 
-      final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
-      await _flutterFFmpeg.execute(command);
+      final FlutterFFmpeg flutterFFmpeg = FlutterFFmpeg();
+      await flutterFFmpeg.execute(command);
 
       String output = await FlutterFFmpegConfig().getLastCommandOutput();
 
@@ -264,8 +263,8 @@ abstract class PlayerMediaSource extends MediaSource {
     String command =
         '-ss $timeStart -to $timeEnd -y -i "$inputPath" -map 0:a:$audioIndex "$outputPath"';
 
-    final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
-    await _flutterFFmpeg.execute(command);
+    final FlutterFFmpeg flutterFFmpeg = FlutterFFmpeg();
+    await flutterFFmpeg.execute(command);
 
     return audioFile;
   }

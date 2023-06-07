@@ -204,14 +204,14 @@ class _DictionaryHistoryScrollableItemState
           WidgetSpan(
             alignment: PlaceholderAlignment.middle,
             child: Padding(
+              padding: EdgeInsets.only(
+                top: 1.25,
+                right: Spacing.of(context).spaces.small,
+              ),
               child: Icon(
                 DictionaryMediaType.instance.icon,
                 size: fontSize,
                 color: Theme.of(context).unselectedWidgetColor,
-              ),
-              padding: EdgeInsets.only(
-                top: 1.25,
-                right: Spacing.of(context).spaces.small,
               ),
             ),
           ),

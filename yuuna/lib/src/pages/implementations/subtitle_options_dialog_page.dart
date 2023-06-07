@@ -432,19 +432,19 @@ class _SubtitleOptionsDialogPage
 
   Widget buildSaveButton() {
     return TextButton(
+      onPressed: executeSave,
       child: Text(
         t.dialog_save,
       ),
-      onPressed: executeSave,
     );
   }
 
   Widget buildSetButton() {
     return TextButton(
+      onPressed: executeSet,
       child: Text(
         t.dialog_set,
       ),
-      onPressed: executeSet,
     );
   }
 

@@ -59,7 +59,7 @@ class _DictionaryDialogPageState extends BasePageState {
   }
 
   Widget buildHardwareAccelerationSwitch() {
-    ValueNotifier<bool> _notifier =
+    ValueNotifier<bool> notifier =
         ValueNotifier<bool>(appModel.playerHardwareAcceleration);
 
     return Row(
@@ -68,13 +68,13 @@ class _DictionaryDialogPageState extends BasePageState {
           child: Text(t.player_hardware_acceleration),
         ),
         ValueListenableBuilder<bool>(
-          valueListenable: _notifier,
+          valueListenable: notifier,
           builder: (_, value, __) {
             return Switch(
               value: value,
               onChanged: (value) {
                 appModel.setPlayerHardwareAcceleration(value: value);
-                _notifier.value = appModel.playerHardwareAcceleration;
+                notifier.value = appModel.playerHardwareAcceleration;
               },
             );
           },
@@ -84,7 +84,7 @@ class _DictionaryDialogPageState extends BasePageState {
   }
 
   Widget buildOpenSLESSwitch() {
-    ValueNotifier<bool> _notifier =
+    ValueNotifier<bool> notifier =
         ValueNotifier<bool>(appModel.playerUseOpenSLES);
 
     return Row(
@@ -93,13 +93,13 @@ class _DictionaryDialogPageState extends BasePageState {
           child: Text(t.player_use_opensles),
         ),
         ValueListenableBuilder<bool>(
-          valueListenable: _notifier,
+          valueListenable: notifier,
           builder: (_, value, __) {
             return Switch(
               value: value,
               onChanged: (value) {
                 appModel.setPlayerUseOpenSLES(value: value);
-                _notifier.value = appModel.playerUseOpenSLES;
+                notifier.value = appModel.playerUseOpenSLES;
               },
             );
           },

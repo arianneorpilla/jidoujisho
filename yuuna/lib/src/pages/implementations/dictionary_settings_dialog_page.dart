@@ -83,7 +83,7 @@ class _DictionaryDialogPageState extends BasePageState {
   }
 
   Widget buildAutoSearchSwitch() {
-    ValueNotifier<bool> _notifier =
+    ValueNotifier<bool> notifier =
         ValueNotifier<bool>(appModel.autoSearchEnabled);
 
     return Row(
@@ -92,13 +92,13 @@ class _DictionaryDialogPageState extends BasePageState {
           child: Text(t.auto_search),
         ),
         ValueListenableBuilder<bool>(
-          valueListenable: _notifier,
+          valueListenable: notifier,
           builder: (_, value, __) {
             return Switch(
               value: value,
               onChanged: (value) {
                 appModel.toggleAutoSearchEnabled();
-                _notifier.value = appModel.autoSearchEnabled;
+                notifier.value = appModel.autoSearchEnabled;
               },
             );
           },
@@ -251,24 +251,26 @@ class _DictionaryDialogPageState extends BasePageState {
       List<String> models = await appModel.getModelList();
       Map<String, bool> items = Map<String, bool>.fromEntries(
           models.map((e) => MapEntry(e, duplicateCheckModels.contains(e))));
-      showDialog(
-        context: context,
-        builder: (context) => SwitchSettingsPage<String>(
-          items: items,
-          generateLabel: (item) => item,
-          onSave: (selection) {
-            List<String> newDuplicateCheckModels = selection.entries
-                .where((e) => e.value)
-                .map((e) => e.key)
-                .toList();
-            appModel.setDuplicateCheckModels(newDuplicateCheckModels);
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => SwitchSettingsPage<String>(
+            items: items,
+            generateLabel: (item) => item,
+            onSave: (selection) {
+              List<String> newDuplicateCheckModels = selection.entries
+                  .where((e) => e.value)
+                  .map((e) => e.key)
+                  .toList();
+              appModel.setDuplicateCheckModels(newDuplicateCheckModels);
 
-            if (!duplicateCheckModels.equals(newDuplicateCheckModels)) {
-              appModel.refresh();
-            }
-          },
-        ),
-      );
+              if (!duplicateCheckModels.equals(newDuplicateCheckModels)) {
+                appModel.refresh();
+              }
+            },
+          ),
+        );
+      }
     }
   }
 }

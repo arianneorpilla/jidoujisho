@@ -27,7 +27,6 @@ class SentenceField extends Field {
 
   @override
   String? onCreatorOpenAction({
-    required BuildContext context,
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,

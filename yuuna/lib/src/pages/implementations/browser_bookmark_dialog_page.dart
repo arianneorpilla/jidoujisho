@@ -80,18 +80,18 @@ class _BrowserBookmarkDialogPageState
 
   Widget buildDeleteButton() {
     return TextButton(
+      onPressed: executeDelete,
       child: Text(
         t.dialog_delete,
         style: TextStyle(color: theme.colorScheme.primary),
       ),
-      onPressed: executeDelete,
     );
   }
 
   Widget buildSaveButton() {
     return TextButton(
-      child: Text(t.dialog_save),
       onPressed: executeSave,
+      child: Text(t.dialog_save),
     );
   }
 

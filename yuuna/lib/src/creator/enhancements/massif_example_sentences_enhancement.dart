@@ -121,6 +121,8 @@ class MassifExampleSentencesEnhancement extends Enhancement {
     late http.Response response;
 
     try {
+      final theme = Theme.of(context);
+
       /// Query the Massif API for results.
       response = await _client.get(Uri.parse(
           'https://massif.la/ja/search?&fmt=json&q=${Uri.encodeComponent(searchTerm)}'));
@@ -176,8 +178,8 @@ class MassifExampleSentencesEnhancement extends Enhancement {
                 text: text,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                  fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
+                  color: theme.colorScheme.primary,
+                  fontSize: theme.textTheme.titleMedium?.fontSize,
                 ),
               ),
             );
@@ -192,7 +194,7 @@ class MassifExampleSentencesEnhancement extends Enhancement {
                 text: splitWithDelim,
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
-                  fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
+                  fontSize: theme.textTheme.titleMedium?.fontSize,
                 ),
               ),
             );

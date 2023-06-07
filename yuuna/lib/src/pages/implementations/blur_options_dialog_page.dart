@@ -107,15 +107,15 @@ class _BlurOptionsDialogPageState extends BasePageState<BlurOptionsDialogPage> {
 
   Widget buildCancelButton() {
     return TextButton(
-      child: Text(t.dialog_cancel),
       onPressed: executeCancel,
+      child: Text(t.dialog_cancel),
     );
   }
 
   Widget buildSaveButton() {
     return TextButton(
-      child: Text(t.dialog_save),
       onPressed: executeSave,
+      child: Text(t.dialog_save),
     );
   }
 

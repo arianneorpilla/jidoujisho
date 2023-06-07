@@ -133,27 +133,27 @@ class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
 
   Widget buildClearButton() {
     return TextButton(
+      onPressed: executeClear,
       child: Text(
         t.dialog_clear,
         style: TextStyle(color: theme.colorScheme.primary),
       ),
-      onPressed: executeClear,
     );
   }
 
   Widget buildLaunchButton() {
     return TextButton(
+      onPressed: executeLaunch,
       child: Text(
         launchLabel,
       ),
-      onPressed: executeLaunch,
     );
   }
 
   Widget buildEditButton() {
     return TextButton(
-      child: Text(t.dialog_edit),
       onPressed: executeEdit,
+      child: Text(t.dialog_edit),
     );
   }
 
@@ -168,7 +168,6 @@ class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
   void executeLaunch() async {
     Navigator.pop(context);
     await appModel.openMedia(
-      context: context,
       mediaSource: mediaSource,
       ref: ref,
       item: widget.item,
@@ -176,7 +175,8 @@ class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
   }
 
   void executeClear() async {
+    final navigator = Navigator.of(context);
     await appModel.deleteMediaItem(widget.item);
-    Navigator.pop(context);
+    navigator.pop();
   }
 }

@@ -37,7 +37,6 @@ class InstantExportAction extends QuickAction {
     Map<Field, String> newTextFields = {};
     for (Field field in appModel.activeFields) {
       String? newTextField = field.onCreatorOpenAction(
-        context: context,
         ref: ref,
         appModel: appModel,
         creatorModel: creatorModel,
@@ -101,7 +100,7 @@ class InstantExportAction extends QuickAction {
       Enhancement? enhancement = appModel.lastSelectedMapping
           .getAutoFieldEnhancement(appModel: appModel, field: field);
 
-      if (enhancement != null) {
+      if (enhancement != null && context.mounted) {
         await enhancement.enhanceCreatorParams(
           context: context,
           ref: ref,

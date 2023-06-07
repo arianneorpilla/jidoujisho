@@ -139,7 +139,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
             Enhancement? enhancement = appModel.lastSelectedMapping
                 .getAutoFieldEnhancement(appModel: appModel, field: field);
 
-            if (enhancement != null) {
+            if (enhancement != null && context.mounted) {
               enhancement.enhanceCreatorParams(
                 context: context,
                 ref: ref,
@@ -182,7 +182,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       Enhancement? enhancement = appModel.lastSelectedMapping
           .getAutoFieldEnhancement(appModel: appModel, field: field);
 
-      if (enhancement != null) {
+      if (enhancement != null && context.mounted) {
         enhancement.enhanceCreatorParams(
           context: context,
           ref: ref,
@@ -1199,6 +1199,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
     Color? color,
   }) {
     return PopupMenuItem<VoidCallback>(
+      value: action,
       child: Row(
         children: [
           if (icon != null)
@@ -1214,7 +1215,6 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
           ),
         ],
       ),
-      value: action,
     );
   }
 

@@ -342,6 +342,7 @@ class _PlayerTranscriptPageState
     Color? color,
   }) {
     return PopupMenuItem<VoidCallback>(
+      value: action,
       child: Row(
         children: [
           if (icon != null)
@@ -357,7 +358,6 @@ class _PlayerTranscriptPageState
           ),
         ],
       ),
-      value: action,
     );
   }
 

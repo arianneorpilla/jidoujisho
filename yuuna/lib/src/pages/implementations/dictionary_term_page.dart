@@ -280,7 +280,7 @@ class _DictionaryTermActionsRowState
                 dictionaryName: null,
               );
 
-              ref.refresh(quickActionColorProvider(widget.heading));
+              ref.invalidate(quickActionColorProvider(widget.heading));
             },
           ),
         );

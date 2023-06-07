@@ -153,8 +153,8 @@ class _TextSegmentationDialogPage
 
   Widget buildStashButton() {
     return TextButton(
-      child: Text(t.dialog_stash),
       onPressed: executeStash,
+      child: Text(t.dialog_stash),
     );
   }
 
@@ -166,15 +166,15 @@ class _TextSegmentationDialogPage
 
   Widget buildSearchButton() {
     return TextButton(
-      child: Text(t.dialog_search),
       onPressed: executeSearch,
+      child: Text(t.dialog_search),
     );
   }
 
   Widget buildSelectButton() {
     return TextButton(
-      child: Text(t.dialog_select),
       onPressed: executeSelect,
+      child: Text(t.dialog_select),
     );
   }
 

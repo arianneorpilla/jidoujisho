@@ -102,7 +102,7 @@ class _ReaderClipboardPageState<ReaderClipboardPage>
   final FocusNode _focusNode = FocusNode(skipTraversal: true);
 
   Widget buildText(String text) {
-    text = RemoveEmoji().removemoji(text);
+    text = RemoveEmoji().clean(text);
     return JidoujishoSelectableText.rich(
       TextSpan(children: getSubtitleSpans(text)),
       focusNode: _focusNode,

@@ -204,6 +204,9 @@ class _MokuroCatalogManageDialogPageState
             splashRadius: 20,
             padding: EdgeInsets.zero,
             tooltip: t.show_options,
+            color: Theme.of(context).popupMenuTheme.color,
+            onSelected: (value) => value(),
+            itemBuilder: (context) => getMenuItems(catalog),
             child: Container(
               height: 30,
               width: 30,
@@ -213,10 +216,7 @@ class _MokuroCatalogManageDialogPageState
                 color: theme.iconTheme.color,
                 size: 24,
               ),
-            ),
-            color: Theme.of(context).popupMenuTheme.color,
-            onSelected: (value) => value(),
-            itemBuilder: (context) => getMenuItems(catalog)),
+            )),
       ),
     );
   }
@@ -228,6 +228,7 @@ class _MokuroCatalogManageDialogPageState
     Color? color,
   }) {
     return PopupMenuItem<VoidCallback>(
+      value: action,
       child: Row(
         children: [
           if (icon != null)
@@ -243,7 +244,6 @@ class _MokuroCatalogManageDialogPageState
           ),
         ],
       ),
-      value: action,
     );
   }
 

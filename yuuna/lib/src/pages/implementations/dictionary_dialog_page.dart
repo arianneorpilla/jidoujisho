@@ -219,13 +219,13 @@ class _DictionaryDialogPageState extends BasePageState with ChangeNotifier {
 
   Widget buildClearButton() {
     return TextButton(
+      onPressed: showDictionaryClearDialog,
       child: Text(
         t.dialog_clear,
         style: const TextStyle(
           color: Colors.red,
         ),
       ),
-      onPressed: showDictionaryClearDialog,
     );
   }
 
@@ -426,6 +426,9 @@ class _DictionaryDialogPageState extends BasePageState with ChangeNotifier {
           splashRadius: 20,
           padding: EdgeInsets.zero,
           tooltip: t.show_options,
+          color: Theme.of(context).popupMenuTheme.color,
+          onSelected: (value) => value(),
+          itemBuilder: (context) => getMenuItems(dictionary),
           child: Container(
             height: 30,
             width: 30,
@@ -436,9 +439,6 @@ class _DictionaryDialogPageState extends BasePageState with ChangeNotifier {
               size: 24,
             ),
           ),
-          color: Theme.of(context).popupMenuTheme.color,
-          onSelected: (value) => value(),
-          itemBuilder: (context) => getMenuItems(dictionary),
         ),
       ),
     );
@@ -451,6 +451,7 @@ class _DictionaryDialogPageState extends BasePageState with ChangeNotifier {
     Color? color,
   }) {
     return PopupMenuItem<VoidCallback>(
+      value: action,
       child: Row(
         children: [
           if (icon != null)
@@ -466,7 +467,6 @@ class _DictionaryDialogPageState extends BasePageState with ChangeNotifier {
           ),
         ],
       ),
-      value: action,
     );
   }
 
@@ -575,19 +575,19 @@ class _DictionaryDialogPageState extends BasePageState with ChangeNotifier {
   }
 
   Widget buildSlowImportSwitch() {
-    ValueNotifier<bool> _notifier = ValueNotifier<bool>(appModel.useSlowImport);
+    ValueNotifier<bool> notifier = ValueNotifier<bool>(appModel.useSlowImport);
 
     return Row(
       children: [
         Expanded(child: Text(t.use_slow_import)),
         ValueListenableBuilder<bool>(
-          valueListenable: _notifier,
+          valueListenable: notifier,
           builder: (_, value, __) {
             return Switch(
               value: value,
               onChanged: (value) {
                 appModel.toggleSlowImport();
-                _notifier.value = appModel.useSlowImport;
+                notifier.value = appModel.useSlowImport;
               },
             );
           },

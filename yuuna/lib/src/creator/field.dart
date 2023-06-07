@@ -67,7 +67,6 @@ abstract class Field {
   /// sentence that is stored in the app state, while the Image field may be
   /// used to return a snapshot of the current app context.
   String? onCreatorOpenAction({
-    required BuildContext context,
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,

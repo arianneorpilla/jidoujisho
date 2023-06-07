@@ -194,7 +194,6 @@ class _BrowserHistoryPageState extends BaseHistoryPageState {
               bookmark: bookmark,
               onTap: () {
                 appModel.openMedia(
-                  context: context,
                   ref: ref,
                   mediaSource: mediaSource,
                   item: ReaderBrowserSource.instance.generateMediaItem(

@@ -139,9 +139,9 @@ class SubtitleUtils {
       outputFile.deleteSync();
     }
 
-    final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
+    final FlutterFFmpeg flutterFFmpeg = FlutterFFmpeg();
 
-    await _flutterFFmpeg.execute(command);
+    await flutterFFmpeg.execute(command);
 
     await Future.delayed(const Duration(seconds: 1));
 
@@ -185,11 +185,11 @@ class SubtitleUtils {
         outputFile.deleteSync();
       }
 
-      final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
-      final FlutterFFmpegConfig _flutterFFmpegConfig = FlutterFFmpegConfig();
+      final FlutterFFmpeg flutterFFmpeg = FlutterFFmpeg();
+      final FlutterFFmpegConfig flutterFFmpegConfig = FlutterFFmpegConfig();
 
-      await _flutterFFmpeg.execute(command);
-      String output = await _flutterFFmpegConfig.getLastCommandOutput();
+      await flutterFFmpeg.execute(command);
+      String output = await flutterFFmpegConfig.getLastCommandOutput();
       if (output.contains("Stream map '0:s:$i' matches no streams.")) {
         break;
       }
@@ -227,9 +227,9 @@ class SubtitleUtils {
 
     String command = '-i "$inputPath" "$outputPath"';
 
-    final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
+    final FlutterFFmpeg flutterFFmpeg = FlutterFFmpeg();
 
-    await _flutterFFmpeg.execute(command);
+    await flutterFFmpeg.execute(command);
 
     return targetFile.readAsStringSync();
   }

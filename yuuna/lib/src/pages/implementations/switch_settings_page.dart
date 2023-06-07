@@ -103,8 +103,8 @@ class _SwitchSettingsPageState<T> extends BasePageState<SwitchSettingsPage<T>> {
 
   Widget buildSaveButton() {
     return TextButton(
-      child: Text(t.dialog_save),
       onPressed: executeSave,
+      child: Text(t.dialog_save),
     );
   }
 

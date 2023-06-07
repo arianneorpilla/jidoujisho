@@ -106,10 +106,10 @@ class _MediaItemEditDialogPageState
                 children: [
                   Expanded(
                     child: Padding(
+                      padding: Spacing.of(context).insets.all.small,
                       child: Image(
                           image: _coverImageProvider ?? _defaultImageProvider!,
                           fit: BoxFit.fitHeight),
-                      padding: Spacing.of(context).insets.all.small,
                     ),
                   ),
                   const SizedBox(width: 5),
@@ -160,15 +160,15 @@ class _MediaItemEditDialogPageState
 
   Widget buildCancelButton() {
     return TextButton(
-      child: Text(t.dialog_cancel),
       onPressed: executeCancel,
+      child: Text(t.dialog_cancel),
     );
   }
 
   Widget buildSaveButton() {
     return TextButton(
-      child: Text(t.dialog_save),
       onPressed: executeSave,
+      child: Text(t.dialog_save),
     );
   }
 
@@ -177,6 +177,8 @@ class _MediaItemEditDialogPageState
   }
 
   void executeSave() async {
+    final navigator = Navigator.of(context);
+
     if (_nameOverrideController.text.trim().isNotEmpty) {
       await mediaSource.setOverrideTitleFromMediaItem(
         item: widget.item,
@@ -190,8 +192,8 @@ class _MediaItemEditDialogPageState
         clearOverrideImage: _clearOverrideImage,
       );
 
-      Navigator.pop(context);
-      Navigator.pop(context);
+      navigator.pop();
+      navigator.pop();
       mediaSource.mediaType.refreshTab();
     }
   }

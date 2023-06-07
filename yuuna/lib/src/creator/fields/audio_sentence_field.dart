@@ -32,7 +32,7 @@ class AudioSentenceField extends AudioExportField {
   /// The unique key for this field.
   static const String key = 'audio_sentence';
 
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  AudioPlayer _audioPlayer = AudioPlayer();
 
   final ValueNotifier<Duration> _positionNotifier =
       ValueNotifier<Duration>(Duration.zero);
@@ -109,6 +109,7 @@ class AudioSentenceField extends AudioExportField {
 
   /// Set up audio for new file.
   Future<void> initialiseAudio(File file) async {
+    _audioPlayer = AudioPlayer();
     await _audioPlayer.setFilePath(file.path);
     await _audioPlayer.pause();
     _positionNotifier.value = _audioPlayer.position;
@@ -259,6 +260,7 @@ class AudioSentenceField extends AudioExportField {
         PlayerState? playerState = values.elementAt(2);
 
         double sliderValue = position.inMilliseconds.toDouble();
+        double max = duration.inMilliseconds.toDouble();
 
         if (playerState == null ||
             playerState.processingState == ProcessingState.completed) {
@@ -267,23 +269,10 @@ class AudioSentenceField extends AudioExportField {
 
         return Expanded(
           child: Slider(
-              value: sliderValue,
-              max: (playerState == null ||
-                      playerState.processingState == ProcessingState.completed)
-                  ? 1.0
-                  : duration.inMilliseconds.toDouble(),
+              value: sliderValue <= max ? sliderValue : 0.0,
+              max: max,
               onChanged: (progress) {
-                if (playerState == null ||
-                    playerState.processingState == ProcessingState.completed) {
-                  sliderValue = progress.floor().toDouble();
-                  _audioPlayer.seek(Duration(
-                    milliseconds: sliderValue.toInt(),
-                  ));
-                } else {
-                  sliderValue = progress.floor().toDouble();
-                  _audioPlayer
-                      .seek(Duration(milliseconds: sliderValue.toInt()));
-                }
+                _audioPlayer.seek(Duration(milliseconds: progress.floor()));
               }),
         );
       },
@@ -292,7 +281,6 @@ class AudioSentenceField extends AudioExportField {
 
   @override
   String? onCreatorOpenAction({
-    required BuildContext context,
     required WidgetRef ref,
     required AppModel appModel,
     required CreatorModel creatorModel,
@@ -329,6 +317,7 @@ class AudioSentenceField extends AudioExportField {
   // Executed on close of the creator screen.
   @override
   void onCreatorClose() async {
+    _initialised = false;
     await _audioPlayer.stop();
     await _audioPlayer.dispose();
   }

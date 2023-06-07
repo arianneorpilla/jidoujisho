@@ -113,37 +113,39 @@ class ForvoAudioEnhancement extends AudioEnhancement {
         );
       }
     } else {
-      await showDialog(
-        context: context,
-        builder: (context) => ForvoAudioDialogPage(
-          results: results,
-          onSelect: (index) async {
-            Directory appDirDoc = await getApplicationDocumentsDirectory();
-            String forvoAudioPath = '${appDirDoc.path}/forvoAudio';
-            Directory forvoAudioDir = Directory(forvoAudioPath);
-            if (forvoAudioDir.existsSync()) {
-              forvoAudioDir.deleteSync(recursive: true);
-            }
-            forvoAudioDir.createSync();
+      if (context.mounted) {
+        await showDialog(
+          context: context,
+          builder: (_) => ForvoAudioDialogPage(
+            results: results,
+            onSelect: (index) async {
+              Directory appDirDoc = await getApplicationDocumentsDirectory();
+              String forvoAudioPath = '${appDirDoc.path}/forvoAudio';
+              Directory forvoAudioDir = Directory(forvoAudioPath);
+              if (forvoAudioDir.existsSync()) {
+                forvoAudioDir.deleteSync(recursive: true);
+              }
+              forvoAudioDir.createSync();
 
-            File file = File('$forvoAudioPath/$index.mp3');
-            File networkFile = await DefaultCacheManager()
-                .getSingleFile(results[index].audioUrl);
-            networkFile.copySync(file.path);
+              File file = File('$forvoAudioPath/$index.mp3');
+              File networkFile = await DefaultCacheManager()
+                  .getSingleFile(results[index].audioUrl);
+              networkFile.copySync(file.path);
 
-            await audioField.setAudio(
-              appModel: appModel,
-              creatorModel: creatorModel,
-              searchTerm: searchTerm,
-              newAutoCannotOverride: false,
-              cause: cause,
-              generateAudio: () async {
-                return file;
-              },
-            );
-          },
-        ),
-      );
+              await audioField.setAudio(
+                appModel: appModel,
+                creatorModel: creatorModel,
+                searchTerm: searchTerm,
+                newAutoCannotOverride: false,
+                cause: cause,
+                generateAudio: () async {
+                  return file;
+                },
+              );
+            },
+          ),
+        );
+      }
     }
   }
 

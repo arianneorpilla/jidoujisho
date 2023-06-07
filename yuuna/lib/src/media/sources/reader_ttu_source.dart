@@ -56,10 +56,9 @@ class ReaderTtuSource extends ReaderMediaSource {
   @override
   Future<void> onSourceExit({
     required AppModel appModel,
-    required BuildContext context,
     required WidgetRef ref,
   }) async {
-    ref.refresh(ttuBooksProvider(appModel.targetLanguage));
+    ref.invalidate(ttuBooksProvider(appModel.targetLanguage));
     // await exportBackup(appModel: appModel);
   }
 
@@ -171,7 +170,6 @@ class ReaderTtuSource extends ReaderMediaSource {
         icon: Icons.local_library_outlined,
         onTap: () {
           appModel.openMedia(
-            context: context,
             ref: ref,
             mediaSource: this,
           );
@@ -197,7 +195,6 @@ class ReaderTtuSource extends ReaderMediaSource {
         icon: Icons.settings,
         onTap: () {
           appModel.openMedia(
-            context: context,
             ref: ref,
             mediaSource: this,
             item: MediaItem(
