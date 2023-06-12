@@ -141,6 +141,8 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
       _lastSearchTerm = searchTerm;
     }
 
+    bool notShowMore = overrideMaximumTerms == null;
+
     overrideMaximumTerms ??= appModel.maximumTerms;
 
     late DictionarySearchResult dictionaryResult;
@@ -148,12 +150,13 @@ class BaseSourcePageState<T extends BaseSourcePage> extends BasePageState<T> {
 
     try {
       _isSearchingNotifier.value = true;
+
       dictionaryResult = await appModel.searchDictionary(
         searchTerm: searchTerm,
         searchWithWildcards: false,
         overrideMaximumTerms: overrideMaximumTerms,
       );
-      if (searchTerm != _lastSearchTerm && resultScrollController.hasClients) {
+      if (notShowMore && resultScrollController.hasClients) {
         resultScrollController
             .jumpTo(resultScrollController.initialScrollOffset);
       }

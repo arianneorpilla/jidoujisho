@@ -93,13 +93,17 @@ class ImageField extends ImageExportField {
           Flexible(
             child: buildCarousel(
               itemCount: itemCount,
+              ref: ref,
               appModel: appModel,
+              creatorModel: creatorModel,
             ),
           )
         else
           buildCarousel(
             itemCount: itemCount,
+            ref: ref,
             appModel: appModel,
+            creatorModel: creatorModel,
           ),
         const Space.normal(),
         ValueListenableBuilder<int?>(
@@ -117,7 +121,9 @@ class ImageField extends ImageExportField {
   /// Build the image carousel.
   Widget buildCarousel({
     required int itemCount,
+    required WidgetRef ref,
     required AppModel appModel,
+    required CreatorModel creatorModel,
   }) {
     return ChangeNotifierBuilder(
       notifier: carouselNotifier,
@@ -151,6 +157,21 @@ class ImageField extends ImageExportField {
             ImageProvider<Object> image = currentImageSuggestions![index];
 
             return GestureDetector(
+              onTap: () {
+                if (index != indexNotifier.value) {
+                  return;
+                }
+                final cropEnhancement = appModel.enhancements[
+                    ImageField.instance]![CropImageEnhancement.key]!;
+
+                cropEnhancement.enhanceCreatorParams(
+                  context: context,
+                  ref: ref,
+                  appModel: appModel,
+                  creatorModel: creatorModel,
+                  cause: EnhancementTriggerCause.manual,
+                );
+              },
               onLongPress: () {
                 if (index != indexNotifier.value) {
                   return;
