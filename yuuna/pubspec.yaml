@@ -1,10 +1,10 @@
 name: yuuna
 description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
-version: 2.8.2+95
+version: 2.8.3+96
 environment:
   sdk: ">=3.0.0<4.0.0"
-  flutter: "^3.10.0"
+  flutter: "^3.10.4"
 
 dependencies:
   audio_service: ^0.18.9
@@ -132,6 +132,7 @@ dependencies:
   wakelock: ^0.6.2
   web_socket_channel: ^2.3.0
   youtube_explode_dart: ^1.12.4
+  
 dependency_overrides:
   ffi: ^2.0.0
   freezed_annotation: ^2.2.0 # Caused by spaces
@@ -148,7 +149,6 @@ dev_dependencies:
   flutter_lints: ^2.0.1
   isar_generator: ^3.1.0+1
   
-
 flutter_icons:
   android: "launcher_icon"
   ios: true

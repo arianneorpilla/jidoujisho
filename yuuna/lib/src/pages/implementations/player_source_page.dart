@@ -846,8 +846,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             onDoubleTap: () async {
               cancelHideTimer();
 
-              await _playerController.seekTo(
-                  _positionNotifier.value - const Duration(seconds: 10));
+              await _playerController.seekTo(_positionNotifier.value -
+                  Duration(milliseconds: appModel.doubleTapSeekDuration));
               _autoPauseNotifier.value = null;
               _autoPauseMemory = null;
               _bufferingNotifier.value = true;
@@ -873,8 +873,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             onDoubleTap: () async {
               cancelHideTimer();
 
-              await _playerController.seekTo(
-                  _positionNotifier.value + const Duration(seconds: 10));
+              await _playerController.seekTo(_positionNotifier.value +
+                  Duration(milliseconds: appModel.doubleTapSeekDuration));
               _autoPauseNotifier.value = null;
               _autoPauseMemory = null;
               _bufferingNotifier.value = true;

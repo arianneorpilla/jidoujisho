@@ -13,6 +13,16 @@ class PlayerSettingsDialogPage extends BasePage {
 }
 
 class _DictionaryDialogPageState extends BasePageState {
+  late TextEditingController _seekDurationController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _seekDurationController = TextEditingController(
+        text: appModelNoUpdate.doubleTapSeekDuration.toString());
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -51,6 +61,9 @@ class _DictionaryDialogPageState extends BasePageState {
             children: [
               buildHardwareAccelerationSwitch(),
               buildOpenSLESSwitch(),
+              const Space.small(),
+              const JidoujishoDivider(),
+              buildSeekDurationField(),
             ],
           ),
         ),
@@ -105,6 +118,38 @@ class _DictionaryDialogPageState extends BasePageState {
           },
         )
       ],
+    );
+  }
+
+  Widget buildSeekDurationField() {
+    return TextField(
+      onChanged: (value) {
+        int newDuration = int.tryParse(value) ?? appModel.doubleTapSeekDuration;
+        if (newDuration.isNegative) {
+          newDuration = appModel.doubleTapSeekDuration;
+          _seekDurationController.text = newDuration.toString();
+        }
+
+        appModel.setDoubleTapSeekDuration(newDuration);
+      },
+      controller: _seekDurationController,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+        suffixText: t.unit_milliseconds,
+        suffixIcon: JidoujishoIconButton(
+          tooltip: t.reset,
+          size: 18,
+          onTap: () async {
+            _seekDurationController.text =
+                appModel.doubleTapSeekDuration.toString();
+            appModel.setDoubleTapSeekDuration(appModel.doubleTapSeekDuration);
+            FocusScope.of(context).unfocus();
+          },
+          icon: Icons.undo,
+        ),
+        labelText: t.double_tap_seek_duration,
+      ),
     );
   }
 }

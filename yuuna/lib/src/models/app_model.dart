@@ -3413,6 +3413,22 @@ class AppModel with ChangeNotifier {
     await _preferences.put('close_on_export', !closeCreatorOnExport);
   }
 
+  /// Default value of [doubleTapSeekDuration].
+  final int defaultDoubleTapSeekDuration = 5000;
+
+  /// The default duration that the video player will seek forward or backward
+  /// when double tapped by the user.
+  int get doubleTapSeekDuration {
+    return _preferences.get('double_tap_seek_duration',
+        defaultValue: defaultDoubleTapSeekDuration);
+  }
+
+  /// Sets the default duration that the video player will seek forward or
+  /// backward when double tapped by the user.
+  void setDoubleTapSeekDuration(int value) async {
+    await _preferences.put('double_tap_seek_duration', value);
+  }
+
   /// Whether or not it is the app's first time setup to show the languages
   /// dialog.
   bool get isFirstTimeSetup {

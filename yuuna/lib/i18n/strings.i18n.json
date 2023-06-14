@@ -341,7 +341,6 @@
     "file_downloaded": "File downloaded: $name",
     "cfhange_sort_order": "Change Sort Order",
     "login": "Login",
-  
     "send": "Send",
     "no_messages": "Start a chat",
     "enter_message": "Enter message...",
@@ -419,5 +418,6 @@
     "reading_list_add_toast": "Added to reading list.",
     "reading_list_remove_toast": "Removed from the reading list.",
     "ad_block_hosts": "Ad-block hosts",
-    "error_parsing_hosts_file": "Error parsing hosts file."
+    "error_parsing_hosts_file": "Error parsing hosts file.",
+    "double_tap_seek_duration": "Double tap seek duration"
   }
