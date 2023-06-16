@@ -218,6 +218,11 @@ class AppModel with ChangeNotifier {
   Directory get exportDirectory => _exportDirectory;
   late final Directory _exportDirectory;
 
+  /// Directory where the browser media source saves web archives for offline
+  /// use.
+  Directory get webArchiveDirectory => _webArchiveDirectory;
+  late final Directory _webArchiveDirectory;
+
   /// Directory where media for export is stored for communication with
   /// third-party APIs. Fallback for failure.
   Directory get alternateExportDirectory => _alternateExportDirectory;
@@ -846,6 +851,7 @@ class AppModel with ChangeNotifier {
         ClearFieldEnhancement(field: NotesField.instance),
         OpenStashEnhancement(field: NotesField.instance),
         PopFromStashEnhancement(field: NotesField.instance),
+        TextSegmentationEnhancement(field: NotesField.instance),
       ],
       ImageField.instance: [
         ClearFieldEnhancement(field: ImageField.instance),
@@ -857,13 +863,14 @@ class AppModel with ChangeNotifier {
       MeaningField.instance: [
         ClearFieldEnhancement(field: MeaningField.instance),
         SentencePickerEnhancement(field: MeaningField.instance),
+        TextSegmentationEnhancement(field: MeaningField.instance),
       ],
       ReadingField.instance: [
         ClearFieldEnhancement(field: ReadingField.instance),
       ],
       SentenceField.instance: [
         ClearFieldEnhancement(field: SentenceField.instance),
-        TextSegmentationEnhancement(),
+        TextSegmentationEnhancement(field: SentenceField.instance),
         SentencePickerEnhancement(field: SentenceField.instance),
         OpenStashEnhancement(field: SentenceField.instance),
         PopFromStashEnhancement(field: SentenceField.instance),
@@ -894,14 +901,17 @@ class AppModel with ChangeNotifier {
       CollapsedMeaningField.instance: [
         ClearFieldEnhancement(field: CollapsedMeaningField.instance),
         SentencePickerEnhancement(field: CollapsedMeaningField.instance),
+        TextSegmentationEnhancement(field: CollapsedMeaningField.instance),
       ],
       ExpandedMeaningField.instance: [
         ClearFieldEnhancement(field: ExpandedMeaningField.instance),
         SentencePickerEnhancement(field: ExpandedMeaningField.instance),
+        TextSegmentationEnhancement(field: ExpandedMeaningField.instance),
       ],
       HiddenMeaningField.instance: [
         ClearFieldEnhancement(field: HiddenMeaningField.instance),
         SentencePickerEnhancement(field: HiddenMeaningField.instance),
+        TextSegmentationEnhancement(field: HiddenMeaningField.instance),
       ],
       TagsField.instance: [
         ClearFieldEnhancement(field: TagsField.instance),
@@ -1032,6 +1042,7 @@ class AppModel with ChangeNotifier {
       BrowserBookmark(name: 'Wikipedia', url: 'https://wikipedia.org/'),
       BrowserBookmark(name: 'Syosetu', url: 'https://syosetu.com/'),
       BrowserBookmark(name: 'Kurashiru', url: 'https://kurashiru.com/'),
+      BrowserBookmark(name: 'Oricon', url: 'https://www.oricon.co.jp/'),
       BrowserBookmark(name: 'NHK News', url: 'https://www3.nhk.or.jp/news/'),
       BrowserBookmark(name: 'BBC News', url: 'https://www.bbc.com/news'),
     ];
@@ -1148,6 +1159,8 @@ class AppModel with ChangeNotifier {
         path.join(appDirectory.path, 'dictionaryImportWorkingDirectory'));
     _exportDirectory = await prepareJidoujishoDirectory();
     _alternateExportDirectory = await prepareFallbackJidoujishoDirectory();
+    _webArchiveDirectory =
+        Directory(path.join(appDirectory.path, 'webArchive'));
 
     thumbnailsDirectory.createSync();
     hiveDirectory.createSync();
@@ -2466,6 +2479,8 @@ class AppModel with ChangeNotifier {
     required MediaSource mediaSource,
     MediaItem? item,
   }) async {
+    _audioHandler?.mediaItem.add(null);
+
     mediaSource.setShouldGenerateImage(value: true);
     mediaSource.setShouldGenerateAudio(value: true);
     mediaSource.clearCurrentSentence();
@@ -3318,6 +3333,26 @@ class AppModel with ChangeNotifier {
     await _preferences.put('player_hardware_acceleration', value);
   }
 
+  /// Whether or not the player should allow background play.
+  bool get playerBackgroundPlay {
+    return _preferences.get('player_background_play', defaultValue: false);
+  }
+
+  /// Set whether or not the player should allow background play.
+  void setPlayerBackgroundPlay({required bool value}) async {
+    await _preferences.put('player_background_play', value);
+  }
+
+  /// Whether or not the player should show subtitles in notifications.
+  bool get showSubtitlesInNotification {
+    return _preferences.get('player_subtitle_notification', defaultValue: true);
+  }
+
+  /// Set whether or not the player should show subtitles in notifications.
+  void setShowSubtitlesInNotification({required bool value}) async {
+    await _preferences.put('player_subtitle_notification', value);
+  }
+
   /// Whether or not the player should use hardware acceleration.
   bool get playerUseOpenSLES {
     return _preferences.get('player_use_opensles', defaultValue: true);
@@ -3328,12 +3363,28 @@ class AppModel with ChangeNotifier {
     await _preferences.put('player_use_opensles', value);
   }
 
-  /// Allows the player screen to listen to handler changes.
-  Stream<void> get audioHandlerStream => _audioHandlerStreamController.stream;
-  final StreamController<void> _audioHandlerStreamController =
+  /// Allows the player screen to listen to play/pause changes.
+  Stream<void> get playStream => _playStreamController.stream;
+  final StreamController<void> _playStreamController =
       StreamController.broadcast();
 
-  /// Allows updating media item art.
+  /// Allows the player screen to listen to seek changes.
+  Stream<Duration> get seekStream => _seekStreamController.stream;
+  final StreamController<Duration> _seekStreamController =
+      StreamController.broadcast();
+
+  /// Allows the player screen to listen to seek backward changes.
+  Stream<void> get rewindStream => _rewindStreamController.stream;
+  final StreamController<void> _rewindStreamController =
+      StreamController.broadcast();
+
+  /// Allows the player screen to listen to seek forward changes.
+  Stream<void> get fastForwardStream => _fastForwardStreamController.stream;
+  final StreamController<void> _fastForwardStreamController =
+      StreamController.broadcast();
+
+  /// For managing audio session events.
+  JidoujishoAudioHandler? get audioHandler => _audioHandler;
   JidoujishoAudioHandler? _audioHandler;
 
   /// Initialises the audio service.
@@ -3343,12 +3394,27 @@ class AppModel with ChangeNotifier {
     }
 
     _audioHandler = await ag.AudioService.init<JidoujishoAudioHandler>(
-      builder: () => JidoujishoAudioHandler(onPlayPause: () {
-        _audioHandlerStreamController.add(null);
-      }),
+      builder: () => JidoujishoAudioHandler(
+        onPlayPause: () {
+          _playStreamController.add(null);
+        },
+        onSeek: (position) {
+          _seekStreamController.add(position);
+        },
+        onRewind: () {
+          _rewindStreamController.add(null);
+        },
+        onFastForward: () {
+          _fastForwardStreamController.add(null);
+        },
+      ),
       config: const ag.AudioServiceConfig(
         androidNotificationChannelId: 'app.lrorpilla.yuuna.channel.audio',
         androidNotificationChannelName: 'jidoujisho',
+        androidNotificationIcon: 'drawable/splash',
+        notificationColor: Colors.black,
+        fastForwardInterval: Duration(seconds: 5),
+        rewindInterval: Duration(seconds: 5),
       ),
     );
   }

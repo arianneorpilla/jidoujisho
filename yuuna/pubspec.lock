@@ -693,8 +693,8 @@ packages:
     dependency: "direct main"
     description:
       path: flutter_vlc_player
-      ref: "460851a4607ef4e37e962d585eefae6d5db421f7"
-      resolved-ref: "460851a4607ef4e37e962d585eefae6d5db421f7"
+      ref: "013632b4cc591c68ced04ccc0244c2770daca633"
+      resolved-ref: "013632b4cc591c68ced04ccc0244c2770daca633"
       url: "https://github.com/lrorpilla/flutter_vlc_player"
     source: git
     version: "7.2.0"

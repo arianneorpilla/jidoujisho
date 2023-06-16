@@ -8,9 +8,8 @@ import 'package:yuuna/utils.dart';
 /// An enhancement used to pick an appropriate term from a text field easily.
 class TextSegmentationEnhancement extends Enhancement {
   /// Initialise this enhancement with the hardset parameters.
-  TextSegmentationEnhancement()
+  TextSegmentationEnhancement({required super.field})
       : super(
-          field: SentenceField.instance,
           uniqueKey: key,
           label: 'Text Segmentation',
           description: 'Search or select a new term from segmented text.',
@@ -40,36 +39,54 @@ class TextSegmentationEnhancement extends Enhancement {
       return;
     }
 
-    await appModel.openTextSegmentationDialog(
-      sourceText: sourceText,
-      onSearch: (selection) async {
-        String searchTerm = selection.textInside;
-        String afterSearchTerm = searchTerm;
+    if (field is SentenceField) {
+      await appModel.openTextSegmentationDialog(
+        sourceText: sourceText,
+        onSearch: (selection) async {
+          String searchTerm = selection.textInside;
+          String afterSearchTerm = searchTerm;
 
-        final subscription =
-            appModel.cardCreatorRecursiveSearchStream.listen((event) {
-          if (searchTerm == afterSearchTerm) {
-            creatorModel.setSentenceAndCloze(selection);
-          }
-        });
+          final subscription =
+              appModel.cardCreatorRecursiveSearchStream.listen((event) {
+            if (searchTerm == afterSearchTerm) {
+              creatorModel.setSentenceAndCloze(selection);
+            }
+          });
 
-        await appModel.openRecursiveDictionarySearch(
-          searchTerm: searchTerm,
-          onUpdateQuery: (query) {
-            afterSearchTerm = query;
-          },
-          killOnPop: false,
-        );
+          await appModel.openRecursiveDictionarySearch(
+            searchTerm: searchTerm,
+            onUpdateQuery: (query) {
+              afterSearchTerm = query;
+            },
+            killOnPop: false,
+          );
 
-        subscription.cancel();
-      },
-      onSelect: (selection) {
-        creatorModel.setSentenceAndCloze(selection);
-        creatorModel.getFieldController(TermField.instance).text =
-            selection.textInside;
+          subscription.cancel();
+        },
+        onSelect: (selection) {
+          creatorModel.setSentenceAndCloze(selection);
+          creatorModel.getFieldController(TermField.instance).text =
+              selection.textInside;
 
-        Navigator.pop(context);
-      },
-    );
+          Navigator.pop(context);
+        },
+      );
+    } else {
+      appModel.openTextSegmentationDialog(
+        sourceText: sourceText,
+        onSearch: (selection) {
+          appModel.openRecursiveDictionarySearch(
+            searchTerm: selection.textInside,
+            killOnPop: false,
+          );
+        },
+        onSelect: (selection) {
+          creatorModel.getFieldController(TermField.instance).text =
+              selection.textInside;
+
+          Navigator.pop(context);
+        },
+      );
+    }
   }
 }

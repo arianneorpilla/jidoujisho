@@ -419,5 +419,8 @@
     "reading_list_remove_toast": "Removed from the reading list.",
     "ad_block_hosts": "Ad-block hosts",
     "error_parsing_hosts_file": "Error parsing hosts file.",
-    "double_tap_seek_duration": "Double tap seek duration"
+    "double_tap_seek_duration": "Double tap seek duration",
+    "player_background_play": "Background play",
+    "loaded_from_cache": "Loaded from web archive cache.",
+    "player_show_subtitle_in_notification": "Show subtitles in media notification"
   }

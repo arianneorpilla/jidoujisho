@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
@@ -106,18 +108,35 @@ class ReaderBrowserSource extends ReaderMediaSource with ChangeNotifier {
   }
 
   /// Helper to generate a media item with parameters.
-  MediaItem generateMediaItem(BrowserBookmark bookmark, {String? base64Image}) {
+  MediaItem generateMediaItem(
+    BrowserBookmark bookmark, {
+    String? base64Image,
+    String? webArchivePath,
+  }) {
     return MediaItem(
       mediaIdentifier: bookmark.url,
       title: bookmark.name,
       mediaTypeIdentifier: mediaType.uniqueKey,
       mediaSourceIdentifier: uniqueKey,
       base64Image: base64Image,
+      extraUrl: webArchivePath,
       position: 0,
       duration: 0,
       canDelete: true,
       canEdit: true,
     );
+  }
+
+  /// This function can be used to clean up resources associated with a
+  /// media item upon clearing it.
+  @override
+  Future<void> onMediaItemClear(MediaItem item) async {
+    if (item.extraUrl != null) {
+      File webArchiveFile = File(item.extraUrl!);
+      if (webArchiveFile.existsSync()) {
+        webArchiveFile.deleteSync();
+      }
+    }
   }
 
   /// Open address bar dialog.

@@ -104,6 +104,7 @@ class _MediaItemDialogPageState extends BasePageState<MediaItemDialogPage> {
                 item: widget.item,
               ),
               fit: BoxFit.fitWidth,
+              alignment: Alignment.topCenter,
             ),
           ),
         ],

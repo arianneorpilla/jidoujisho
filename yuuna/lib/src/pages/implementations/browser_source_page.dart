@@ -196,6 +196,10 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
 
         bool inReadingList = _readingListUrls.contains(mediaIdentifier);
 
+        bool disabled = _titleNotifier.value == null;
+        // (_uriNotifier.value.toString() ==
+        //     Uri.file(widget.item?.extraUrl ?? '').toString());
+
         return Padding(
           padding: Spacing.of(context).insets.onlyLeft.normal,
           child: ClipRRect(
@@ -206,7 +210,7 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
                 child: Tooltip(
                   message: t.add_to_reading_list,
                   child: InkWell(
-                    onTap: _titleNotifier.value == null
+                    onTap: disabled
                         ? null
                         : () => inReadingList
                             ? existsReadingListAction(mediaIdentifier)
@@ -220,7 +224,7 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
                       ),
                       child: Icon(
                         Icons.bookmark_outline,
-                        color: _titleNotifier.value == null
+                        color: disabled
                             ? theme.disabledColor
                             : inReadingList
                                 ? theme.colorScheme.primary
@@ -279,6 +283,19 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
         base64Image =
             'data:image/png;base64,${base64.encode(screenshot.toList())}';
       }
+
+      // final stringToBase64Url = utf8.fuse(base64Url);
+      // String encoded = stringToBase64Url.encode(bookmark.url);
+
+      // Directory directory = Directory(
+      //   path.join(appModel.webArchiveDirectory.path, encoded),
+      // );
+      // directory.createSync(recursive: true);
+
+      // String? webArchivePath = await _controller.saveWebArchive(
+      //   filePath: directory.path,
+      //   autoname: true,
+      // );
 
       MediaItem item = mediaSource.generateMediaItem(
         bookmark,
@@ -465,9 +482,6 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
         crossPlatform: InAppWebViewOptions(
           userAgent: userAgent,
         ),
-        android: AndroidInAppWebViewOptions(
-          useShouldInterceptRequest: true,
-        ),
       ),
       initialUrlRequest:
           URLRequest(url: Uri.parse(widget.item!.mediaIdentifier)),
@@ -477,6 +491,19 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
         _controller = controller;
         _controllerInitialised = true;
       },
+      // onLoadError: (controller, url, code, message) async {
+      //   if (url.toString() ==
+      //           Uri.parse(widget.item!.mediaIdentifier).toString() &&
+      //       widget.item?.extraUrl != null) {
+      //     File webArchiveFile = File(widget.item!.extraUrl!);
+      //     if (webArchiveFile.existsSync()) {
+      //       Fluttertoast.showToast(msg: t.loaded_from_cache);
+      //       await _controller.loadUrl(
+      //           urlRequest: URLRequest(url: Uri.file(webArchiveFile.path)));
+      //       controller.evaluateJavascript(source: javascriptToExecute);
+      //     }
+      //   }
+      // },
       onLoadStop: (controller, uri) async {
         _uriNotifier.value = uri;
         _titleNotifier.value = await controller.getTitle();

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:audio_service/audio_service.dart' as ag;
 import 'package:audio_session/audio_session.dart';
 import 'package:collection/collection.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
@@ -81,6 +82,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   late final ValueNotifier<SubtitleOptions> _subtitleOptionsNotifier;
 
   StreamSubscription<void>? _playPauseSubscription;
+  StreamSubscription<Duration>? _seekSubscription;
+  StreamSubscription<void>? _rewindSubscription;
+  StreamSubscription<void>? _fastForwardSubscription;
 
   Timer? _notPlayingTimer;
 
@@ -101,6 +105,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   @override
   void dispose() async {
     _playPauseSubscription?.cancel();
+    _seekSubscription?.cancel();
+    _rewindSubscription?.cancel();
+    _fastForwardSubscription?.cancel();
+
     WidgetsBinding.instance.removeObserver(this);
 
     _playerController.dispose();
@@ -191,6 +199,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   PlayerMediaSource get source => widget.source as PlayerMediaSource;
 
+  late final ag.MediaItem mediaItem;
+
   /// Executed on dictionary dismiss.
   @override
   void onDictionaryDismiss() {
@@ -269,6 +279,24 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     _currentSubtitle.value = null;
     appModel.blockCreatorInitialMedia = true;
 
+    mediaItem = ag.MediaItem(
+      id: widget.item!.uniqueKey,
+      title: widget.item!.title,
+      artist: widget.item!.author,
+      artUri: source is PlayerYoutubeSource
+          ? Uri.parse(widget.item!.extraUrl ?? widget.item!.imageUrl ?? '')
+          : Uri.file(
+              source.getOverrideThumbnailFilename(
+                appModel: appModel,
+                item: widget.item!,
+              ),
+            ),
+    );
+
+    if (appModel.playerBackgroundPlay) {
+      appModel.audioHandler?.mediaItem.add(mediaItem);
+    }
+
     _playerController.addOnInitListener(() async {
       if (!mounted) {
         return;
@@ -295,8 +323,47 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       await Wakelock.enable();
     }
 
-    _playPauseSubscription = appModel.audioHandlerStream.listen((_) {
+    _playPauseSubscription = appModel.playStream.listen((_) {
+      if (appModel.isCreatorOpen ||
+          (_transcriptOpenNotifier.value && !appModel.isTranscriptPlayerMode)) {
+        return;
+      }
       playPause();
+    });
+    _seekSubscription = appModel.seekStream.listen((position) async {
+      if (appModel.isCreatorOpen ||
+          (_transcriptOpenNotifier.value && !appModel.isTranscriptPlayerMode)) {
+        return;
+      }
+      await _playerController.seekTo(position);
+      _listeningSubtitle.value = getNearestSubtitle();
+      _autoPauseNotifier.value = null;
+      _bufferingNotifier.value = true;
+      _autoPauseMemory = null;
+    });
+    _rewindSubscription = appModel.rewindStream.listen((_) async {
+      if (appModel.isCreatorOpen ||
+          (_transcriptOpenNotifier.value && !appModel.isTranscriptPlayerMode)) {
+        return;
+      }
+      await _playerController.seekTo(_positionNotifier.value -
+          Duration(milliseconds: appModel.doubleTapSeekDuration));
+      _autoPauseNotifier.value = null;
+      _autoPauseMemory = null;
+      _bufferingNotifier.value = true;
+      _listeningSubtitle.value = getNearestSubtitle();
+    });
+    _fastForwardSubscription = appModel.fastForwardStream.listen((_) async {
+      if (appModel.isCreatorOpen ||
+          (_transcriptOpenNotifier.value && !appModel.isTranscriptPlayerMode)) {
+        return;
+      }
+      await _playerController.seekTo(_positionNotifier.value +
+          Duration(milliseconds: appModel.doubleTapSeekDuration));
+      _autoPauseNotifier.value = null;
+      _autoPauseMemory = null;
+      _bufferingNotifier.value = true;
+      _listeningSubtitle.value = getNearestSubtitle();
     });
 
     _session = await AudioSession.instance;
@@ -337,6 +404,49 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       _durationNotifier.value = _playerController.value.duration;
       _playingNotifier.value = _playerController.value.isPlaying;
       _endedNotifier.value = _playerController.value.isEnded;
+
+      if (appModel.playerBackgroundPlay) {
+        appModel.audioHandler?.mediaItem.add(
+          appModel.audioHandler?.mediaItem.value?.copyWith.call(
+            duration: _durationNotifier.value,
+          ),
+        );
+
+        if (_currentSubtitle.value != null) {
+          appModel.audioHandler?.mediaItem.add(
+            appModel.audioHandler?.mediaItem.value?.copyWith.call(
+              artist: appModel.showSubtitlesInNotification
+                  ? _currentSubtitle.value?.data
+                  : widget.item!.author,
+            ),
+          );
+        }
+
+        appModel.audioHandler?.playbackState.add(
+          ag.PlaybackState(
+            controls: [
+              ag.MediaControl.rewind,
+              if (_playingNotifier.value)
+                ag.MediaControl.pause
+              else
+                ag.MediaControl.play,
+              ag.MediaControl.fastForward,
+            ],
+            systemActions: const {
+              ag.MediaAction.seek,
+              ag.MediaAction.fastForward,
+              ag.MediaAction.rewind,
+            },
+            androidCompactActionIndices: const [1],
+            processingState: _bufferingNotifier.value
+                ? ag.AudioProcessingState.buffering
+                : ag.AudioProcessingState.ready,
+            playing: _playingNotifier.value,
+            updatePosition: _positionNotifier.value,
+            bufferedPosition: _positionNotifier.value,
+          ),
+        );
+      }
 
       if (_playerController.value.aspectRatio != _lastAspectRatio) {
         _lastAspectRatio = _playerController.value.aspectRatio;

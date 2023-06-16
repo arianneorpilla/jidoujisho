@@ -372,6 +372,7 @@ class PlayerYoutubeSource extends PlayerMediaSource {
     return VlcPlayerController.network(
       dataSource,
       hwAcc: appModel.playerHardwareAcceleration ? HwAcc.auto : HwAcc.disabled,
+      allowBackgroundPlayback: appModel.playerBackgroundPlay,
       options: VlcPlayerOptions(
         advanced: VlcAdvancedOptions(advancedParams),
         audio: VlcAudioOptions(audioParams),

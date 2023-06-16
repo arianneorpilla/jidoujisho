@@ -196,7 +196,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
         appModel: appModel,
         item: item,
         file: thumbnailFile,
-        clearOverrideImage: true,
+        clearOverrideImage: false,
       );
     }
 
@@ -320,6 +320,7 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
     return VlcPlayerController.file(
       File(item.mediaIdentifier),
       hwAcc: appModel.playerHardwareAcceleration ? HwAcc.auto : HwAcc.disabled,
+      allowBackgroundPlayback: appModel.playerBackgroundPlay,
       options: VlcPlayerOptions(
         advanced: VlcAdvancedOptions(advancedParams),
         audio: VlcAudioOptions(audioParams),

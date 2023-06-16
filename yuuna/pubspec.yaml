@@ -1,7 +1,7 @@
 name: yuuna
 description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
-version: 2.8.3+96
+version: 2.8.4+97
 environment:
   sdk: ">=3.0.0<4.0.0"
   flutter: "^3.10.4"
@@ -59,7 +59,7 @@ dependencies:
   flutter_vlc_player:
    git:
       url: https://github.com/lrorpilla/flutter_vlc_player
-      ref: 460851a4607ef4e37e962d585eefae6d5db421f7
+      ref: 013632b4cc591c68ced04ccc0244c2770daca633
       path: flutter_vlc_player
   fluttertoast: ^8.2.1
   google_fonts: ^4.0.4

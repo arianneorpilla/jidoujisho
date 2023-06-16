@@ -61,6 +61,8 @@ class _DictionaryDialogPageState extends BasePageState {
             children: [
               buildHardwareAccelerationSwitch(),
               buildOpenSLESSwitch(),
+              buildBackgroundPlaySwitch(),
+              buildShowNotificationsSwitch(),
               const Space.small(),
               const JidoujishoDivider(),
               buildSeekDurationField(),
@@ -88,6 +90,56 @@ class _DictionaryDialogPageState extends BasePageState {
               onChanged: (value) {
                 appModel.setPlayerHardwareAcceleration(value: value);
                 notifier.value = appModel.playerHardwareAcceleration;
+              },
+            );
+          },
+        )
+      ],
+    );
+  }
+
+  Widget buildBackgroundPlaySwitch() {
+    ValueNotifier<bool> notifier =
+        ValueNotifier<bool>(appModel.playerBackgroundPlay);
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(t.player_background_play),
+        ),
+        ValueListenableBuilder<bool>(
+          valueListenable: notifier,
+          builder: (_, value, __) {
+            return Switch(
+              value: value,
+              onChanged: (value) {
+                appModel.setPlayerBackgroundPlay(value: value);
+                notifier.value = appModel.playerBackgroundPlay;
+              },
+            );
+          },
+        )
+      ],
+    );
+  }
+
+  Widget buildShowNotificationsSwitch() {
+    ValueNotifier<bool> notifier =
+        ValueNotifier<bool>(appModel.showSubtitlesInNotification);
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(t.player_show_subtitle_in_notification),
+        ),
+        ValueListenableBuilder<bool>(
+          valueListenable: notifier,
+          builder: (_, value, __) {
+            return Switch(
+              value: value,
+              onChanged: (value) {
+                appModel.setShowSubtitlesInNotification(value: value);
+                notifier.value = appModel.showSubtitlesInNotification;
               },
             );
           },
