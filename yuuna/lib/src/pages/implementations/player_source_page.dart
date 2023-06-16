@@ -120,7 +120,17 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     switch (state) {
       case AppLifecycleState.resumed:
-        _session.setActive(true);
+        _lifecycleActive = true;
+
+        if (!appModel.playerBackgroundPlay) {
+          _session.setActive(true);
+        } else {
+          appModel.audioHandler?.mediaItem.add(
+            appModel.audioHandler?.mediaItem.value?.copyWith.call(
+              artist: widget.item!.author,
+            ),
+          );
+        }
 
         if (mounted) {
           if (appModelNoUpdate.isPlayerOrientationPortrait) {
@@ -139,7 +149,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
         break;
       case AppLifecycleState.inactive:
-        _session.setActive(false);
+        _lifecycleActive = false;
+        if (!appModel.playerBackgroundPlay) {
+          _session.setActive(false);
+        }
+
         if (source is PlayerNetworkStreamSource) {
           await ReceiveIntent.setResult(
             kActivityResultOk,
@@ -154,7 +168,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         break;
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
-        _session.setActive(false);
+        _lifecycleActive = false;
+        if (!appModel.playerBackgroundPlay) {
+          _session.setActive(false);
+        }
         break;
     }
   }
@@ -179,6 +196,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   bool _dialogSmartPaused = false;
   bool _dialogSmartFocusFlag = false;
+
+  bool _lifecycleActive = true;
 
   /// Subtitle delay. May be temporarily different from saved value.
   Duration get subtitleDelay =>
@@ -306,17 +325,19 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       appModel.audioHandler?.mediaItem.add(mediaItem);
       appModel.audioHandler?.playbackState.add(playbackState);
 
-      appModel.audioHandler?.mediaItem.add(mediaItem);
       try {
-        appModel.audioHandler?.mediaItem.value?.copyWith.call(
-          artUri: source is PlayerYoutubeSource
-              ? Uri.parse(widget.item!.extraUrl ?? widget.item!.imageUrl ?? '')
-              : Uri.file(
-                  source.getOverrideThumbnailFilename(
-                    appModel: appModel,
-                    item: widget.item!,
+        appModel.audioHandler?.mediaItem.add(
+          appModel.audioHandler?.mediaItem.value?.copyWith.call(
+            artUri: source is PlayerYoutubeSource
+                ? Uri.parse(
+                    widget.item!.extraUrl ?? widget.item!.imageUrl ?? '')
+                : Uri.file(
+                    source.getOverrideThumbnailFilename(
+                      appModel: appModel,
+                      item: widget.item!,
+                    ),
                   ),
-                ),
+          ),
         );
       } finally {}
     }
@@ -522,7 +543,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         if (appModel.playerBackgroundPlay &&
             appModel.showSubtitlesInNotification &&
             !_sliderBeingDragged &&
-            _currentSubtitle.value != null) {
+            _currentSubtitle.value != null &&
+            !_lifecycleActive) {
           appModel.audioHandler?.mediaItem.add(
             appModel.audioHandler?.mediaItem.value?.copyWith.call(
               artist: _currentSubtitle.value?.data,
