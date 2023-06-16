@@ -199,8 +199,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   PlayerMediaSource get source => widget.source as PlayerMediaSource;
 
-  late final ag.MediaItem mediaItem;
-
   /// Executed on dictionary dismiss.
   @override
   void onDictionaryDismiss() {
@@ -279,22 +277,48 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     _currentSubtitle.value = null;
     appModel.blockCreatorInitialMedia = true;
 
-    mediaItem = ag.MediaItem(
+    final mediaItem = ag.MediaItem(
       id: widget.item!.uniqueKey,
       title: widget.item!.title,
       artist: widget.item!.author,
-      artUri: source is PlayerYoutubeSource
-          ? Uri.parse(widget.item!.extraUrl ?? widget.item!.imageUrl ?? '')
-          : Uri.file(
-              source.getOverrideThumbnailFilename(
-                appModel: appModel,
-                item: widget.item!,
-              ),
-            ),
+    );
+
+    final playbackState = ag.PlaybackState(
+      controls: [
+        ag.MediaControl.rewind,
+        if (_playingNotifier.value)
+          ag.MediaControl.pause
+        else
+          ag.MediaControl.play,
+        ag.MediaControl.fastForward,
+      ],
+      systemActions: const {
+        ag.MediaAction.seek,
+        ag.MediaAction.fastForward,
+        ag.MediaAction.rewind,
+      },
+      androidCompactActionIndices: const [1],
+      processingState: ag.AudioProcessingState.ready,
+      updatePosition: Duration(seconds: widget.item!.position),
     );
 
     if (appModel.playerBackgroundPlay) {
       appModel.audioHandler?.mediaItem.add(mediaItem);
+      appModel.audioHandler?.playbackState.add(playbackState);
+
+      appModel.audioHandler?.mediaItem.add(mediaItem);
+      try {
+        appModel.audioHandler?.mediaItem.value?.copyWith.call(
+          artUri: source is PlayerYoutubeSource
+              ? Uri.parse(widget.item!.extraUrl ?? widget.item!.imageUrl ?? '')
+              : Uri.file(
+                  source.getOverrideThumbnailFilename(
+                    appModel: appModel,
+                    item: widget.item!,
+                  ),
+                ),
+        );
+      } finally {}
     }
 
     _playerController.addOnInitListener(() async {
@@ -392,6 +416,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   double _lastAspectRatio = 1;
 
   Subtitle? _autoPauseMemory;
+  bool _lastPlayingState = true;
 
   /// This is called each time the player ticks.
   void listener() async {
@@ -400,53 +425,18 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     }
 
     if (_playerController.value.isInitialized) {
+      if (_durationNotifier.value == Duration.zero) {
+        appModel.audioHandler?.mediaItem.add(
+          appModel.audioHandler?.mediaItem.value?.copyWith.call(
+            duration: _playerController.value.duration,
+          ),
+        );
+      }
+
       _positionNotifier.value = _playerController.value.position;
       _durationNotifier.value = _playerController.value.duration;
       _playingNotifier.value = _playerController.value.isPlaying;
       _endedNotifier.value = _playerController.value.isEnded;
-
-      if (appModel.playerBackgroundPlay) {
-        appModel.audioHandler?.mediaItem.add(
-          appModel.audioHandler?.mediaItem.value?.copyWith.call(
-            duration: _durationNotifier.value,
-          ),
-        );
-
-        if (_currentSubtitle.value != null) {
-          appModel.audioHandler?.mediaItem.add(
-            appModel.audioHandler?.mediaItem.value?.copyWith.call(
-              artist: appModel.showSubtitlesInNotification
-                  ? _currentSubtitle.value?.data
-                  : widget.item!.author,
-            ),
-          );
-        }
-
-        appModel.audioHandler?.playbackState.add(
-          ag.PlaybackState(
-            controls: [
-              ag.MediaControl.rewind,
-              if (_playingNotifier.value)
-                ag.MediaControl.pause
-              else
-                ag.MediaControl.play,
-              ag.MediaControl.fastForward,
-            ],
-            systemActions: const {
-              ag.MediaAction.seek,
-              ag.MediaAction.fastForward,
-              ag.MediaAction.rewind,
-            },
-            androidCompactActionIndices: const [1],
-            processingState: _bufferingNotifier.value
-                ? ag.AudioProcessingState.buffering
-                : ag.AudioProcessingState.ready,
-            playing: _playingNotifier.value,
-            updatePosition: _positionNotifier.value,
-            bufferedPosition: _positionNotifier.value,
-          ),
-        );
-      }
 
       if (_playerController.value.aspectRatio != _lastAspectRatio) {
         _lastAspectRatio = _playerController.value.aspectRatio;
@@ -528,6 +518,17 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           _currentSubtitle.value = newSubtitle;
           // For remembering the last subtitle even if it has disappeared.
         }
+
+        if (appModel.playerBackgroundPlay &&
+            appModel.showSubtitlesInNotification &&
+            !_sliderBeingDragged &&
+            _currentSubtitle.value != null) {
+          appModel.audioHandler?.mediaItem.add(
+            appModel.audioHandler?.mediaItem.value?.copyWith.call(
+              artist: _currentSubtitle.value?.data,
+            ),
+          );
+        }
       }
 
       if (_shadowingSubtitle.value != null) {
@@ -568,6 +569,39 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       if (_durationNotifier.value != Duration.zero &&
           _positionNotifier.value != Duration.zero) {
         updateHistory();
+      }
+
+      if (appModel.playerBackgroundPlay && !_sliderBeingDragged) {
+        if (_lastPlayingState != _playingNotifier.value) {
+          _lastPlayingState = _playingNotifier.value;
+
+          appModel.audioHandler?.playbackState.add(
+            appModel.audioHandler!.playbackState.value.copyWith(
+              controls: [
+                ag.MediaControl.rewind,
+                if (_playingNotifier.value)
+                  ag.MediaControl.pause
+                else
+                  ag.MediaControl.play,
+                ag.MediaControl.fastForward,
+              ],
+              playing: _playingNotifier.value,
+              updatePosition: _positionNotifier.value,
+            ),
+          );
+        } else {
+          final distance = (_positionNotifier.value.inSeconds -
+                  appModel.audioHandler!.playbackState.value.position.inSeconds)
+              .abs();
+
+          if (distance > 3) {
+            appModel.audioHandler?.playbackState.add(
+              appModel.audioHandler!.playbackState.value.copyWith(
+                updatePosition: _positionNotifier.value,
+              ),
+            );
+          }
+        }
       }
     }
   }
