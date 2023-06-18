@@ -1,10 +1,10 @@
 name: yuuna
 description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
-version: 2.8.5+99
+version: 2.8.5+100
 environment:
   sdk: ">=3.0.0<4.0.0"
-  flutter: "^3.10.4"
+  flutter: "^3.10.5"
 
 dependencies:
   audio_service: ^0.18.9
@@ -90,7 +90,7 @@ dependencies:
     git: 
       url: https://github.com/lrorpilla/nowplaying
       ref: 290ee1097d67cafc50f3aba1ba5bba01e758d877
-  package_info_plus: ^4.0.1
+  package_info_plus: ^4.0.2
   path: ^1.8.2
   path_provider: ^2.0.13
   permission_handler: ^10.2.0
@@ -129,7 +129,11 @@ dependencies:
       url: https://github.com/lrorpilla/ve_dart
       ref: c366bb1ae24f6fad4f5c7e3a1efad5f2b8122e58
   visibility_detector: ^0.4.0+2
-  wakelock: ^0.6.2
+  wakelock:
+    git:
+      url: https://github.com/diegotori/wakelock
+      ref: 40464c75e908f57f458597ef4912f5273ab89b1a
+      path: wakelock
   web_socket_channel: ^2.3.0
   youtube_explode_dart: ^1.12.4
   
@@ -139,10 +143,10 @@ dependency_overrides:
   gap: ^3.0.0 # Caused by spaces
   wakelock_windows:
     git:
-      url: https://github.com/timsneath/wakelock
-      ref: win32-v5
+      url: https://github.com/diegotori/wakelock
+      ref: 40464c75e908f57f458597ef4912f5273ab89b1a
       path: wakelock_windows
-  
+
 dev_dependencies:
   build_runner: ^2.3.3
   dependency_validator: ^3.0.0

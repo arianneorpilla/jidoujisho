@@ -81,12 +81,12 @@ class CreatorModel with ChangeNotifier {
 
   /// Append the appropriate fields for cloze compatibility.
   void appendSentenceAndCloze(String sentence) {
-    getFieldController(SentenceField.instance).text += '\n\n$sentence';
-    getFieldController(ClozeAfterField.instance).text += '\n\n$sentence';
-    getFieldController(SentenceField.instance).text =
-        getFieldController(SentenceField.instance).text.trim();
-    getFieldController(ClozeAfterField.instance).text =
-        getFieldController(SentenceField.instance).text.trim();
+    if (getFieldController(SentenceField.instance).text.trim().isNotEmpty) {
+      getFieldController(SentenceField.instance).text += '\n\n';
+      getFieldController(ClozeAfterField.instance).text += '\n\n';
+    }
+    getFieldController(SentenceField.instance).text += sentence;
+    getFieldController(ClozeAfterField.instance).text += sentence;
   }
 
   /// Get the [TextEditingController] for a particular field.
