@@ -152,6 +152,15 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         _lifecycleActive = false;
         if (!appModel.playerBackgroundPlay) {
           _session.setActive(false);
+        } else {
+          if (appModel.showSubtitlesInNotification &&
+              _currentSubtitle.value != null) {
+            appModel.audioHandler?.mediaItem.add(
+              appModel.audioHandler?.mediaItem.value?.copyWith.call(
+                artist: _currentSubtitle.value?.data,
+              ),
+            );
+          }
         }
 
         if (source is PlayerNetworkStreamSource) {

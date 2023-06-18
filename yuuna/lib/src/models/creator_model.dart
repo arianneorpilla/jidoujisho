@@ -83,6 +83,10 @@ class CreatorModel with ChangeNotifier {
   void appendSentenceAndCloze(String sentence) {
     getFieldController(SentenceField.instance).text += '\n\n$sentence';
     getFieldController(ClozeAfterField.instance).text += '\n\n$sentence';
+    getFieldController(SentenceField.instance).text =
+        getFieldController(SentenceField.instance).text.trim();
+    getFieldController(ClozeAfterField.instance).text =
+        getFieldController(SentenceField.instance).text.trim();
   }
 
   /// Get the [TextEditingController] for a particular field.
