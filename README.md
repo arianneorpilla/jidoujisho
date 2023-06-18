@@ -189,7 +189,9 @@ A primer on the basics of the application is as follows.
 * 📹 The quality closest to the **last selected quality** will be selected by default for YouTube videos
 * 💬 **If your video has burned-in subtitles,** you may use the blur widget under player options to hide them
 * ✂️ Reading manga? You can **crop an image** before exporting a card
-* 🎧 **Listening to an audiobook?** You can auto-align subtitles during playback by opening the transcript and clicking on the upper-right icon
+* 🎧 **Listening to an audiobook?** You can read with subtitles during playback by opening the transcript and clicking on the upper-right icon
+* 🔔 You can listen in the background by turning on **background play** with
+**live subtitle previews in media notifications** with controls
 * 🪡 **Limit export to a single dictionary** by selecting the button on the rightmost tag of a dictionary entry
 * 📜 **Tap on a field's icon** in the Card Creator to **lock the field**, which can be useful if exporting the same sentence multiple times
 * 🤖 Users may chat in various languages supported by ChatGPT.  **Users are advised not to heavily rely on an AI language model if they cannot accurately distinguish its correctness and accuracy.**
