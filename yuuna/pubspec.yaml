@@ -1,7 +1,7 @@
 name: yuuna
 description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
-version: 2.8.5+100
+version: 2.8.6+101
 environment:
   sdk: ">=3.0.0<4.0.0"
   flutter: "^3.10.5"

@@ -267,32 +267,100 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       reverseDuration: const Duration(milliseconds: 400),
     );
 
-    await source.prepareMediaResources(
-        appModel: appModel, ref: ref, item: widget.item!);
-    final futures = await Future.wait(
-      [
-        source.preparePlayerController(
-          appModel: appModel,
-          ref: ref,
-          item: widget.item!,
-        ),
-        source.prepareSubtitles(
-          appModel: appModel,
-          ref: ref,
-          item: widget.item!,
-        ),
-      ],
-    );
+    late final List<dynamic> futures;
+
+    try {
+      await source.prepareMediaResources(
+          appModel: appModel, ref: ref, item: widget.item!);
+
+      futures = await Future.wait(
+        [
+          source.preparePlayerController(
+            appModel: appModel,
+            ref: ref,
+            item: widget.item!,
+          ),
+          source.prepareSubtitles(
+            appModel: appModel,
+            ref: ref,
+            item: widget.item!,
+          ),
+        ],
+      );
+    } catch (e) {
+      if (e is VideoUnavailableException || e is VideoUnplayableException) {
+        if (mounted) {
+          showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text(
+                  t.video_unavailable,
+                ),
+                content: Text(
+                  t.video_unavailable_content,
+                  textAlign: TextAlign.justify,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                    },
+                    child: Text(t.dialog_close),
+                  ),
+                ],
+              );
+            },
+          );
+        } else {
+          rethrow;
+        }
+      }
+    }
 
     _playerController = futures.elementAt(0) as VlcPlayerController;
     _subtitleItems = futures.elementAt(1) as List<SubtitleItem>;
     _transcriptBackgroundNotifier.value = appModel.isTranscriptOpaque;
 
+    if (source is PlayerLocalMediaSource) {
+      final videoFile = File(widget.item!.mediaIdentifier);
+      if (!videoFile.existsSync()) {
+        if (mounted) {
+          showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text(
+                  t.video_file_error,
+                ),
+                content: Text(
+                  t.video_file_error_content,
+                  textAlign: TextAlign.justify,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                    },
+                    child: Text(t.dialog_close),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      }
+    }
+
     if (_subtitleItems.isNotEmpty) {
       _subtitleItem = _subtitleItems.first;
     }
     if (!_subtitleItem.controller.initialized) {
-      await _subtitleItem.controller.initial();
+      _subtitleItem.controller.initial();
     }
 
     _blurOptionsNotifier = ValueNotifier<BlurOptions>(appModel.blurOptions);
@@ -913,6 +981,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             opaque: false,
             pageBuilder: (context, _, __) => PlayerTranscriptPage(
               title: widget.item!.title,
+              subtitleController: _subtitleItem.controller,
               subtitles: _subtitleItem.controller.subtitles,
               currentSubtitle: _currentSubtitle,
               autoPauseNotifier: _autoPauseNotifier,
@@ -1619,6 +1688,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               pageBuilder: (context, _, __) => PlayerTranscriptPage(
                 title: widget.item!.title,
                 subtitles: _subtitleItem.controller.subtitles,
+                subtitleController: _subtitleItem.controller,
                 controller: _playerController,
                 autoPauseNotifier: _autoPauseNotifier,
                 playingNotifier: _playingNotifier,

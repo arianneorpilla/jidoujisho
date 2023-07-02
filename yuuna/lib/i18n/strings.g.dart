@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 390
+/// Strings: 395
 ///
-/// Built on 2023-06-16 at 14:20 UTC
+/// Built on 2023-07-02 at 01:09 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -534,6 +534,11 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get player_background_play => 'Background play';
 	String get loaded_from_cache => 'Loaded from web archive cache.';
 	String get player_show_subtitle_in_notification => 'Show subtitles in media notification';
+	String get subtitles_processing => 'Subtitles are processing...';
+	String get video_unavailable => 'Video Unavailable';
+	String get video_unavailable_content => 'Cannot fetch streams. There may be restrictions in place that prevent watching this video.';
+	String get video_file_error => 'Cannot Load File';
+	String get video_file_error_content => 'Unable to load the video file. Please ensure this file exists and is located in a directory accessible by the application.';
 }
 
 // Path: retrying_in
@@ -962,6 +967,11 @@ extension on _StringsEn {
 			case 'player_background_play': return 'Background play';
 			case 'loaded_from_cache': return 'Loaded from web archive cache.';
 			case 'player_show_subtitle_in_notification': return 'Show subtitles in media notification';
+			case 'subtitles_processing': return 'Subtitles are processing...';
+			case 'video_unavailable': return 'Video Unavailable';
+			case 'video_unavailable_content': return 'Cannot fetch streams. There may be restrictions in place that prevent watching this video.';
+			case 'video_file_error': return 'Cannot Load File';
+			case 'video_file_error_content': return 'Unable to load the video file. Please ensure this file exists and is located in a directory accessible by the application.';
 			default: return null;
 		}
 	}

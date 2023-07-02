@@ -35,6 +35,7 @@ class PlayerTranscriptPage extends BaseSourcePage {
     required this.onTap,
     required this.onLongPress,
     required this.alignMode,
+    required this.subtitleController,
     super.key,
     super.item,
   });
@@ -44,6 +45,9 @@ class PlayerTranscriptPage extends BaseSourcePage {
 
   /// All subtitles in the current video.
   final List<Subtitle> subtitles;
+
+  /// Subtitle controller.
+  final SubtitleController subtitleController;
 
   /// Subtitle to be highlighted.
   final ValueNotifier<Subtitle?> currentSubtitle;
@@ -486,11 +490,43 @@ class _PlayerTranscriptPageState
   }
 
   Widget buildBody() {
+    if (!widget.subtitleController.initialized) {
+      return buildProcessingPlaceholder();
+    }
+
     if (widget.subtitles.isEmpty) {
       return buildPlaceholder();
     } else {
       return buildSubtitles();
     }
+  }
+
+  Widget buildProcessingPlaceholder() {
+    return Padding(
+      padding: Spacing.of(context).insets.onlyBottom.extraBig,
+      child: Material(
+        color: Colors.transparent,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.subtitles_outlined,
+                size: 72,
+              ),
+              const Space.normal(),
+              Text(
+                t.subtitles_processing,
+                style: const TextStyle(
+                  fontSize: 20,
+                ),
+              ),
+              const Space.big(),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget buildPlaceholder() {

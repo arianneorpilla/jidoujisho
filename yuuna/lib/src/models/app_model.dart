@@ -3335,7 +3335,7 @@ class AppModel with ChangeNotifier {
 
   /// Whether or not the player should allow background play.
   bool get playerBackgroundPlay {
-    return _preferences.get('player_background_play', defaultValue: false);
+    return _preferences.get('player_background_play', defaultValue: true);
   }
 
   /// Set whether or not the player should allow background play.

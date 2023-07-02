@@ -422,5 +422,10 @@
     "double_tap_seek_duration": "Double tap seek duration",
     "player_background_play": "Background play",
     "loaded_from_cache": "Loaded from web archive cache.",
-    "player_show_subtitle_in_notification": "Show subtitles in media notification"
+    "player_show_subtitle_in_notification": "Show subtitles in media notification",
+    "subtitles_processing": "Subtitles are processing...",
+    "video_unavailable": "Video Unavailable",
+    "video_unavailable_content": "Cannot fetch streams. There may be restrictions in place that prevent watching this video.",
+    "video_file_error": "Cannot Load File",
+    "video_file_error_content": "Unable to load the video file. Please ensure this file exists and is located in a directory accessible by the application."
   }
