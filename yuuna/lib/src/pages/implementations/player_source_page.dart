@@ -304,9 +304,21 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 ),
                 actions: [
                   TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      Navigator.pop(context);
+                    onPressed: () async {
+                      if (mounted) {
+                        Navigator.pop(context);
+                      }
+
+                      await onSourcePagePop();
+
+                      if (mounted) {
+                        Navigator.pop(context, true);
+                      }
+                      await appModel.closeMedia(
+                        ref: ref,
+                        mediaSource: appModel.currentMediaSource!,
+                        item: widget.item,
+                      );
                     },
                     child: Text(t.dialog_close),
                   ),
@@ -342,9 +354,21 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 ),
                 actions: [
                   TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      Navigator.pop(context);
+                    onPressed: () async {
+                      if (mounted) {
+                        Navigator.pop(context);
+                      }
+
+                      await onSourcePagePop();
+
+                      if (mounted) {
+                        Navigator.pop(context, true);
+                      }
+                      await appModel.closeMedia(
+                        ref: ref,
+                        mediaSource: appModel.currentMediaSource!,
+                        item: widget.item,
+                      );
                     },
                     child: Text(t.dialog_close),
                   ),
