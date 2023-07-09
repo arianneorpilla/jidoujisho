@@ -25,7 +25,7 @@ class TatoebaExampleSentencesEnhancement extends Enhancement {
   static const String key = 'tatoeba_example_sentences';
 
   /// Used to store results that have already been found at runtime.
-  final Map<String, List<String>> _tatoebaCache = {};
+  final Map<String, Map<String, List<String>>> _tatoebaCache = {};
 
   /// Client used to communicate with Tatoeba.
   final http.Client _client = http.Client();
@@ -84,8 +84,10 @@ class TatoebaExampleSentencesEnhancement extends Enhancement {
     Language language = appModel.targetLanguage;
     String langCode = language.threeLetterCode;
 
-    if (_tatoebaCache[langCode] != null) {
-      return _tatoebaCache[langCode]!;
+    _tatoebaCache[langCode] ??= {};
+
+    if (_tatoebaCache[langCode]![searchTerm] != null) {
+      return _tatoebaCache[langCode]![searchTerm]!;
     }
 
     List<String> sentences = [];
@@ -98,7 +100,7 @@ class TatoebaExampleSentencesEnhancement extends Enhancement {
         List<Map<String, dynamic>>.from(json['results']);
 
     sentences = results.map((result) => result['text'].toString()).toList();
-    _tatoebaCache[langCode] = sentences;
+    _tatoebaCache[langCode]![searchTerm] = sentences;
 
     return sentences;
   }
