@@ -3227,11 +3227,15 @@ class AppModel with ChangeNotifier {
     double fontSize = _preferences.get('font_size', defaultValue: 20.0);
     String fontName = _preferences
         .get('font_name/${targetLanguage.languageCode}', defaultValue: '');
+    int fontColor = _preferences.get('font_color', defaultValue: 0xff00EE);
+    String fontWeight = _preferences.get('font_weight', defaultValue: 'Normal');
     String regexFilter = _preferences.get('regex_filter', defaultValue: '');
     double subtitleBackgroundOpacity =
         _preferences.get('subtitle_background_opacity', defaultValue: 0.0);
     double subtitleOutlineWidth =
         _preferences.get('subtitle_outline_width', defaultValue: 3.0);
+    int subtitleOutlineColor =
+        _preferences.get('subtitle_outline_color', defaultValue: 0xffffff);
     double subtitleBackgroundBlurRadius =
         _preferences.get('subtitle_background_blur_radius', defaultValue: 0.0);
     bool alwaysAboveBottomBar =
@@ -3244,8 +3248,11 @@ class AppModel with ChangeNotifier {
       subtitleBackgroundBlurRadius: subtitleBackgroundBlurRadius,
       fontSize: fontSize,
       fontName: fontName,
+      fontColor: fontColor,
+      fontWeight: fontWeight,
       regexFilter: regexFilter,
       subtitleOutlineWidth: subtitleOutlineWidth,
+      subtitleOutlineColor: subtitleOutlineColor,
       alwaysAboveBottomBar: alwaysAboveBottomBar,
     );
   }
@@ -3255,6 +3262,8 @@ class AppModel with ChangeNotifier {
     _preferences.put('audio_allowance', options.audioAllowance);
     _preferences.put('subtitle_delay', options.subtitleDelay);
     _preferences.put('font_size', options.fontSize);
+    _preferences.put('font_color', options.fontColor);
+    _preferences.put('font_weight', options.fontWeight);
     _preferences.put(
         'font_name/${targetLanguage.languageCode}', options.fontName);
     _preferences.put('regex_filter', options.regexFilter);

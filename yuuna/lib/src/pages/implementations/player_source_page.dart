@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:google_fonts/google_fonts.dart';
+// import 'package:google_fonts/google_fonts.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
 import 'package:receive_intent/receive_intent.dart';
 import 'package:share_plus/share_plus.dart';
@@ -65,6 +65,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   final ValueNotifier<bool> _bufferingNotifier = ValueNotifier<bool>(false);
 
   final ValueNotifier<bool> _isMenuHidden = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _isMenuShownPermanent = ValueNotifier<bool>(false);
 
   late final ValueNotifier<Subtitle?> _currentSubtitle;
 
@@ -1180,16 +1181,33 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   Widget buildMenuArea() {
     return Align(
       alignment: Alignment.topCenter,
-      child: ValueListenableBuilder<bool>(
-        valueListenable: _isMenuHidden,
-        builder: (context, value, _) {
+      child: MultiValueListenableBuilder(
+        valueListenables: [
+          _isMenuHidden,
+          _isMenuShownPermanent,
+        ],
+        builder: (context, values, _) {
           return AnimatedOpacity(
-            opacity: value ? 0.0 : 1.0,
+            opacity: values[1]
+                ? 1.0
+                : values[0]
+                    ? 0.0
+                    : 1.0,
             duration: const Duration(milliseconds: 200),
             child: buildMenuContent(),
           );
         },
       ),
+      // ValueListenableBuilder<bool>(
+      //   valueListenable: _isMenuHidden,
+      //   builder: (context, value, _) {
+      //     return AnimatedOpacity(
+      //       opacity: value ? 0.0 : 1.0,
+      //       duration: const Duration(milliseconds: 200),
+      //       child: buildMenuContent(),
+      //     );
+      //   },
+      // ),
     );
   }
 
@@ -1207,6 +1225,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             child: Row(
               children: [
                 const Space.small(),
+                buildPinButton(),
                 buildPlayButton(),
                 buildDurationAndPosition(),
                 buildSlider(),
@@ -1218,6 +1237,33 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// This shows the pin button in the bottomleft of the screen.
+  Widget buildPinButton() {
+    return Material(
+      color: Colors.transparent,
+      child: JidoujishoIconButton(
+        size: 24,
+        icon: _isMenuShownPermanent.value
+            ? Icons.push_pin
+            : Icons.push_pin_outlined,
+        tooltip: t.pin_player_bottom_bar,
+        onTap: () async {
+          Wakelock.enable();
+          _menuHideTimer?.cancel();
+          _isMenuShownPermanent.value = !_isMenuShownPermanent.value;
+
+          if (!_isMenuShownPermanent.value) {
+            _menuHideTimer = Timer(const Duration(seconds: 3), () {
+              if (_playingNotifier.value) {
+                _isMenuHidden.value = true;
+              }
+            });
+          }
+        },
       ),
     );
   }
@@ -2339,35 +2385,57 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   Paint get subtitlePaintStyle => Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = _subtitleOptionsNotifier.value.subtitleOutlineWidth
-    ..color = Colors.black.withOpacity(
-        _subtitleOptionsNotifier.value.subtitleOutlineWidth == 0 ? 0 : 0.75);
+    ..color = Color(_subtitleOptionsNotifier.value.subtitleOutlineColor)
+        .withOpacity(_subtitleOptionsNotifier.value.subtitleOutlineWidth == 0
+            ? 0
+            : 0.75);
 
   /// Subtitle outline text style.
-  ///
-  TextStyle get subtitleOutlineStyle =>
-      _subtitleOptionsNotifier.value.fontName.trim().isEmpty
-          ? TextStyle(
-              fontSize: _subtitleOptionsNotifier.value.fontSize,
-              foreground: subtitlePaintStyle,
-            )
-          : GoogleFonts.getFont(
-              _subtitleOptionsNotifier.value.fontName,
-              fontSize: _subtitleOptionsNotifier.value.fontSize,
-              foreground: subtitlePaintStyle,
-            );
+  TextStyle get subtitleOutlineStyle => TextStyle(
+        fontFamily: _subtitleOptionsNotifier.value.fontName,
+        fontSize: _subtitleOptionsNotifier.value.fontSize,
+        fontWeight: _subtitleOptionsNotifier.value.fontWeight == 'Thin'
+            ? FontWeight.w300
+            : _subtitleOptionsNotifier.value.fontWeight == 'Normal'
+                ? FontWeight.normal
+                : FontWeight.bold,
+        foreground: subtitlePaintStyle,
+      );
+  // TextStyle get subtitleOutlineStyle =>
+  //     _subtitleOptionsNotifier.value.fontName.trim().isEmpty
+  //         ? TextStyle(
+  //             fontSize: _subtitleOptionsNotifier.value.fontSize,
+  //             foreground: subtitlePaintStyle,
+  //           )
+  //         : GoogleFonts.getFont(
+
+  //             _subtitleOptionsNotifier.value.fontName,
+  //             fontSize: _subtitleOptionsNotifier.value.fontSize,
+  //             foreground: subtitlePaintStyle,
+  //           );
 
   /// Subtitle text style.
-  TextStyle get subtitleTextStyle =>
-      _subtitleOptionsNotifier.value.fontName.trim().isEmpty
-          ? TextStyle(
-              fontSize: _subtitleOptionsNotifier.value.fontSize,
-              color: Colors.white,
-            )
-          : GoogleFonts.getFont(
-              _subtitleOptionsNotifier.value.fontName,
-              fontSize: _subtitleOptionsNotifier.value.fontSize,
-              color: Colors.white,
-            );
+  TextStyle get subtitleTextStyle => TextStyle(
+        fontFamily: _subtitleOptionsNotifier.value.fontName,
+        fontSize: _subtitleOptionsNotifier.value.fontSize,
+        fontWeight: _subtitleOptionsNotifier.value.fontWeight == 'Thin'
+            ? FontWeight.w100
+            : _subtitleOptionsNotifier.value.fontWeight == 'Normal'
+                ? FontWeight.normal
+                : FontWeight.bold,
+        color: Color(_subtitleOptionsNotifier.value.fontColor),
+      );
+  // TextStyle get subtitleTextStyle =>
+  //     _subtitleOptionsNotifier.value.fontName.trim().isEmpty
+  //         ? TextStyle(
+  //             fontSize: _subtitleOptionsNotifier.value.fontSize,
+  //             color: Color(_subtitleOptionsNotifier.value.fontColor),
+  //           )
+  //         : GoogleFonts.getFont(
+  //             _subtitleOptionsNotifier.value.fontName,
+  //             fontSize: _subtitleOptionsNotifier.value.fontSize,
+  //             color: Color(_subtitleOptionsNotifier.value.fontColor),
+  //           );
 
   /// This is used to set the search term upon pressing on a character
   /// or selecting text.

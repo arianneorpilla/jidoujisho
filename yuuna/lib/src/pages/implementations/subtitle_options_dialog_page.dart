@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
+// import 'package:google_fonts/google_fonts.dart';
 import 'package:spaces/spaces.dart';
-import 'package:url_launcher/url_launcher_string.dart';
-import 'package:yuuna/language.dart';
+// import 'package:url_launcher/url_launcher_string.dart';
+// import 'package:yuuna/language.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'dart:io';
 
 /// The content of the dialog when editing [SubtitleOptions].
 class SubtitleOptionsDialogPage extends BasePage {
@@ -29,18 +33,27 @@ class _SubtitleOptionsDialogPage
   late final TextEditingController _delayController;
   late final TextEditingController _fontSizeController;
   late final TextEditingController _fontNameController;
+  late final TextEditingController _fontColorController;
+  late final TextEditingController _outLineColorController;
   late final TextEditingController _regexFilterController;
   late final TextEditingController _opacityController;
   late final TextEditingController _widthController;
   late final TextEditingController _blurController;
 
   late ValueNotifier<bool> _aboveBottomBarNotifier;
+  Color fontColor = Colors.white;
+  Color outLineColor = Colors.white;
+  List<String> fontWeights = ['Thin', 'Normal', 'Bold'];
+  int fontWeightIdx = 1;
 
   @override
   void initState() {
     super.initState();
     _options = widget.notifier.value;
 
+    fontWeightIdx = fontWeights.indexOf(_options.fontWeight);
+    fontColor = Color(_options.fontColor);
+    outLineColor = Color(_options.subtitleOutlineColor);
     _allowanceController =
         TextEditingController(text: _options.audioAllowance.toString());
     _delayController =
@@ -48,6 +61,8 @@ class _SubtitleOptionsDialogPage
     _fontSizeController =
         TextEditingController(text: _options.fontSize.toString());
     _fontNameController = TextEditingController(text: _options.fontName.trim());
+    _fontColorController = TextEditingController(text: 'Font Color');
+    _outLineColorController = TextEditingController(text: 'Outline Color');
     _regexFilterController =
         TextEditingController(text: _options.regexFilter.trim());
     _opacityController = TextEditingController(
@@ -94,6 +109,7 @@ class _SubtitleOptionsDialogPage
             width: MediaQuery.of(context).size.width * (1 / 3),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TextField(
                   controller: _delayController,
@@ -293,11 +309,12 @@ class _SubtitleOptionsDialogPage
                           tooltip: t.google_fonts,
                           onTap: () async {
                             /// Language Customizable
-                            if (appModel.targetLanguage is JapaneseLanguage) {
-                              launchUrlString(
-                                  'https://fonts.google.com/?subset=japanese');
-                            }
-                            launchUrlString('https://fonts.google.com/');
+                            // if (appModel.targetLanguage is JapaneseLanguage) {
+                            //   launchUrlString(
+                            //       'https://fonts.google.com/?subset=japanese');
+                            // }
+                            // launchUrlString('https://fonts.google.com/');
+                            pickFontFile();
                           },
                           icon: Icons.font_download,
                         ),
@@ -306,6 +323,94 @@ class _SubtitleOptionsDialogPage
                           tooltip: t.reset,
                           onTap: () async {
                             _fontNameController.text = '';
+                            FocusScope.of(context).unfocus();
+                          },
+                          icon: Icons.undo,
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    ),
+                  ),
+                ),
+                TextField(
+                  controller: _fontColorController,
+                  style: TextStyle(color: fontColor),
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    labelText: t.player_option_font_color,
+                    suffixIcon: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        JidoujishoIconButton(
+                          size: 18,
+                          tooltip: t.google_fonts,
+                          onTap: () async {
+                            showColorPicker('Font');
+                          },
+                          icon: Icons.color_lens,
+                        ),
+                        JidoujishoIconButton(
+                          size: 18,
+                          tooltip: t.reset,
+                          onTap: () async {
+                            _fontColorController.text = '';
+                            FocusScope.of(context).unfocus();
+                          },
+                          icon: Icons.undo,
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    ),
+                  ),
+                ),
+                const Space.small(),
+                Padding(
+                  padding: Spacing.of(context).insets.onlyTop.small,
+                  child: Text(
+                    t.player_option_font_weight,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.hintColor,
+                    ),
+                  ),
+                ),
+                JidoujishoDropdown<String>(
+                  options: fontWeights,
+                  initialOption: fontWeights[fontWeightIdx],
+                  generateLabel: (weight) => weight,
+                  onChanged: (weight) {
+                    fontWeightIdx = fontWeights.indexOf(weight ?? 'Normal');
+                    setState(() {});
+                  },
+                ),
+                Container(height: 0.45, color: Colors.black87),
+                const Space.small(),
+                TextField(
+                  controller: _outLineColorController,
+                  readOnly: true,
+                  style: TextStyle(color: outLineColor),
+                  decoration: InputDecoration(
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    labelText: t.player_option_outline_color,
+                    suffixIcon: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        JidoujishoIconButton(
+                          size: 18,
+                          tooltip: t.google_fonts,
+                          onTap: () async {
+                            showColorPicker('Outline');
+                          },
+                          icon: Icons.color_lens,
+                        ),
+                        JidoujishoIconButton(
+                          size: 18,
+                          tooltip: t.reset,
+                          onTap: () async {
+                            _fontColorController.text = '';
                             FocusScope.of(context).unfocus();
                           },
                           icon: Icons.undo,
@@ -397,11 +502,11 @@ class _SubtitleOptionsDialogPage
         newWidth >= 0 &&
         newBlur >= 0) {
       RegExp(newRegexFilter);
-      try {
-        GoogleFonts.getFont(newFontName);
-      } catch (e) {
-        newFontName = '';
-      }
+      // try {
+      //   GoogleFonts.getFont(newFontName);
+      // } catch (e) {
+      //   newFontName = '';
+      // }
 
       SubtitleOptions subtitleOptions = appModel.subtitleOptions;
 
@@ -410,8 +515,11 @@ class _SubtitleOptionsDialogPage
       subtitleOptions.regexFilter = newRegexFilter;
       subtitleOptions.fontName = newFontName;
       subtitleOptions.fontSize = newFontSize;
+      subtitleOptions.fontColor = fontColor.value;
+      subtitleOptions.fontWeight = fontWeights[fontWeightIdx];
       subtitleOptions.subtitleBackgroundOpacity = newOpacity;
       subtitleOptions.subtitleOutlineWidth = newWidth;
+      subtitleOptions.subtitleOutlineColor = outLineColor.value;
       subtitleOptions.subtitleBackgroundBlurRadius = newBlur;
       subtitleOptions.alwaysAboveBottomBar = newAlwaysAboveBottomBar;
 
@@ -458,5 +566,54 @@ class _SubtitleOptionsDialogPage
 
   void executeSet() async {
     await setValues(saveOptions: false);
+  }
+
+  /// Pick a font file with a built-in file picker.
+  Future<bool> pickFontFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['ttf', 'otf'],
+    );
+    if (result != null) {
+      _fontNameController.text = result.files.single.name.split('.').first;
+      var custom = FontLoader(_fontNameController.text);
+      custom.addFont(loadFont(result.files.single.path ?? ''));
+      await custom.load();
+      return true;
+    }
+    return false;
+  }
+
+  Future<ByteData> loadFont(String path) async {
+    File file = File(path);
+    Uint8List bytes = await file.readAsBytes();
+    return ByteData.view(bytes.buffer);
+  }
+
+  void showColorPicker(String target) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Pick color'),
+            content: SingleChildScrollView(
+              child: ColorPicker(
+                pickerColor: const Color(0xff443a49),
+                paletteType: PaletteType.hueWheel,
+                onColorChanged: (value) {
+                  if (target == 'Font') {
+                    setState(() {
+                      fontColor = value;
+                    });
+                  } else {
+                    setState(() {
+                      outLineColor = value;
+                    });
+                  }
+                },
+              ),
+            ),
+          );
+        });
   }
 }
