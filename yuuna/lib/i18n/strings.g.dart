@@ -617,8 +617,10 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
   String subtitle_delay_set({required Object ms}) =>
       'Subtitle delay set to ${ms} ms.';
   String get cancel => 'Cancel';
+  String get choose_color => 'Choose';
   String get server_port_in_use => 'Local server port already in use';
   String get google_fonts => 'Google Fonts';
+  String get pick_color => 'Pick Color';
   String get video_show => 'Show video';
   String get video_hide => 'Hide video';
   String get subtitle_timing_show => 'Show subtitle timings';
@@ -1429,10 +1431,14 @@ extension on _StringsEn {
         return ({required Object ms}) => 'Subtitle delay set to ${ms} ms.';
       case 'cancel':
         return 'Cancel';
+      case 'choose_color':
+        return 'Choose';
       case 'server_port_in_use':
         return 'Local server port already in use';
       case 'google_fonts':
         return 'Google Fonts';
+      case 'pick_color':
+        return 'Pick Color';
       case 'video_show':
         return 'Show video';
       case 'video_hide':

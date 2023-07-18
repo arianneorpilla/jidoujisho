@@ -34,16 +34,15 @@ class _SubtitleOptionsDialogPage
   late final TextEditingController _fontSizeController;
   late final TextEditingController _fontNameController;
   late final TextEditingController _fontColorController;
-  late final TextEditingController _outLineColorController;
+  late final TextEditingController _outlineColorController;
   late final TextEditingController _regexFilterController;
   late final TextEditingController _opacityController;
   late final TextEditingController _widthController;
   late final TextEditingController _blurController;
 
   late ValueNotifier<bool> _aboveBottomBarNotifier;
-  Color fontColor = Colors.white;
-  Color outLineColor = Colors.white;
   List<String> fontWeights = ['Thin', 'Normal', 'Bold'];
+
   int fontWeightIdx = 1;
 
   @override
@@ -52,8 +51,6 @@ class _SubtitleOptionsDialogPage
     _options = widget.notifier.value;
 
     fontWeightIdx = fontWeights.indexOf(_options.fontWeight);
-    fontColor = Color(_options.fontColor);
-    outLineColor = Color(_options.subtitleOutlineColor);
     _allowanceController =
         TextEditingController(text: _options.audioAllowance.toString());
     _delayController =
@@ -61,8 +58,10 @@ class _SubtitleOptionsDialogPage
     _fontSizeController =
         TextEditingController(text: _options.fontSize.toString());
     _fontNameController = TextEditingController(text: _options.fontName.trim());
-    _fontColorController = TextEditingController(text: 'Font Color');
-    _outLineColorController = TextEditingController(text: 'Outline Color');
+    _fontColorController =
+        TextEditingController(text: '#${_options.fontColor.toRadixString(16)}');
+    _outlineColorController = TextEditingController(
+        text: '#${_options.subtitleOutlineColor.toRadixString(16)}');
     _regexFilterController =
         TextEditingController(text: _options.regexFilter.trim());
     _opacityController = TextEditingController(
@@ -334,8 +333,6 @@ class _SubtitleOptionsDialogPage
                 ),
                 TextField(
                   controller: _fontColorController,
-                  style: TextStyle(color: fontColor),
-                  readOnly: true,
                   decoration: InputDecoration(
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     labelText: t.player_option_font_color,
@@ -345,7 +342,7 @@ class _SubtitleOptionsDialogPage
                       children: [
                         JidoujishoIconButton(
                           size: 18,
-                          tooltip: t.google_fonts,
+                          tooltip: t.pick_color,
                           onTap: () async {
                             showColorPicker('Font');
                           },
@@ -388,9 +385,8 @@ class _SubtitleOptionsDialogPage
                 Container(height: 0.45, color: Colors.black87),
                 const Space.small(),
                 TextField(
-                  controller: _outLineColorController,
+                  controller: _outlineColorController,
                   readOnly: true,
-                  style: TextStyle(color: outLineColor),
                   decoration: InputDecoration(
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     labelText: t.player_option_outline_color,
@@ -400,7 +396,7 @@ class _SubtitleOptionsDialogPage
                       children: [
                         JidoujishoIconButton(
                           size: 18,
-                          tooltip: t.google_fonts,
+                          tooltip: t.pick_color,
                           onTap: () async {
                             showColorPicker('Outline');
                           },
@@ -477,6 +473,13 @@ class _SubtitleOptionsDialogPage
     String fontSizeText = _fontSizeController.text;
     double? newFontSize = double.tryParse(fontSizeText);
 
+    String fontColorText = _fontColorController.text;
+    int? newFontColor = int.tryParse(fontColorText.replaceFirst('#', '0xFF'));
+
+    String outlineColorText = _outlineColorController.text;
+    int? newOutlineColor =
+        int.tryParse(outlineColorText.replaceFirst('#', '0xFF'));
+
     String newFontName = _fontNameController.text.trim();
     String newRegexFilter = _regexFilterController.text.trim();
 
@@ -494,6 +497,8 @@ class _SubtitleOptionsDialogPage
     if (newDelay != null &&
         newAllowance != null &&
         newFontSize != null &&
+        newFontColor != null &&
+        newOutlineColor != null &&
         newOpacity != null &&
         newWidth != null &&
         newBlur != null &&
@@ -515,11 +520,11 @@ class _SubtitleOptionsDialogPage
       subtitleOptions.regexFilter = newRegexFilter;
       subtitleOptions.fontName = newFontName;
       subtitleOptions.fontSize = newFontSize;
-      subtitleOptions.fontColor = fontColor.value;
+      subtitleOptions.fontColor = newFontColor;
       subtitleOptions.fontWeight = fontWeights[fontWeightIdx];
       subtitleOptions.subtitleBackgroundOpacity = newOpacity;
       subtitleOptions.subtitleOutlineWidth = newWidth;
-      subtitleOptions.subtitleOutlineColor = outLineColor.value;
+      subtitleOptions.subtitleOutlineColor = newOutlineColor;
       subtitleOptions.subtitleBackgroundBlurRadius = newBlur;
       subtitleOptions.alwaysAboveBottomBar = newAlwaysAboveBottomBar;
 
@@ -577,42 +582,53 @@ class _SubtitleOptionsDialogPage
     if (result != null) {
       _fontNameController.text = result.files.single.name.split('.').first;
       var custom = FontLoader(_fontNameController.text);
-      custom.addFont(loadFont(result.files.single.path ?? ''));
+      File file = File(result.files.single.path ?? '');
+      Uint8List bytes = await file.readAsBytes();
+      custom.addFont(Future.value(ByteData.view(bytes.buffer)));
       await custom.load();
       return true;
     }
     return false;
   }
 
-  Future<ByteData> loadFont(String path) async {
-    File file = File(path);
-    Uint8List bytes = await file.readAsBytes();
-    return ByteData.view(bytes.buffer);
-  }
-
   void showColorPicker(String target) {
+    Color newColor = target == 'Font'
+        ? Color(_options.fontColor)
+        : Color(_options.subtitleOutlineColor);
     showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Pick color'),
             content: SingleChildScrollView(
               child: ColorPicker(
                 pickerColor: const Color(0xff443a49),
                 paletteType: PaletteType.hueWheel,
                 onColorChanged: (value) {
-                  if (target == 'Font') {
-                    setState(() {
-                      fontColor = value;
-                    });
-                  } else {
-                    setState(() {
-                      outLineColor = value;
-                    });
-                  }
+                  newColor = value;
                 },
               ),
             ),
+            actions: [
+              TextButton(
+                child: Text(t.choose_color),
+                onPressed: () {
+                  if (target == 'Font') {
+                    _fontColorController.text =
+                        '#${newColor.value.toRadixString(16)}';
+                  } else {
+                    _outlineColorController.text =
+                        '#${newColor.value.toRadixString(16)}';
+                  }
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text(t.cancel),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
           );
         });
   }
