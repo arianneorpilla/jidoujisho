@@ -624,7 +624,15 @@ class AppModel with ChangeNotifier {
     return _currentSubtitleOptions;
   }
 
+  /// Current player bottom bar options.
+  ValueNotifier<PlayerBottomBarOptions>? get currentPlayerBottomBarOptions {
+    _currentPlayerBottomBarOptions ??=
+        ValueNotifier<PlayerBottomBarOptions>(playerBottomBarOptions);
+    return _currentPlayerBottomBarOptions;
+  }
+
   ValueNotifier<SubtitleOptions>? _currentSubtitleOptions;
+  ValueNotifier<PlayerBottomBarOptions>? _currentPlayerBottomBarOptions;
 
   /// Override color for the dictionary widget.
   Color? get overrideDictionaryColor => _overrideDictionaryColor;
@@ -2446,6 +2454,7 @@ class AppModel with ChangeNotifier {
     }
 
     _currentSubtitleOptions = ValueNotifier(subtitleOptions);
+    _currentPlayerBottomBarOptions = ValueNotifier(playerBottomBarOptions);
     _overrideDictionaryColor = null;
     _overrideDictionaryTheme = null;
 
@@ -3270,9 +3279,24 @@ class AppModel with ChangeNotifier {
     _preferences.put(
         'subtitle_background_opacity', options.subtitleBackgroundOpacity);
     _preferences.put('subtitle_outline_width', options.subtitleOutlineWidth);
+    _preferences.put('subtitle_outline_color', options.subtitleOutlineColor);
     _preferences.put('subtitle_background_blur_radius',
         options.subtitleBackgroundBlurRadius);
     _preferences.put('subtitle_above_bar', options.alwaysAboveBottomBar);
+  }
+
+  /// Get the bottom bar options used in the player.
+  PlayerBottomBarOptions get playerBottomBarOptions {
+    bool keepShown = _preferences.get('keep_shown', defaultValue: false);
+
+    return PlayerBottomBarOptions(
+      keepShown: keepShown,
+    );
+  }
+
+  /// Set the subtitle options used in the player.
+  void setPlayerBottomBarOptions(PlayerBottomBarOptions options) {
+    _preferences.put('keep_shown', options.keepShown);
   }
 
   /// Gets the last used audio index of a given media item.

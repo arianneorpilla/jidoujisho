@@ -81,6 +81,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   late final ValueNotifier<BlurOptions> _blurOptionsNotifier;
   late final ValueNotifier<SubtitleOptions> _subtitleOptionsNotifier;
+  late final ValueNotifier<PlayerBottomBarOptions>
+      _playerBottomBarOptionsNotifier;
 
   StreamSubscription<void>? _playPauseSubscription;
   StreamSubscription<Duration>? _seekSubscription;
@@ -394,7 +396,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     appModel.currentPlayerController = _playerController;
     _currentSubtitle = appModel.currentSubtitle;
     _subtitleOptionsNotifier = appModel.currentSubtitleOptions!;
-
+    _playerBottomBarOptionsNotifier = appModel.currentPlayerBottomBarOptions!;
+    _isMenuShownPermanent.value =
+        _playerBottomBarOptionsNotifier.value.keepShown;
+    _isMenuHidden.value = !_playerBottomBarOptionsNotifier.value.keepShown;
     _currentSubtitle.value = null;
     appModel.blockCreatorInitialMedia = true;
 
@@ -1226,6 +1231,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               children: [
                 const Space.small(),
                 buildPinButton(),
+                buildPrevSubtitleSeekButton(),
+                buildNextSubtitleSeekButton(),
                 buildPlayButton(),
                 buildDurationAndPosition(),
                 buildSlider(),
@@ -1263,8 +1270,93 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               }
             });
           }
+
+          PlayerBottomBarOptions playerBottomBarOptions =
+              appModel.playerBottomBarOptions;
+          playerBottomBarOptions.keepShown = _isMenuShownPermanent.value;
+          appModel.setPlayerBottomBarOptions(playerBottomBarOptions);
         },
       ),
+    );
+  }
+
+  /// This shows the Fast Forward button in the bottomleft of the screen.
+  Widget buildPrevSubtitleSeekButton() {
+    return MultiValueListenableBuilder(
+      valueListenables: [
+        _durationNotifier,
+        _positionNotifier,
+        _endedNotifier,
+      ],
+      builder: (context, values, _) {
+        Duration duration = values.elementAt(0);
+        Duration position = values.elementAt(1);
+        bool isEnded = values.elementAt(2);
+
+        bool validPosition = duration.compareTo(position) >= 0;
+        double sliderValue = validPosition ? position.inSeconds.toDouble() : 0;
+
+        if (isEnded) {
+          sliderValue = 1;
+        }
+
+        return Material(
+          color: Colors.transparent,
+          child: JidoujishoIconButton(
+            size: 24,
+            icon: Icons.fast_rewind,
+            tooltip: t.seek_control,
+            onTap: () async {
+              if (validPosition) {
+                _playerController.setTime((sliderValue.toInt() - 5) * 1000);
+                _listeningSubtitle.value = getNearestSubtitle();
+                _autoPauseNotifier.value = null;
+                _autoPauseMemory = null;
+              }
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  /// This shows the Fast Forward button in the bottomleft of the screen.
+  Widget buildNextSubtitleSeekButton() {
+    return MultiValueListenableBuilder(
+      valueListenables: [
+        _durationNotifier,
+        _positionNotifier,
+        _endedNotifier,
+      ],
+      builder: (context, values, _) {
+        Duration duration = values.elementAt(0);
+        Duration position = values.elementAt(1);
+        bool isEnded = values.elementAt(2);
+
+        bool validPosition = duration.compareTo(position) >= 0;
+        double sliderValue = validPosition ? position.inSeconds.toDouble() : 0;
+
+        if (isEnded) {
+          sliderValue = 1;
+        }
+
+        return Material(
+          color: Colors.transparent,
+          child: JidoujishoIconButton(
+            size: 24,
+            icon: Icons.fast_forward,
+            tooltip: t.seek_control,
+            onTap: () async {
+              if (validPosition) {
+                _playerController.setTime((sliderValue.toInt() + 5) * 1000);
+                _listeningSubtitle.value = getNearestSubtitle();
+                _autoPauseNotifier.value = null;
+                _autoPauseMemory = null;
+              }
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -2568,15 +2660,17 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   /// This hides or shows the menu.
   void toggleMenuVisibility() async {
-    Wakelock.enable();
-    _menuHideTimer?.cancel();
-    _isMenuHidden.value = !_isMenuHidden.value;
-    if (!_isMenuHidden.value) {
-      _menuHideTimer = Timer(const Duration(seconds: 3), () {
-        if (_playingNotifier.value) {
-          _isMenuHidden.value = true;
-        }
-      });
+    if (!_playerBottomBarOptionsNotifier.value.keepShown) {
+      Wakelock.enable();
+      _menuHideTimer?.cancel();
+      _isMenuHidden.value = !_isMenuHidden.value;
+      if (!_isMenuHidden.value) {
+        _menuHideTimer = Timer(const Duration(seconds: 3), () {
+          if (_playingNotifier.value) {
+            _isMenuHidden.value = true;
+          }
+        });
+      }
     }
   }
 

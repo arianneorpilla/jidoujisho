@@ -386,7 +386,6 @@ class _SubtitleOptionsDialogPage
                 const Space.small(),
                 TextField(
                   controller: _outlineColorController,
-                  readOnly: true,
                   decoration: InputDecoration(
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     labelText: t.player_option_outline_color,
@@ -406,7 +405,7 @@ class _SubtitleOptionsDialogPage
                           size: 18,
                           tooltip: t.reset,
                           onTap: () async {
-                            _fontColorController.text = '';
+                            _outlineColorController.text = '';
                             FocusScope.of(context).unfocus();
                           },
                           icon: Icons.undo,

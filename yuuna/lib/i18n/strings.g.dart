@@ -426,6 +426,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
   String get local_media_directory_empty => 'Directory has no folders or video';
   String get pick_video_file => 'Pick Video File';
   String get pin_player_bottom_bar => 'Pin Player Bottom Bar';
+  String get seek_control => 'Seek Control';
   String get navigate_up_one_directory_level =>
       'Navigate Up One Directory Level';
   String get play => 'Play';
@@ -1106,6 +1107,8 @@ extension on _StringsEn {
         return 'Pick Video File';
       case 'pin_player_bottom_bar':
         return 'Pin Player Bottom Bar';
+      case 'seek_control':
+        return 'Seek Control';
       case 'navigate_up_one_directory_level':
         return 'Navigate Up One Directory Level';
       case 'play':
