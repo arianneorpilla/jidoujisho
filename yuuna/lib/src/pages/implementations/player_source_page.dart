@@ -2660,7 +2660,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   /// This hides or shows the menu.
   void toggleMenuVisibility() async {
-    if (!_playerBottomBarOptionsNotifier.value.keepShown) {
+    if (!_isMenuShownPermanent.value) {
       Wakelock.enable();
       _menuHideTimer?.cancel();
       _isMenuHidden.value = !_isMenuHidden.value;
