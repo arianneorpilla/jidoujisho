@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 // import 'package:google_fonts/google_fonts.dart';
 import 'package:spaces/spaces.dart';
 // import 'package:url_launcher/url_launcher_string.dart';
@@ -473,11 +474,11 @@ class _SubtitleOptionsDialogPage
     double? newFontSize = double.tryParse(fontSizeText);
 
     String fontColorText = _fontColorController.text;
-    int? newFontColor = int.tryParse(fontColorText.replaceFirst('#', '0xFF'));
+    int? newFontColor = int.tryParse(fontColorText.replaceFirst('#', '0x'));
 
     String outlineColorText = _outlineColorController.text;
     int? newOutlineColor =
-        int.tryParse(outlineColorText.replaceFirst('#', '0xFF'));
+        int.tryParse(outlineColorText.replaceFirst('#', '0x'));
 
     String newFontName = _fontNameController.text.trim();
     String newRegexFilter = _regexFilterController.text.trim();
@@ -579,10 +580,16 @@ class _SubtitleOptionsDialogPage
       allowedExtensions: ['ttf', 'otf'],
     );
     if (result != null) {
+      File file = File(result.files.single.path ?? '');
+      Directory appDirectory = await getApplicationDocumentsDirectory();
+      String savedFilePath =
+          '${appDirectory.path}/${result.files.single.name.split('.').first}';
+      File newFile = File(savedFilePath);
+      await newFile.writeAsBytes(await file.readAsBytes());
       _fontNameController.text = result.files.single.name.split('.').first;
       var custom = FontLoader(_fontNameController.text);
-      File file = File(result.files.single.path ?? '');
-      Uint8List bytes = await file.readAsBytes();
+
+      Uint8List bytes = await newFile.readAsBytes();
       custom.addFont(Future.value(ByteData.view(bytes.buffer)));
       await custom.load();
       return true;

@@ -436,9 +436,15 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
   String get replay => 'Replay';
   String get audio_subtitles => 'Audio/Subtitles';
   String get player_option_shadowing => 'Shadowing Mode';
+  String get player_option_volume_brightness => 'Change Volume & Brightness';
+  String get player_option_volume_down => 'Volume Down';
+  String get player_option_volume_up => 'Volume Up';
+  String get player_option_brightness_down => 'Brightness Down';
+  String get player_option_brightness_up => 'Brightness Up';
   String get player_option_change_mode => 'Change Playback Mode';
   String get player_option_listening_comprehension =>
       'Listening Comprehension Mode';
+  String get player_option_pin_bottom_bar => 'Toggle to Pin Player Bottom Bar';
   String get player_option_drag_to_select =>
       'Use Drag to Select Subtitle Selection';
   String get player_option_tap_to_select =>
@@ -1125,10 +1131,22 @@ extension on _StringsEn {
         return 'Audio/Subtitles';
       case 'player_option_shadowing':
         return 'Shadowing Mode';
+      case 'player_option_volume_brightness':
+        return 'Change Volume & Brightness';
+      case 'player_option_volume_down':
+        return 'Volume Down';
+      case 'player_option_volume_up':
+        return 'Volume Up';
+      case 'player_option_brightness_down':
+        return 'Brightness Down';
+      case 'player_option_brightness_up':
+        return 'Brightness Up';
       case 'player_option_change_mode':
         return 'Change Playback Mode';
       case 'player_option_listening_comprehension':
         return 'Listening Comprehension Mode';
+      case 'player_option_pin_bottom_bar':
+        return 'Toggle to Pin Player Bottom Bar';
       case 'player_option_drag_to_select':
         return 'Use Drag to Select Subtitle Selection';
       case 'player_option_tap_to_select':

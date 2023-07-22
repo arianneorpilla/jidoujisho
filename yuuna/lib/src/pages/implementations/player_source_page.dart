@@ -14,6 +14,7 @@ import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 // import 'package:google_fonts/google_fonts.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:receive_intent/receive_intent.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:spaces/spaces.dart';
@@ -81,8 +82,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   late final ValueNotifier<BlurOptions> _blurOptionsNotifier;
   late final ValueNotifier<SubtitleOptions> _subtitleOptionsNotifier;
-  late final ValueNotifier<PlayerBottomBarOptions>
-      _playerBottomBarOptionsNotifier;
+  late final ValueNotifier<PlayerBasicOptions> _playerBottomBarOptionsNotifier;
 
   StreamSubscription<void>? _playPauseSubscription;
   StreamSubscription<Duration>? _seekSubscription;
@@ -246,7 +246,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     if (_playerInitialised) {
       return;
     }
-
     await Future.delayed(const Duration(seconds: 1), () {});
 
     appModel.currentMediaPauseStream.listen((event) {
@@ -396,10 +395,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     appModel.currentPlayerController = _playerController;
     _currentSubtitle = appModel.currentSubtitle;
     _subtitleOptionsNotifier = appModel.currentSubtitleOptions!;
-    _playerBottomBarOptionsNotifier = appModel.currentPlayerBottomBarOptions!;
+    _playerBottomBarOptionsNotifier = appModel.currentPlayerBasicOptions!;
     _isMenuShownPermanent.value =
         _playerBottomBarOptionsNotifier.value.keepShown;
-    _isMenuHidden.value = !_playerBottomBarOptionsNotifier.value.keepShown;
+    _isMenuHidden.value = !_isMenuShownPermanent.value;
     _currentSubtitle.value = null;
     appModel.blockCreatorInitialMedia = true;
 
@@ -531,6 +530,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     setState(() {
       _playerInitialised = true;
     });
+    loadSavedFont();
 
     _playerController.addListener(listener);
 
@@ -1001,7 +1001,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     _transcriptOpenNotifier.value = true;
 
     _menuHideTimer?.cancel();
-    _isMenuHidden.value = true;
+    _isMenuHidden.value = !_isMenuShownPermanent.value;
 
     try {
       await appModel.temporarilyDisableStatusBarHiding(action: () async {
@@ -1130,7 +1130,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               if (!_isMenuHidden.value) {
                 _menuHideTimer = Timer(const Duration(seconds: 3), () {
                   if (_playingNotifier.value) {
-                    _isMenuHidden.value = true;
+                    // _isMenuHidden.value = true;
+                    _isMenuHidden.value = !_isMenuShownPermanent.value;
                   }
                 });
               }
@@ -1157,7 +1158,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               if (!_isMenuHidden.value) {
                 _menuHideTimer = Timer(const Duration(seconds: 3), () {
                   if (_playingNotifier.value) {
-                    _isMenuHidden.value = true;
+                    // _isMenuHidden.value = true;
+                    _isMenuHidden.value = !_isMenuShownPermanent.value;
                   }
                 });
               }
@@ -1186,33 +1188,16 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   Widget buildMenuArea() {
     return Align(
       alignment: Alignment.topCenter,
-      child: MultiValueListenableBuilder(
-        valueListenables: [
-          _isMenuHidden,
-          _isMenuShownPermanent,
-        ],
-        builder: (context, values, _) {
+      child: ValueListenableBuilder<bool>(
+        valueListenable: _isMenuHidden,
+        builder: (context, value, _) {
           return AnimatedOpacity(
-            opacity: values[1]
-                ? 1.0
-                : values[0]
-                    ? 0.0
-                    : 1.0,
+            opacity: _isMenuHidden.value ? 0.0 : 1.0,
             duration: const Duration(milliseconds: 200),
             child: buildMenuContent(),
           );
         },
       ),
-      // ValueListenableBuilder<bool>(
-      //   valueListenable: _isMenuHidden,
-      //   builder: (context, value, _) {
-      //     return AnimatedOpacity(
-      //       opacity: value ? 0.0 : 1.0,
-      //       duration: const Duration(milliseconds: 200),
-      //       child: buildMenuContent(),
-      //     );
-      //   },
-      // ),
     );
   }
 
@@ -1230,13 +1215,12 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             child: Row(
               children: [
                 const Space.small(),
-                buildPinButton(),
                 buildPrevSubtitleSeekButton(),
-                buildNextSubtitleSeekButton(),
                 buildPlayButton(),
+                buildNextSubtitleSeekButton(),
                 buildDurationAndPosition(),
                 buildSlider(),
-                buildSourceButton(),
+                // buildSourceButton(),
                 buildAudioSubtitlesButton(),
                 buildOptionsButton(),
                 const Space.small(),
@@ -1248,39 +1232,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     );
   }
 
-  /// This shows the pin button in the bottomleft of the screen.
-  Widget buildPinButton() {
-    return Material(
-      color: Colors.transparent,
-      child: JidoujishoIconButton(
-        size: 24,
-        icon: _isMenuShownPermanent.value
-            ? Icons.push_pin
-            : Icons.push_pin_outlined,
-        tooltip: t.pin_player_bottom_bar,
-        onTap: () async {
-          Wakelock.enable();
-          _menuHideTimer?.cancel();
-          _isMenuShownPermanent.value = !_isMenuShownPermanent.value;
-
-          if (!_isMenuShownPermanent.value) {
-            _menuHideTimer = Timer(const Duration(seconds: 3), () {
-              if (_playingNotifier.value) {
-                _isMenuHidden.value = true;
-              }
-            });
-          }
-
-          PlayerBottomBarOptions playerBottomBarOptions =
-              appModel.playerBottomBarOptions;
-          playerBottomBarOptions.keepShown = _isMenuShownPermanent.value;
-          appModel.setPlayerBottomBarOptions(playerBottomBarOptions);
-        },
-      ),
-    );
-  }
-
-  /// This shows the Fast Forward button in the bottomleft of the screen.
+  /// This shows the Fast Rewind button in the bottomleft of the screen.
   Widget buildPrevSubtitleSeekButton() {
     return MultiValueListenableBuilder(
       valueListenables: [
@@ -1309,9 +1261,14 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             onTap: () async {
               if (validPosition) {
                 _playerController.setTime((sliderValue.toInt() - 5) * 1000);
-                _listeningSubtitle.value = getNearestSubtitle();
+                // _listeningSubtitle.value = getNearestSubtitle();
                 _autoPauseNotifier.value = null;
                 _autoPauseMemory = null;
+                // for (Subtitle subtitle in _subtitleItem.controller.subtitles) {
+                //   if (subtitle > _currentSubtitle.value!) {
+                //     _currentSubtitle.value = subtitle;
+                //   }
+                // }
               }
             },
           ),
@@ -1569,7 +1526,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               if (!_isMenuHidden.value) {
                 _menuHideTimer = Timer(const Duration(seconds: 3), () {
                   if (_playingNotifier.value) {
-                    _isMenuHidden.value = true;
+                    // _isMenuHidden.value = true;
+                    _isMenuHidden.value = !_isMenuShownPermanent.value;
                   }
                 });
               }
@@ -2177,6 +2135,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   /// This lists the options available when the bottom-right option is tapped.
   List<JidoujishoBottomSheetOption> getOptions() {
+    MediaSource source = widget.item!.getMediaSource(appModel: appModel);
+
     List<JidoujishoBottomSheetOption> options = [
       JidoujishoBottomSheetOption(
         label: t.player_option_change_mode,
@@ -2202,6 +2162,127 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         action: () async {
           appModel.togglePlayerListeningComprehensionMode();
           refreshSubtitleWidget();
+        },
+      ),
+      if (source is PlayerLocalMediaSource)
+        JidoujishoBottomSheetOption(
+          label: t.pick_video_file,
+          icon: Icons.perm_media,
+          action: () async {
+            PlayerLocalMediaSource localMediaSource = source;
+            bool shouldResume = !_dialogSmartPaused;
+            dialogSmartPause();
+
+            await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+            await Future.delayed(const Duration(milliseconds: 5), () {});
+            if (context.mounted) {
+              await localMediaSource.pickVideoFile(
+                appModel: appModel,
+                context: context,
+                ref: ref,
+                pushReplacement: true,
+                onFileSelected: (path) async {
+                  await _playerController.stop();
+                },
+              );
+            }
+
+            if (mounted) {
+              await Future.delayed(const Duration(milliseconds: 5), () {});
+              await SystemChrome.setEnabledSystemUIMode(
+                  SystemUiMode.immersiveSticky);
+
+              if (shouldResume) {
+                await dialogSmartResume();
+              }
+            }
+          },
+        ),
+      if (source is PlayerYoutubeSource)
+        JidoujishoBottomSheetOption(
+          label: t.comments,
+          icon: Icons.comment_outlined,
+          action: () async {
+            clearDictionaryResult();
+
+            await dialogSmartPause();
+            await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+            await Future.delayed(const Duration(milliseconds: 5), () {});
+
+            try {
+              widget.source.setShouldGenerateAudio(value: false);
+
+              await appModel.temporarilyDisableStatusBarHiding(
+                  action: () async {
+                await Navigator.of(context).push(
+                  PageRouteBuilder(
+                    opaque: false,
+                    pageBuilder: (context, _, __) =>
+                        PlayerCommentsPage(videoUrl: widget.item!.uniqueKey),
+                    settings: RouteSettings(
+                      name: (PlayerCommentsPage).toString(),
+                    ),
+                  ),
+                );
+              });
+            } finally {
+              widget.source.setShouldGenerateAudio(value: true);
+              widget.source.setCurrentSentence(
+                selection: JidoujishoTextSelection(
+                  text: _currentSubtitle.value?.data ?? '',
+                ),
+              );
+            }
+
+            await Future.delayed(const Duration(milliseconds: 5), () {});
+            await SystemChrome.setEnabledSystemUIMode(
+                SystemUiMode.immersiveSticky);
+            await dialogSmartResume();
+          },
+        ),
+      if (source is PlayerYoutubeSource)
+        JidoujishoBottomSheetOption(
+          label: t.change_quality,
+          icon: Icons.video_settings,
+          action: () async {
+            PlayerYoutubeSource youtubeSource = source;
+            StreamManifest manifest =
+                youtubeSource.getStreamManifest(widget.item!);
+
+            await showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              useRootNavigator: true,
+              builder: (context) => JidoujishoBottomSheet(
+                options: getQualityOptions(
+                  manifest: manifest,
+                ),
+              ),
+            );
+          },
+        ),
+      JidoujishoBottomSheetOption(
+        label: t.player_option_pin_bottom_bar,
+        icon: _isMenuShownPermanent.value
+            ? Icons.push_pin
+            : Icons.push_pin_outlined,
+        active: _isMenuShownPermanent.value,
+        action: () async {
+          _isMenuShownPermanent.value = !_isMenuShownPermanent.value;
+          _menuHideTimer?.cancel();
+          if (_isMenuShownPermanent.value) {
+            _isMenuHidden.value = false;
+          } else {
+            _menuHideTimer = Timer(const Duration(seconds: 3), () {
+              if (_playingNotifier.value) {
+                _isMenuHidden.value = true;
+              }
+            });
+          }
+
+          PlayerBasicOptions playerBasicOptions = appModel.playerBasicOptions;
+          playerBasicOptions.keepShown = _isMenuShownPermanent.value;
+          appModel.setPlayerBasicOptions(playerBasicOptions);
         },
       ),
       JidoujishoBottomSheetOption(
@@ -2286,6 +2367,27 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           bool shouldResume = !_dialogSmartPaused;
           await dialogSmartPause();
           await openCardCreator(subtitles);
+          if (shouldResume) {
+            await dialogSmartResume();
+          }
+        },
+      ),
+      JidoujishoBottomSheetOption(
+        label: t.player_option_volume_brightness,
+        icon: Icons.volume_up,
+        action: () async {
+          bool shouldResume = !_dialogSmartPaused;
+          await dialogSmartPause();
+          if (context.mounted) {
+            await showDialog(
+              context: context,
+              builder: (context) => PlayerVolumeBrightnessControlPage(
+                notifier: _playerBottomBarOptionsNotifier,
+                playerController: _playerController,
+              ),
+            );
+          }
+
           if (shouldResume) {
             await dialogSmartResume();
           }
@@ -2493,18 +2595,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 : FontWeight.bold,
         foreground: subtitlePaintStyle,
       );
-  // TextStyle get subtitleOutlineStyle =>
-  //     _subtitleOptionsNotifier.value.fontName.trim().isEmpty
-  //         ? TextStyle(
-  //             fontSize: _subtitleOptionsNotifier.value.fontSize,
-  //             foreground: subtitlePaintStyle,
-  //           )
-  //         : GoogleFonts.getFont(
-
-  //             _subtitleOptionsNotifier.value.fontName,
-  //             fontSize: _subtitleOptionsNotifier.value.fontSize,
-  //             foreground: subtitlePaintStyle,
-  //           );
 
   /// Subtitle text style.
   TextStyle get subtitleTextStyle => TextStyle(
@@ -2517,17 +2607,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 : FontWeight.bold,
         color: Color(_subtitleOptionsNotifier.value.fontColor),
       );
-  // TextStyle get subtitleTextStyle =>
-  //     _subtitleOptionsNotifier.value.fontName.trim().isEmpty
-  //         ? TextStyle(
-  //             fontSize: _subtitleOptionsNotifier.value.fontSize,
-  //             color: Color(_subtitleOptionsNotifier.value.fontColor),
-  //           )
-  //         : GoogleFonts.getFont(
-  //             _subtitleOptionsNotifier.value.fontName,
-  //             fontSize: _subtitleOptionsNotifier.value.fontSize,
-  //             color: Color(_subtitleOptionsNotifier.value.fontColor),
-  //           );
 
   /// This is used to set the search term upon pressing on a character
   /// or selecting text.
@@ -2660,7 +2739,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   /// This hides or shows the menu.
   void toggleMenuVisibility() async {
-    if (!_isMenuShownPermanent.value) {
+    if (_isMenuShownPermanent.value) {
+      _isMenuHidden.value = false;
+    } else {
       Wakelock.enable();
       _menuHideTimer?.cancel();
       _isMenuHidden.value = !_isMenuHidden.value;
@@ -2697,7 +2778,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           _playPauseAnimationController.forward();
 
           _menuHideTimer?.cancel();
-          _isMenuHidden.value = true;
+          // _isMenuHidden.value = true;
+          _isMenuHidden.value = !_isMenuShownPermanent.value;
         });
       } else {
         _playPauseAnimationController.forward();
@@ -2708,7 +2790,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           _session.setActive(true);
           await Future.delayed(const Duration(seconds: 2), () async {
             _menuHideTimer?.cancel();
-            _isMenuHidden.value = true;
+            // _isMenuHidden.value = true;
+            _isMenuHidden.value = !_isMenuShownPermanent.value;
 
             await _playerController.seekTo(Duration.zero);
             _autoPauseNotifier.value = null;
@@ -2717,7 +2800,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           });
         } else {
           _menuHideTimer?.cancel();
-          _isMenuHidden.value = true;
+          // _isMenuHidden.value = true;
+          _isMenuHidden.value = !_isMenuShownPermanent.value;
 
           await _playerController.play();
           _session.setActive(true);
@@ -2796,11 +2880,13 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     if (_dialogSmartPaused) {
       if (hideInstantly) {
         _menuHideTimer?.cancel();
-        _isMenuHidden.value = true;
+        // _isMenuHidden.value = true;
+        _isMenuHidden.value = !_isMenuShownPermanent.value;
       } else {
         _menuHideTimer = Timer(const Duration(seconds: 3), () {
           if (_playingNotifier.value) {
-            _isMenuHidden.value = true;
+            // _isMenuHidden.value = true;
+            _isMenuHidden.value = !_isMenuShownPermanent.value;
           }
         });
       }
@@ -2855,5 +2941,25 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     _currentSubtitle.value = null;
     widget.source.clearCurrentSentence();
     refreshSubtitleWidget();
+  }
+
+  Future<void> loadSavedFont() async {
+    try {
+      Directory appDirectory = await getApplicationDocumentsDirectory();
+      String savedFontFilePath =
+          '${appDirectory.path}/${_subtitleOptionsNotifier.value.fontName}';
+      File file = File(savedFontFilePath);
+      // ignore: avoid_slow_async_io
+      bool isExisting = file.existsSync();
+      if (isExisting) {
+        FontLoader custom = FontLoader(_subtitleOptionsNotifier.value.fontName);
+
+        Uint8List bytes = await file.readAsBytes();
+        custom.addFont(Future.value(ByteData.view(bytes.buffer)));
+        await custom.load();
+      }
+    } catch (e) {
+      rethrow;
+    }
   }
 }
