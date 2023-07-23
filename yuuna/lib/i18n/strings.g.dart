@@ -431,6 +431,8 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
       'Navigate Up One Directory Level';
   String get play => 'Play';
   String get pause => 'Pause';
+  String get prev_subtitle => 'Prev Subtitle';
+  String get next_subtitle => 'Next Subtitle';
   String get record => 'Record';
   String get stop => 'Stop';
   String get replay => 'Replay';
@@ -445,6 +447,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
   String get player_option_listening_comprehension =>
       'Listening Comprehension Mode';
   String get player_option_pin_bottom_bar => 'Toggle to Pin Player Bottom Bar';
+  String get player_option_fullscreen_mode => 'Toggle to Set FullScreen Mode';
   String get player_option_drag_to_select =>
       'Use Drag to Select Subtitle Selection';
   String get player_option_tap_to_select =>
@@ -470,6 +473,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
       'Align Subtitle with Transcript';
   String get player_option_subtitle_appearance =>
       'Subtitle Timing and Appearance';
+  String get player_option_head_to_target_subtitle => 'Head to Target Subtitle';
   String get player_option_load_subtitles => 'Load External Subtitles';
   String get player_option_subtitle_delay => 'Subtitle delay';
   String get player_option_audio_allowance => 'Audio allowance';
@@ -623,8 +627,6 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
   String get api_key => 'API Key';
   String subtitle_delay_set({required Object ms}) =>
       'Subtitle delay set to ${ms} ms.';
-  String get cancel => 'Cancel';
-  String get choose_color => 'Choose';
   String get server_port_in_use => 'Local server port already in use';
   String get google_fonts => 'Google Fonts';
   String get pick_color => 'Pick Color';
@@ -1121,6 +1123,10 @@ extension on _StringsEn {
         return 'Play';
       case 'pause':
         return 'Pause';
+      case 'prev_subtitle':
+        return 'Prev Subtitle';
+      case 'next_subtitle':
+        return 'Next Subtitle';
       case 'record':
         return 'Record';
       case 'stop':
@@ -1147,6 +1153,8 @@ extension on _StringsEn {
         return 'Listening Comprehension Mode';
       case 'player_option_pin_bottom_bar':
         return 'Toggle to Pin Player Bottom Bar';
+      case 'player_option_fullscreen_mode':
+        return 'Toggle to Set FullScreen Mode';
       case 'player_option_drag_to_select':
         return 'Use Drag to Select Subtitle Selection';
       case 'player_option_tap_to_select':
@@ -1187,6 +1195,8 @@ extension on _StringsEn {
         return 'Align Subtitle with Transcript';
       case 'player_option_subtitle_appearance':
         return 'Subtitle Timing and Appearance';
+      case 'player_option_head_to_target_subtitle':
+        return 'Head to Target Subtitle';
       case 'player_option_load_subtitles':
         return 'Load External Subtitles';
       case 'player_option_subtitle_delay':
@@ -1450,10 +1460,6 @@ extension on _StringsEn {
         return 'API Key';
       case 'subtitle_delay_set':
         return ({required Object ms}) => 'Subtitle delay set to ${ms} ms.';
-      case 'cancel':
-        return 'Cancel';
-      case 'choose_color':
-        return 'Choose';
       case 'server_port_in_use':
         return 'Local server port already in use';
       case 'google_fonts':

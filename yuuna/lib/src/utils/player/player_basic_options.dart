@@ -5,6 +5,7 @@ class PlayerBasicOptions {
     required this.keepShown,
     required this.volume,
     required this.brightness,
+    required this.keepSysNavbarShown,
   });
 
   /// Keep player bottom bar shown.
@@ -15,4 +16,7 @@ class PlayerBasicOptions {
 
   /// Player brightness
   double brightness;
+
+  /// Keep system navigation bar shown.
+  bool keepSysNavbarShown;
 }

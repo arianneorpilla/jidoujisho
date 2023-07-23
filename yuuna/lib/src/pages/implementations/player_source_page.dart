@@ -82,7 +82,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   late final ValueNotifier<BlurOptions> _blurOptionsNotifier;
   late final ValueNotifier<SubtitleOptions> _subtitleOptionsNotifier;
-  late final ValueNotifier<PlayerBasicOptions> _playerBottomBarOptionsNotifier;
+  late final ValueNotifier<PlayerBasicOptions> _playerBasicOptionsNotifier;
 
   StreamSubscription<void>? _playPauseSubscription;
   StreamSubscription<Duration>? _seekSubscription;
@@ -395,9 +395,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     appModel.currentPlayerController = _playerController;
     _currentSubtitle = appModel.currentSubtitle;
     _subtitleOptionsNotifier = appModel.currentSubtitleOptions!;
-    _playerBottomBarOptionsNotifier = appModel.currentPlayerBasicOptions!;
-    _isMenuShownPermanent.value =
-        _playerBottomBarOptionsNotifier.value.keepShown;
+    _playerBasicOptionsNotifier = appModel.currentPlayerBasicOptions!;
+    _isMenuShownPermanent.value = _playerBasicOptionsNotifier.value.keepShown;
     _isMenuHidden.value = !_isMenuShownPermanent.value;
     _currentSubtitle.value = null;
     appModel.blockCreatorInitialMedia = true;
@@ -531,6 +530,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       _playerInitialised = true;
     });
     loadSavedFont();
+    setScreenMode();
 
     _playerController.addListener(listener);
 
@@ -941,7 +941,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     return GestureDetector(
       child: buildScrubDetectors(),
       onTap: () {
-        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+        if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+        }
+
         toggleMenuVisibility();
       },
       onHorizontalDragStart: (details) {
@@ -994,8 +997,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     if (!appModel.isTranscriptPlayerMode) {
       await dialogSmartPause();
     }
-
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
     await Future.delayed(const Duration(milliseconds: 5), () {});
 
     _transcriptOpenNotifier.value = true;
@@ -1025,8 +1029,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               onTap: (index) async {
                 final navigator = Navigator.of(context);
                 await Future.delayed(const Duration(milliseconds: 5), () {});
-                await SystemChrome.setEnabledSystemUIMode(
-                    SystemUiMode.immersiveSticky);
+                if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+                  await SystemChrome.setEnabledSystemUIMode(
+                      SystemUiMode.immersiveSticky);
+                }
                 navigator.pop();
                 await _playerController.seekTo(
                     _subtitleItem.controller.subtitles[index].start -
@@ -1074,7 +1080,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       }
 
       await Future.delayed(const Duration(milliseconds: 5), () {});
-      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     }
   }
 
@@ -1220,7 +1225,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
                 buildNextSubtitleSeekButton(),
                 buildDurationAndPosition(),
                 buildSlider(),
-                // buildSourceButton(),
                 buildAudioSubtitlesButton(),
                 buildOptionsButton(),
                 const Space.small(),
@@ -1234,86 +1238,59 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   /// This shows the Fast Rewind button in the bottomleft of the screen.
   Widget buildPrevSubtitleSeekButton() {
-    return MultiValueListenableBuilder(
-      valueListenables: [
-        _durationNotifier,
-        _positionNotifier,
-        _endedNotifier,
-      ],
-      builder: (context, values, _) {
-        Duration duration = values.elementAt(0);
-        Duration position = values.elementAt(1);
-        bool isEnded = values.elementAt(2);
-
-        bool validPosition = duration.compareTo(position) >= 0;
-        double sliderValue = validPosition ? position.inSeconds.toDouble() : 0;
-
-        if (isEnded) {
-          sliderValue = 1;
-        }
-
-        return Material(
-          color: Colors.transparent,
-          child: JidoujishoIconButton(
-            size: 24,
-            icon: Icons.fast_rewind,
-            tooltip: t.seek_control,
-            onTap: () async {
-              if (validPosition) {
-                _playerController.setTime((sliderValue.toInt() - 5) * 1000);
-                // _listeningSubtitle.value = getNearestSubtitle();
-                _autoPauseNotifier.value = null;
-                _autoPauseMemory = null;
-                // for (Subtitle subtitle in _subtitleItem.controller.subtitles) {
-                //   if (subtitle > _currentSubtitle.value!) {
-                //     _currentSubtitle.value = subtitle;
-                //   }
-                // }
-              }
-            },
-          ),
-        );
-      },
+    return Material(
+      color: Colors.transparent,
+      child: JidoujishoIconButton(
+        size: 24,
+        icon: Icons.fast_rewind,
+        tooltip: t.seek_control,
+        onTap: () async {
+          int prevIdx = _subtitleItem.controller.subtitles.lastIndexWhere(
+              (element) =>
+                  _positionNotifier.value > (element.start + subtitleDelay));
+          if (prevIdx != -1) {
+            _playerController.seekTo(
+                _subtitleItem.controller.subtitles[prevIdx].start -
+                    subtitleDelay);
+            _autoPauseNotifier.value = null;
+            _autoPauseMemory = null;
+            _bufferingNotifier.value = true;
+            _listeningSubtitle.value = getNearestSubtitle();
+            refreshSubtitleWidget();
+            // _currentSubtitle.value =
+            //     _subtitleItem.controller.subtitles[prevIdx];
+          }
+        },
+      ),
     );
   }
 
   /// This shows the Fast Forward button in the bottomleft of the screen.
   Widget buildNextSubtitleSeekButton() {
-    return MultiValueListenableBuilder(
-      valueListenables: [
-        _durationNotifier,
-        _positionNotifier,
-        _endedNotifier,
-      ],
-      builder: (context, values, _) {
-        Duration duration = values.elementAt(0);
-        Duration position = values.elementAt(1);
-        bool isEnded = values.elementAt(2);
-
-        bool validPosition = duration.compareTo(position) >= 0;
-        double sliderValue = validPosition ? position.inSeconds.toDouble() : 0;
-
-        if (isEnded) {
-          sliderValue = 1;
-        }
-
-        return Material(
-          color: Colors.transparent,
-          child: JidoujishoIconButton(
-            size: 24,
-            icon: Icons.fast_forward,
-            tooltip: t.seek_control,
-            onTap: () async {
-              if (validPosition) {
-                _playerController.setTime((sliderValue.toInt() + 5) * 1000);
-                _listeningSubtitle.value = getNearestSubtitle();
-                _autoPauseNotifier.value = null;
-                _autoPauseMemory = null;
-              }
-            },
-          ),
-        );
-      },
+    return Material(
+      color: Colors.transparent,
+      child: JidoujishoIconButton(
+        size: 24,
+        icon: Icons.fast_forward,
+        tooltip: t.seek_control,
+        onTap: () async {
+          int nextIdx = _subtitleItem.controller.subtitles.indexWhere(
+              (element) =>
+                  _positionNotifier.value < (element.start - subtitleDelay));
+          if (nextIdx != -1) {
+            _playerController.seekTo(
+                _subtitleItem.controller.subtitles[nextIdx].start -
+                    subtitleDelay);
+            _autoPauseNotifier.value = null;
+            _autoPauseMemory = null;
+            _bufferingNotifier.value = true;
+            _listeningSubtitle.value = getNearestSubtitle();
+            refreshSubtitleWidget();
+            // _currentSubtitle.value =
+            //     _subtitleItem.controller.subtitles[nextIdx];
+          }
+        },
+      ),
     );
   }
 
@@ -1580,8 +1557,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         onTap: () async {
           bool shouldResume = !_dialogSmartPaused;
           dialogSmartPause();
-
-          await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+            await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          }
           await Future.delayed(const Duration(milliseconds: 5), () {});
           if (context.mounted) {
             await source.pickVideoFile(
@@ -1597,8 +1575,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
           if (mounted) {
             await Future.delayed(const Duration(milliseconds: 5), () {});
-            await SystemChrome.setEnabledSystemUIMode(
-                SystemUiMode.immersiveSticky);
+            if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+              await SystemChrome.setEnabledSystemUIMode(
+                  SystemUiMode.immersiveSticky);
+            }
 
             if (shouldResume) {
               await dialogSmartResume();
@@ -1648,7 +1628,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           clearDictionaryResult();
 
           await dialogSmartPause();
-          await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+            await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          }
           await Future.delayed(const Duration(milliseconds: 5), () {});
 
           try {
@@ -1676,8 +1658,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           }
 
           await Future.delayed(const Duration(milliseconds: 5), () {});
-          await SystemChrome.setEnabledSystemUIMode(
-              SystemUiMode.immersiveSticky);
+          if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+            await SystemChrome.setEnabledSystemUIMode(
+                SystemUiMode.immersiveSticky);
+          }
           await dialogSmartResume();
         },
       ),
@@ -1796,8 +1780,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           bool shouldResume = !_dialogSmartPaused;
 
           await dialogSmartPause();
-
-          await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+            await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          }
           await Future.delayed(const Duration(milliseconds: 5), () {});
 
           _transcriptOpenNotifier.value = true;
@@ -1853,14 +1838,40 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           _transcriptOpenNotifier.value = false;
 
           await Future.delayed(const Duration(milliseconds: 5), () {});
-          await SystemChrome.setEnabledSystemUIMode(
-              SystemUiMode.immersiveSticky);
+          if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+            await SystemChrome.setEnabledSystemUIMode(
+                SystemUiMode.immersiveSticky);
+          }
 
           if (shouldResume) {
             await dialogSmartResume();
           }
         },
       ),
+      // JidoujishoBottomSheetOption(
+      //   label: t.player_option_head_to_target_subtitle,
+      //   icon: Icons.swipe_left,
+      //   action: () async {
+      //     bool shouldResume = !_dialogSmartPaused;
+      //     await dialogSmartPause();
+      //     if (context.mounted) {
+      //       await showDialog(
+      //         context: context,
+      //         builder: (context) => SubtitleSeekDialogPage(
+      //           playerController: _playerController,
+      //           subtitleOptionsNotifier: _subtitleOptionsNotifier,
+      //           subtitleItem: _subtitleItem,
+      //           positionNotifier: _positionNotifier,
+      //           currentSubtitle: _currentSubtitle,
+      //         ),
+      //       );
+      //     }
+
+      //     if (shouldResume) {
+      //       await dialogSmartResume();
+      //     }
+      //   },
+      // ),
       JidoujishoBottomSheetOption(
         label: t.player_option_subtitle_appearance,
         icon: Icons.text_fields,
@@ -2172,8 +2183,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             PlayerLocalMediaSource localMediaSource = source;
             bool shouldResume = !_dialogSmartPaused;
             dialogSmartPause();
-
-            await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+            if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+              await SystemChrome.setEnabledSystemUIMode(
+                  SystemUiMode.edgeToEdge);
+            }
             await Future.delayed(const Duration(milliseconds: 5), () {});
             if (context.mounted) {
               await localMediaSource.pickVideoFile(
@@ -2189,8 +2202,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
             if (mounted) {
               await Future.delayed(const Duration(milliseconds: 5), () {});
-              await SystemChrome.setEnabledSystemUIMode(
-                  SystemUiMode.immersiveSticky);
+              if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+                await SystemChrome.setEnabledSystemUIMode(
+                    SystemUiMode.immersiveSticky);
+              }
 
               if (shouldResume) {
                 await dialogSmartResume();
@@ -2206,7 +2221,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             clearDictionaryResult();
 
             await dialogSmartPause();
-            await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+            if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+              await SystemChrome.setEnabledSystemUIMode(
+                  SystemUiMode.edgeToEdge);
+            }
             await Future.delayed(const Duration(milliseconds: 5), () {});
 
             try {
@@ -2235,8 +2253,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             }
 
             await Future.delayed(const Duration(milliseconds: 5), () {});
-            await SystemChrome.setEnabledSystemUIMode(
-                SystemUiMode.immersiveSticky);
+            if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+              await SystemChrome.setEnabledSystemUIMode(
+                  SystemUiMode.immersiveSticky);
+            }
             await dialogSmartResume();
           },
         ),
@@ -2283,6 +2303,19 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           PlayerBasicOptions playerBasicOptions = appModel.playerBasicOptions;
           playerBasicOptions.keepShown = _isMenuShownPermanent.value;
           appModel.setPlayerBasicOptions(playerBasicOptions);
+        },
+      ),
+      JidoujishoBottomSheetOption(
+        label: t.player_option_fullscreen_mode,
+        icon: _playerBasicOptionsNotifier.value.keepSysNavbarShown
+            ? Icons.bolt
+            : Icons.bolt_outlined,
+        active: _playerBasicOptionsNotifier.value.keepSysNavbarShown,
+        action: () async {
+          _playerBasicOptionsNotifier.value.keepSysNavbarShown =
+              !_playerBasicOptionsNotifier.value.keepSysNavbarShown;
+          setScreenMode();
+          appModel.setPlayerBasicOptions(_playerBasicOptionsNotifier.value);
         },
       ),
       JidoujishoBottomSheetOption(
@@ -2382,7 +2415,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             await showDialog(
               context: context,
               builder: (context) => PlayerVolumeBrightnessControlPage(
-                notifier: _playerBottomBarOptionsNotifier,
+                notifier: _playerBasicOptionsNotifier,
                 playerController: _playerController,
               ),
             );
@@ -2676,8 +2709,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     }
 
     String sentence = buffer.toString().trim();
-
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
     await Future.delayed(const Duration(milliseconds: 5), () {});
 
     await appModel.openCreator(
@@ -2696,7 +2730,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     );
 
     await Future.delayed(const Duration(milliseconds: 5), () {});
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    }
   }
 
   /// This makes the subtitle widget force to reflect a change, for example
@@ -2949,7 +2985,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       String savedFontFilePath =
           '${appDirectory.path}/${_subtitleOptionsNotifier.value.fontName}';
       File file = File(savedFontFilePath);
-      // ignore: avoid_slow_async_io
       bool isExisting = file.existsSync();
       if (isExisting) {
         FontLoader custom = FontLoader(_subtitleOptionsNotifier.value.fontName);
@@ -2960,6 +2995,15 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       }
     } catch (e) {
       rethrow;
+    }
+  }
+
+  Future<void> setScreenMode() async {
+    if (_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+          overlays: SystemUiOverlay.values);
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     }
   }
 }

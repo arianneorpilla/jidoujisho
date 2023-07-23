@@ -3288,11 +3288,16 @@ class AppModel with ChangeNotifier {
   /// Get the bottom bar options used in the player.
   PlayerBasicOptions get playerBasicOptions {
     bool keepShown = _preferences.get('keep_shown', defaultValue: false);
+    bool keepSysNavbarShown =
+        _preferences.get('keep_system_navbar_shown', defaultValue: false);
     int volume = _preferences.get('volume', defaultValue: 60);
     double brightness = _preferences.get('brightness', defaultValue: 1.0);
 
     return PlayerBasicOptions(
-        keepShown: keepShown, volume: volume, brightness: brightness);
+        keepShown: keepShown,
+        volume: volume,
+        brightness: brightness,
+        keepSysNavbarShown: keepSysNavbarShown);
   }
 
   /// Set the subtitle options used in the player.
@@ -3300,6 +3305,7 @@ class AppModel with ChangeNotifier {
     _preferences.put('keep_shown', options.keepShown);
     _preferences.put('volume', options.volume);
     _preferences.put('brightness', options.brightness);
+    _preferences.put('keep_system_navbar_shown', options.keepSysNavbarShown);
   }
 
   /// Gets the last used audio index of a given media item.

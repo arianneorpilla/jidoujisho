@@ -36,6 +36,7 @@ export 'src/pages/implementations/reader_ttu_source_history_page.dart';
 export 'src/pages/implementations/reader_lyrics_page.dart';
 export 'src/pages/implementations/subtitle_options_dialog_page.dart';
 export 'src/pages/implementations/player_volume_brightness_control_page.dart';
+export 'src/pages/implementations/subtitle_seek_dialog_page.dart';
 export 'src/pages/implementations/placeholder_source_page.dart';
 export 'src/pages/implementations/player_transcript_page.dart';
 export 'src/pages/implementations/youtube_video_results_page.dart';

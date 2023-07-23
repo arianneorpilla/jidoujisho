@@ -607,7 +607,9 @@ class _SubtitleOptionsDialogPage
           return AlertDialog(
             content: SingleChildScrollView(
               child: ColorPicker(
-                pickerColor: const Color(0xff443a49),
+                pickerColor: target == 'Font'
+                    ? Color(_options.fontColor)
+                    : Color(_options.subtitleOutlineColor),
                 paletteType: PaletteType.hueWheel,
                 onColorChanged: (value) {
                   newColor = value;
@@ -616,7 +618,7 @@ class _SubtitleOptionsDialogPage
             ),
             actions: [
               TextButton(
-                child: Text(t.choose_color),
+                child: Text(t.dialog_save),
                 onPressed: () {
                   if (target == 'Font') {
                     _fontColorController.text =
@@ -629,7 +631,7 @@ class _SubtitleOptionsDialogPage
                 },
               ),
               TextButton(
-                child: Text(t.cancel),
+                child: Text(t.dialog_cancel),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
