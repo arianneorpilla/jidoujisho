@@ -818,12 +818,29 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: onWillPop,
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        backgroundColor: Colors.black,
-        body: buildBody(),
+    return RawKeyboardListener(
+      focusNode: FocusNode(),
+      autofocus: true,
+      onKey: (event) async {
+        if (event.runtimeType == RawKeyDownEvent) {
+          if (event.isKeyPressed(LogicalKeyboardKey.keyP)) {
+            await playPause();
+          }
+          if (event.isKeyPressed(LogicalKeyboardKey.keyB)) {
+            seekPrevSubtitle();
+          }
+          if (event.isKeyPressed(LogicalKeyboardKey.keyF)) {
+            seekNextSubtitle();
+          }
+        }
+      },
+      child: WillPopScope(
+        onWillPop: onWillPop,
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          backgroundColor: Colors.black,
+          body: buildBody(),
+        ),
       ),
     );
   }
@@ -1245,21 +1262,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         icon: Icons.fast_rewind,
         tooltip: t.seek_control,
         onTap: () async {
-          int prevIdx = _subtitleItem.controller.subtitles.lastIndexWhere(
-              (element) =>
-                  _positionNotifier.value > (element.start + subtitleDelay));
-          if (prevIdx != -1) {
-            _playerController.seekTo(
-                _subtitleItem.controller.subtitles[prevIdx].start -
-                    subtitleDelay);
-            _autoPauseNotifier.value = null;
-            _autoPauseMemory = null;
-            _bufferingNotifier.value = true;
-            _listeningSubtitle.value = getNearestSubtitle();
-            refreshSubtitleWidget();
-            // _currentSubtitle.value =
-            //     _subtitleItem.controller.subtitles[prevIdx];
-          }
+          seekPrevSubtitle();
         },
       ),
     );
@@ -1274,21 +1277,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         icon: Icons.fast_forward,
         tooltip: t.seek_control,
         onTap: () async {
-          int nextIdx = _subtitleItem.controller.subtitles.indexWhere(
-              (element) =>
-                  _positionNotifier.value < (element.start - subtitleDelay));
-          if (nextIdx != -1) {
-            _playerController.seekTo(
-                _subtitleItem.controller.subtitles[nextIdx].start -
-                    subtitleDelay);
-            _autoPauseNotifier.value = null;
-            _autoPauseMemory = null;
-            _bufferingNotifier.value = true;
-            _listeningSubtitle.value = getNearestSubtitle();
-            refreshSubtitleWidget();
-            // _currentSubtitle.value =
-            //     _subtitleItem.controller.subtitles[nextIdx];
-          }
+          seekNextSubtitle();
         },
       ),
     );
@@ -1848,30 +1837,32 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           }
         },
       ),
-      // JidoujishoBottomSheetOption(
-      //   label: t.player_option_head_to_target_subtitle,
-      //   icon: Icons.swipe_left,
-      //   action: () async {
-      //     bool shouldResume = !_dialogSmartPaused;
-      //     await dialogSmartPause();
-      //     if (context.mounted) {
-      //       await showDialog(
-      //         context: context,
-      //         builder: (context) => SubtitleSeekDialogPage(
-      //           playerController: _playerController,
-      //           subtitleOptionsNotifier: _subtitleOptionsNotifier,
-      //           subtitleItem: _subtitleItem,
-      //           positionNotifier: _positionNotifier,
-      //           currentSubtitle: _currentSubtitle,
-      //         ),
-      //       );
-      //     }
+      JidoujishoBottomSheetOption(
+        label: t.seek_control,
+        icon: Icons.swipe_left,
+        action: () async {
+          bool shouldResume = !_dialogSmartPaused;
+          await dialogSmartPause();
+          if (context.mounted) {
+            await showDialog(
+              context: context,
+              builder: (context) => SubtitleSeekDialogPage(
+                playerController: _playerController,
+                subtitleOptionsNotifier: _subtitleOptionsNotifier,
+                positionNotifier: _positionNotifier,
+                currentSubtitle: _currentSubtitle,
+                durationNotifier: _durationNotifier,
+                endedNotifier: _endedNotifier,
+                autoPauseNotifier: _autoPauseNotifier,
+              ),
+            );
+          }
 
-      //     if (shouldResume) {
-      //       await dialogSmartResume();
-      //     }
-      //   },
-      // ),
+          if (shouldResume) {
+            await dialogSmartResume();
+          }
+        },
+      ),
       JidoujishoBottomSheetOption(
         label: t.player_option_subtitle_appearance,
         icon: Icons.text_fields,
@@ -3004,6 +2995,59 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           overlays: SystemUiOverlay.values);
     } else {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+    }
+  }
+
+  void seekPrevSubtitle() {
+    Duration duration = _durationNotifier.value;
+    Duration position = _positionNotifier.value;
+    bool isEnded = _endedNotifier.value;
+
+    bool validPosition = duration.compareTo(position) >= 0;
+    double sliderValue = validPosition ? position.inSeconds.toDouble() : 0;
+
+    if (isEnded) {
+      sliderValue = 1;
+    }
+    int prevIdx = _subtitleItem.controller.subtitles.lastIndexWhere(
+        (element) => _positionNotifier.value > (element.start + subtitleDelay));
+    if (validPosition && prevIdx != -1) {
+      // _playerController.setTime(
+      //     _subtitleItem.controller.subtitles[prevIdx].start.inSeconds -
+      //         subtitleDelay.inSeconds);
+      int deltaTime = _positionNotifier.value.inSeconds -
+          _subtitleItem.controller.subtitles[prevIdx].start.inSeconds +
+          subtitleDelay.inSeconds;
+      _playerController.setTime((sliderValue.toInt() - deltaTime) * 1000);
+      _autoPauseNotifier.value = null;
+      _autoPauseMemory = null;
+    }
+  }
+
+  void seekNextSubtitle() {
+    Duration duration = _durationNotifier.value;
+    Duration position = _positionNotifier.value;
+    bool isEnded = _endedNotifier.value;
+
+    bool validPosition = duration.compareTo(position) >= 0;
+    double sliderValue = validPosition ? position.inSeconds.toDouble() : 0;
+
+    if (isEnded) {
+      sliderValue = 1;
+    }
+    int nextIdx = _subtitleItem.controller.subtitles.indexWhere(
+        (element) => _positionNotifier.value < (element.start - subtitleDelay));
+    if (validPosition && nextIdx != -1) {
+      int deltaTime =
+          _subtitleItem.controller.subtitles[nextIdx].start.inSeconds -
+              _positionNotifier.value.inSeconds -
+              subtitleDelay.inSeconds;
+      _playerController.setTime((sliderValue.toInt() + deltaTime) * 1000);
+      // _playerController.setTime(
+      //     _subtitleItem.controller.subtitles[nextIdx].start.inSeconds -
+      //         subtitleDelay.inSeconds);
+      _autoPauseNotifier.value = null;
+      _autoPauseMemory = null;
     }
   }
 }

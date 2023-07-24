@@ -11,9 +11,11 @@ class SubtitleSeekDialogPage extends BasePage {
   const SubtitleSeekDialogPage({
     required this.playerController,
     required this.subtitleOptionsNotifier,
-    required this.subtitleItem,
     required this.positionNotifier,
+    required this.durationNotifier,
+    required this.endedNotifier,
     required this.currentSubtitle,
+    required this.autoPauseNotifier,
     super.key,
   });
 
@@ -23,14 +25,20 @@ class SubtitleSeekDialogPage extends BasePage {
   /// Notifier for the subtitle options.
   final ValueNotifier<SubtitleOptions> subtitleOptionsNotifier;
 
-  /// Subtitle Item for current Video
-  final SubtitleItem subtitleItem;
-
   /// Notifier for the current position of Video progress.
   final ValueNotifier<Duration> positionNotifier;
 
+  /// Notifier for the duration of Video progress.
+  final ValueNotifier<Duration> durationNotifier;
+
+  /// Notifier to check the video is finished.
+  final ValueNotifier<bool> endedNotifier;
+
   /// Notifier for current subtitle of Video.
   final ValueNotifier<Subtitle?> currentSubtitle;
+
+  /// Notifier for auto pause of Video.
+  final ValueNotifier<Subtitle?> autoPauseNotifier;
 
   @override
   BasePageState createState() => _PlayerVolumeBrightnessControlPage();
@@ -40,18 +48,22 @@ class _PlayerVolumeBrightnessControlPage
     extends BasePageState<SubtitleSeekDialogPage> {
   late VlcPlayerController _playerController;
   late SubtitleOptions _subtitleOptions;
-  late SubtitleItem _subtitleItem;
   late ValueNotifier<Duration> _positionNotifier;
+  late ValueNotifier<Duration> _durationNotifier;
+  late ValueNotifier<bool> _endedNotifier;
   late ValueNotifier<Subtitle?> _currentSubtitle;
+  late ValueNotifier<Subtitle?> _autoPauseNotifier;
 
   @override
   void initState() {
     super.initState();
     _playerController = widget.playerController;
     _subtitleOptions = widget.subtitleOptionsNotifier.value;
-    _subtitleItem = widget.subtitleItem;
     _positionNotifier = widget.positionNotifier;
+    _durationNotifier = widget.durationNotifier;
+    _endedNotifier = widget.endedNotifier;
     _currentSubtitle = widget.currentSubtitle;
+    _autoPauseNotifier = widget.autoPauseNotifier;
   }
 
   @override
@@ -114,21 +126,22 @@ class _PlayerVolumeBrightnessControlPage
                       child: JidoujishoIconButton(
                         size: 24,
                         icon: Icons.swipe_left,
-                        tooltip: t.prev_subtitle,
+                        tooltip: t.seek_control,
                         onTap: () async {
-                          int prevIdx = _subtitleItem.controller.subtitles
-                              .lastIndexWhere((element) =>
-                                  _positionNotifier.value >
-                                  (element.start +
-                                      Duration(
-                                          milliseconds:
-                                              _subtitleOptions.subtitleDelay)));
-                          if (prevIdx != -1) {
-                            _playerController.seekTo(_subtitleItem
-                                    .controller.subtitles[prevIdx].start -
-                                Duration(
-                                    milliseconds:
-                                        _subtitleOptions.subtitleDelay));
+                          Duration duration = _durationNotifier.value;
+                          Duration position = _positionNotifier.value;
+                          bool isEnded = _endedNotifier.value;
+                          bool validPosition =
+                              duration.compareTo(position) >= 0;
+                          double sliderValue =
+                              validPosition ? position.inSeconds.toDouble() : 0;
+                          if (isEnded) {
+                            sliderValue = 1;
+                          }
+                          if (validPosition) {
+                            _playerController
+                                .setTime((sliderValue.toInt() - 5) * 1000);
+                            _autoPauseNotifier.value = null;
                           }
                         },
                       ),
@@ -138,21 +151,22 @@ class _PlayerVolumeBrightnessControlPage
                       child: JidoujishoIconButton(
                         size: 24,
                         icon: Icons.swipe_right,
-                        tooltip: t.next_subtitle,
+                        tooltip: t.seek_control,
                         onTap: () async {
-                          int nextIdx = _subtitleItem.controller.subtitles
-                              .indexWhere((element) =>
-                                  _positionNotifier.value <
-                                  (element.start -
-                                      Duration(
-                                          milliseconds:
-                                              _subtitleOptions.subtitleDelay)));
-                          if (nextIdx != -1) {
-                            _playerController.seekTo(_subtitleItem
-                                    .controller.subtitles[nextIdx].start -
-                                Duration(
-                                    milliseconds:
-                                        _subtitleOptions.subtitleDelay));
+                          Duration duration = _durationNotifier.value;
+                          Duration position = _positionNotifier.value;
+                          bool isEnded = _endedNotifier.value;
+                          bool validPosition =
+                              duration.compareTo(position) >= 0;
+                          double sliderValue =
+                              validPosition ? position.inSeconds.toDouble() : 0;
+                          if (isEnded) {
+                            sliderValue = 1;
+                          }
+                          if (validPosition) {
+                            _playerController
+                                .setTime((sliderValue.toInt() + 5) * 1000);
+                            _autoPauseNotifier.value = null;
                           }
                         },
                       ),
