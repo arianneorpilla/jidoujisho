@@ -81,7 +81,13 @@ Future<Map<DictionaryHeading, List<DictionaryEntry>>>
         String reading = item[1] as String;
 
         double popularity = (item[4] as num).toDouble();
-        List<String> entryTagNames = (item[2] as String).split(' ');
+
+        // Third entry in array can be null
+        List<String> entryTagNames = [];
+        if (item[2] != null) {
+          entryTagNames = (item[2] as String).split(' ');
+        }
+
         List<String> headingTagNames = (item[7] as String).split(' ');
 
         List<String> definitions = [];
