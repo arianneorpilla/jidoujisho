@@ -4,7 +4,7 @@
 <h3 align="center">jidoujisho</h3>
 <p align="center">A full-featured immersion language learning suite for mobile.</p>
 <p align="center">
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.8.7">
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.8.8">
     <img src="https://img.shields.io/github/v/release/lrorpilla/jidoujisho" alt="latest release" />
   </a>
   <a href="https://github.com/lrorpilla/jidoujisho/commits/main">
@@ -34,7 +34,7 @@
 ---
 
 <p align="center" style="margin:0"><b>✨ Latest Release:
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.8.7">2.8.7</a>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.8.8">2.8.8</a>
 </b></p>
 
 <b>
