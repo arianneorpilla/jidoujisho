@@ -4,9 +4,14 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_archive/flutter_archive.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:html/dom.dart' as dom;
 import 'package:path/path.dart' as path;
+import 'package:recase/recase.dart';
 import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
+import 'package:html/parser.dart';
 
 /// A dictionary format for archives following the latest Yomichan bank schema.
 /// Example dictionaries for this format may be downloaded from the Yomichan
@@ -37,6 +42,100 @@ class YomichanFormat extends DictionaryFormat {
   static YomichanFormat get instance => _instance;
 
   static final YomichanFormat _instance = YomichanFormat._privateConstructor();
+
+  /// Used to allow a format to render its dictionary entries with a custom
+  /// widget.
+  @override
+  Widget customDefinitionWidget({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String definition,
+  }) {
+    Map<String, dynamic> definitionMap = jsonDecode(definition);
+    final html = YomichanFormat.getStructuredContentHtml(definitionMap);
+    print(html);
+
+    return DictionaryStructuredContentPage(html: html);
+  }
+
+  /// If true, uses the [customDefinitionWidget] instead.
+  @override
+  bool shouldUseCustomDefinitionWidget(String definition) {
+    try {
+      dynamic definitionMap = jsonDecode(definition);
+      return definitionMap is Map &&
+          definitionMap['type'] == 'structured-content';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  String getCustomDefinitionText(String meaning) {
+    Map<String, dynamic> definitionMap = jsonDecode(meaning);
+    final html = YomichanFormat.getStructuredContentHtml(definitionMap);
+
+    return parse(html, generateSpans: true)
+        .documentElement!
+        .querySelectorAll('*')
+        .map((e) {
+      if (e.children.isNotEmpty) {
+        return '';
+      }
+      if (e.localName == 'li') {
+        return '  - ${e.text}\n';
+      }
+
+      return e.text;
+    }).join();
+  }
+
+  /// Recursively get HTML for a structured content definition.
+  static String getStructuredContentHtml(dynamic content) {
+    if (content is Map) {
+      return getNodeHtml(
+        tag: content['tag'],
+        content: getStructuredContentHtml(content['content']),
+        style: getStyle(
+          content['style'] ?? {},
+        ),
+      );
+    } else if (content is List) {
+      return content.map(getStructuredContentHtml).join();
+    }
+
+    return content;
+  }
+
+  /// Convert style to appropriate format.
+  static Map<String, String> getStyle(Map<String, dynamic> styleMap) {
+    return Map<String, String>.fromEntries(
+      styleMap.entries.map(
+        (e) => MapEntry(
+          ReCase(e.key).paramCase,
+          e.value.toString(),
+        ),
+      ),
+    );
+  }
+
+  /// Get the HTML for a certain node.
+  static String getNodeHtml({
+    required String content,
+    String? tag,
+    Map<String, String> style = const {},
+  }) {
+    if (tag == null) {
+      return content;
+    }
+
+    dom.Element element = dom.Element.tag(tag);
+    element.attributes.addAll(style);
+
+    element.innerHtml = content;
+
+    return element.outerHtml;
+  }
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
@@ -100,8 +199,7 @@ Future<Map<DictionaryHeading, List<DictionaryEntry>>>
               if (data['type'] == 'image') {
                 return '';
               } else if (data['type'] == 'structured-content') {
-                structuredContentCount++;
-                return '';
+                return jsonEncode(e);
               } else {
                 return e.toString().trim();
               }
@@ -111,8 +209,11 @@ Future<Map<DictionaryHeading, List<DictionaryEntry>>>
           }).toList();
         } else if (item[5] is Map) {
           Map<String, dynamic> data = Map<String, dynamic>.from(item[5]);
-          if (data['type'] != 'image' && data['type'] != 'structured-content') {
+          if (data['type'] != 'image') {
             definitions.add(item[5].toString().trim());
+          }
+          if (data['type'] == 'structured-content') {
+            definitions.add(jsonEncode(item[5]));
           }
         } else {
           definitions.add(item[5].toString().trim());

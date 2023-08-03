@@ -26,6 +26,7 @@ class MeaningField extends Field {
 
   /// Get a single combined text for all meanings in a list of entries.
   static String flattenMeanings({
+    required AppModel appModel,
     required List<DictionaryEntry> entries,
     required bool prependDictionaryNames,
   }) {
@@ -48,8 +49,14 @@ class MeaningField extends Field {
       }
 
       for (DictionaryEntry entry in singleDictionaryEntries) {
+        DictionaryFormat dictionaryFormat =
+            appModel.getDictionaryFormat(entry.dictionary.value!);
+
         if (singleDictionaryEntries.length == 1) {
           entry.definitions.forEachIndexed((index, meaning) {
+            if (dictionaryFormat.shouldUseCustomDefinitionWidget(meaning)) {
+              meaning = dictionaryFormat.getCustomDefinitionText(meaning);
+            }
             meaning = meaning.trim();
             if (meaningsCount != 1) {
               meaningBuffer.write('• $meaning');
@@ -63,6 +70,9 @@ class MeaningField extends Field {
           });
         } else {
           entry.definitions.forEachIndexed((index, meaning) {
+            if (dictionaryFormat.shouldUseCustomDefinitionWidget(meaning)) {
+              meaning = dictionaryFormat.getCustomDefinitionText(meaning);
+            }
             meaning = meaning.trim();
             if (meaningsCount == 1) {
               meaningBuffer.write('$meaning\n');
@@ -117,6 +127,7 @@ class MeaningField extends Field {
         .compareTo(dictionaryNamesByOrder[b.dictionary.value!.name]!));
 
     return flattenMeanings(
+      appModel: appModel,
       entries: entries,
       prependDictionaryNames:
           appModel.lastSelectedMapping.prependDictionaryNames ?? false,

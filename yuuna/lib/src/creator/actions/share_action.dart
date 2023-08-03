@@ -57,6 +57,7 @@ class ShareAction extends QuickAction {
     buffer.write('\n\n');
     buffer.write(
       MeaningField.flattenMeanings(
+        appModel: appModel,
         entries: entries,
         prependDictionaryNames:
             appModel.lastSelectedMapping.prependDictionaryNames ?? false,

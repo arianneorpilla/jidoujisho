@@ -1993,6 +1993,11 @@ class AppModel with ChangeNotifier {
     }
   }
 
+  /// Get the target language from persisted preferences.
+  DictionaryFormat getDictionaryFormat(Dictionary dictionary) {
+    return dictionaryFormats[dictionary.formatKey]!;
+  }
+
   /// Get a list of field names for a given [model] name in Anki. This function
   /// assumes that the model name can be found in [getDecks] and is valid.
   Future<List<String>> getFieldList(String model) async {

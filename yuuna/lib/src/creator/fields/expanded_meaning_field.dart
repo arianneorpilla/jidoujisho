@@ -64,6 +64,7 @@ class ExpandedMeaningField extends Field {
             .compareTo(dictionaryNamesByOrder[b.dictionary.value!.name]!));
 
     return MeaningField.flattenMeanings(
+        appModel: appModel,
         entries: expandedEntries,
         prependDictionaryNames:
             appModel.lastSelectedMapping.prependDictionaryNames ?? false);

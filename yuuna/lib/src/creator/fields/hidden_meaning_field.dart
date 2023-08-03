@@ -51,6 +51,7 @@ class HiddenMeaningField extends Field {
             .compareTo(dictionaryNamesByOrder[b.dictionary.value!.name]!));
 
     return MeaningField.flattenMeanings(
+        appModel: appModel,
         entries: hiddenEntries,
         prependDictionaryNames:
             appModel.lastSelectedMapping.prependDictionaryNames ?? false);

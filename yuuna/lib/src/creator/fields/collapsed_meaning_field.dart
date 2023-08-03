@@ -66,6 +66,7 @@ class CollapsedMeaningField extends Field {
             .compareTo(dictionaryNamesByOrder[b.dictionary.value!.name]!));
 
     return MeaningField.flattenMeanings(
+        appModel: appModel,
         entries: collapsedEntries,
         prependDictionaryNames:
             appModel.lastSelectedMapping.prependDictionaryNames ?? false);
