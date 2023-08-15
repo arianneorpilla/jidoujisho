@@ -6,9 +6,12 @@ class SubtitleOptions {
     required this.subtitleDelay,
     required this.fontSize,
     required this.fontName,
+    required this.fontColor,
+    required this.fontWeight,
     required this.subtitleBackgroundOpacity,
     required this.regexFilter,
     required this.subtitleOutlineWidth,
+    required this.subtitleOutlineColor,
     required this.subtitleBackgroundBlurRadius,
     required this.alwaysAboveBottomBar,
   });
@@ -25,6 +28,12 @@ class SubtitleOptions {
   /// Name of the font preferred for the subtitle.
   String fontName;
 
+  /// Font color preferred for the subtitle.
+  int fontColor;
+
+  /// Font weight preferred for the subtitle.
+  String fontWeight;
+
   /// Subtitle background blur radius.
   double subtitleBackgroundBlurRadius;
 
@@ -33,6 +42,9 @@ class SubtitleOptions {
 
   /// Subtitle outline width.
   double subtitleOutlineWidth;
+
+  /// Subtitle outline color.
+  int subtitleOutlineColor;
 
   /// Regex filter used for the subtitle.
   String regexFilter;

@@ -25,6 +25,7 @@ export 'src/utils/player/subtitle_utils.dart';
 export 'src/utils/player/player_payload.dart';
 export 'src/utils/player/blur_options.dart';
 export 'src/utils/player/subtitle_options.dart';
+export 'src/utils/player/player_basic_options.dart';
 export 'src/utils/player/youtube_quality.dart';
 export 'src/utils/player/playback_mode.dart';
 

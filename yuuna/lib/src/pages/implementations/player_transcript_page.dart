@@ -6,7 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:google_fonts/google_fonts.dart';
+// import 'package:google_fonts/google_fonts.dart';
 import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -689,14 +689,10 @@ class _PlayerTranscriptPageState
     FocusScope.of(context).unfocus();
   }
 
-  TextStyle? get style => widget.subtitleOptions.fontName.trim().isEmpty
-      ? TextStyle(
-          fontSize: widget.subtitleOptions.fontSize,
-        )
-      : GoogleFonts.getFont(
-          widget.subtitleOptions.fontName,
-          fontSize: widget.subtitleOptions.fontSize,
-        );
+  TextStyle? get style => TextStyle(
+        fontFamily: widget.subtitleOptions.fontName,
+        fontSize: widget.subtitleOptions.fontSize,
+      );
 
   @override
   void clearDictionaryResult() {

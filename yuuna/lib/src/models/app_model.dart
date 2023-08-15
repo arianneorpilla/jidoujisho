@@ -624,7 +624,15 @@ class AppModel with ChangeNotifier {
     return _currentSubtitleOptions;
   }
 
+  /// Current player bottom bar options.
+  ValueNotifier<PlayerBasicOptions>? get currentPlayerBasicOptions {
+    _currentPlayerBasicOptions ??=
+        ValueNotifier<PlayerBasicOptions>(playerBasicOptions);
+    return _currentPlayerBasicOptions;
+  }
+
   ValueNotifier<SubtitleOptions>? _currentSubtitleOptions;
+  ValueNotifier<PlayerBasicOptions>? _currentPlayerBasicOptions;
 
   /// Override color for the dictionary widget.
   Color? get overrideDictionaryColor => _overrideDictionaryColor;
@@ -2446,6 +2454,7 @@ class AppModel with ChangeNotifier {
     }
 
     _currentSubtitleOptions = ValueNotifier(subtitleOptions);
+    _currentPlayerBasicOptions = ValueNotifier(playerBasicOptions);
     _overrideDictionaryColor = null;
     _overrideDictionaryTheme = null;
 
@@ -3224,14 +3233,18 @@ class AppModel with ChangeNotifier {
   SubtitleOptions get subtitleOptions {
     int audioAllowance = _preferences.get('audio_allowance', defaultValue: 0);
     int subtitleDelay = _preferences.get('subtitle_delay', defaultValue: 0);
-    double fontSize = _preferences.get('font_size', defaultValue: 20.0);
+    double fontSize = _preferences.get('font_size', defaultValue: 25.0);
     String fontName = _preferences
         .get('font_name/${targetLanguage.languageCode}', defaultValue: '');
+    int fontColor = _preferences.get('font_color', defaultValue: 0xffffffff);
+    String fontWeight = _preferences.get('font_weight', defaultValue: 'Normal');
     String regexFilter = _preferences.get('regex_filter', defaultValue: '');
     double subtitleBackgroundOpacity =
         _preferences.get('subtitle_background_opacity', defaultValue: 0.0);
     double subtitleOutlineWidth =
-        _preferences.get('subtitle_outline_width', defaultValue: 3.0);
+        _preferences.get('subtitle_outline_width', defaultValue: 1.0);
+    int subtitleOutlineColor =
+        _preferences.get('subtitle_outline_color', defaultValue: 0xffffffff);
     double subtitleBackgroundBlurRadius =
         _preferences.get('subtitle_background_blur_radius', defaultValue: 0.0);
     bool alwaysAboveBottomBar =
@@ -3244,8 +3257,11 @@ class AppModel with ChangeNotifier {
       subtitleBackgroundBlurRadius: subtitleBackgroundBlurRadius,
       fontSize: fontSize,
       fontName: fontName,
+      fontColor: fontColor,
+      fontWeight: fontWeight,
       regexFilter: regexFilter,
       subtitleOutlineWidth: subtitleOutlineWidth,
+      subtitleOutlineColor: subtitleOutlineColor,
       alwaysAboveBottomBar: alwaysAboveBottomBar,
     );
   }
@@ -3255,15 +3271,41 @@ class AppModel with ChangeNotifier {
     _preferences.put('audio_allowance', options.audioAllowance);
     _preferences.put('subtitle_delay', options.subtitleDelay);
     _preferences.put('font_size', options.fontSize);
+    _preferences.put('font_color', options.fontColor);
+    _preferences.put('font_weight', options.fontWeight);
     _preferences.put(
         'font_name/${targetLanguage.languageCode}', options.fontName);
     _preferences.put('regex_filter', options.regexFilter);
     _preferences.put(
         'subtitle_background_opacity', options.subtitleBackgroundOpacity);
     _preferences.put('subtitle_outline_width', options.subtitleOutlineWidth);
+    _preferences.put('subtitle_outline_color', options.subtitleOutlineColor);
     _preferences.put('subtitle_background_blur_radius',
         options.subtitleBackgroundBlurRadius);
     _preferences.put('subtitle_above_bar', options.alwaysAboveBottomBar);
+  }
+
+  /// Get the bottom bar options used in the player.
+  PlayerBasicOptions get playerBasicOptions {
+    bool keepShown = _preferences.get('keep_shown', defaultValue: false);
+    bool keepSysNavbarShown =
+        _preferences.get('keep_system_navbar_shown', defaultValue: false);
+    int volume = _preferences.get('volume', defaultValue: 60);
+    double brightness = _preferences.get('brightness', defaultValue: 1.0);
+
+    return PlayerBasicOptions(
+        keepShown: keepShown,
+        volume: volume,
+        brightness: brightness,
+        keepSysNavbarShown: keepSysNavbarShown);
+  }
+
+  /// Set the subtitle options used in the player.
+  void setPlayerBasicOptions(PlayerBasicOptions options) {
+    _preferences.put('keep_shown', options.keepShown);
+    _preferences.put('volume', options.volume);
+    _preferences.put('brightness', options.brightness);
+    _preferences.put('keep_system_navbar_shown', options.keepSysNavbarShown);
   }
 
   /// Gets the last used audio index of a given media item.

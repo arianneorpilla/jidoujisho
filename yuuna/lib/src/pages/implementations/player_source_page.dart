@@ -12,8 +12,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:google_fonts/google_fonts.dart';
+// import 'package:google_fonts/google_fonts.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:receive_intent/receive_intent.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:spaces/spaces.dart';
@@ -65,6 +66,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   final ValueNotifier<bool> _bufferingNotifier = ValueNotifier<bool>(false);
 
   final ValueNotifier<bool> _isMenuHidden = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _isMenuShownPermanent = ValueNotifier<bool>(false);
 
   late final ValueNotifier<Subtitle?> _currentSubtitle;
 
@@ -80,6 +82,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   late final ValueNotifier<BlurOptions> _blurOptionsNotifier;
   late final ValueNotifier<SubtitleOptions> _subtitleOptionsNotifier;
+  late final ValueNotifier<PlayerBasicOptions> _playerBasicOptionsNotifier;
 
   StreamSubscription<void>? _playPauseSubscription;
   StreamSubscription<Duration>? _seekSubscription;
@@ -243,7 +246,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     if (_playerInitialised) {
       return;
     }
-
     await Future.delayed(const Duration(seconds: 1), () {});
 
     appModel.currentMediaPauseStream.listen((event) {
@@ -393,7 +395,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     appModel.currentPlayerController = _playerController;
     _currentSubtitle = appModel.currentSubtitle;
     _subtitleOptionsNotifier = appModel.currentSubtitleOptions!;
-
+    _playerBasicOptionsNotifier = appModel.currentPlayerBasicOptions!;
+    _isMenuShownPermanent.value = _playerBasicOptionsNotifier.value.keepShown;
+    _isMenuHidden.value = !_isMenuShownPermanent.value;
     _currentSubtitle.value = null;
     appModel.blockCreatorInitialMedia = true;
 
@@ -525,6 +529,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     setState(() {
       _playerInitialised = true;
     });
+    loadSavedFont();
+    setScreenMode();
 
     _playerController.addListener(listener);
 
@@ -812,12 +818,29 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: onWillPop,
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        backgroundColor: Colors.black,
-        body: buildBody(),
+    return RawKeyboardListener(
+      focusNode: FocusNode(),
+      autofocus: true,
+      onKey: (event) async {
+        if (event.runtimeType == RawKeyDownEvent) {
+          if (event.isKeyPressed(LogicalKeyboardKey.keyP)) {
+            await playPause();
+          }
+          if (event.isKeyPressed(LogicalKeyboardKey.keyB)) {
+            seekPrevSubtitle();
+          }
+          if (event.isKeyPressed(LogicalKeyboardKey.keyF)) {
+            seekNextSubtitle();
+          }
+        }
+      },
+      child: WillPopScope(
+        onWillPop: onWillPop,
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          backgroundColor: Colors.black,
+          body: buildBody(),
+        ),
       ),
     );
   }
@@ -935,7 +958,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     return GestureDetector(
       child: buildScrubDetectors(),
       onTap: () {
-        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+        if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+        }
+
         toggleMenuVisibility();
       },
       onHorizontalDragStart: (details) {
@@ -988,14 +1014,15 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     if (!appModel.isTranscriptPlayerMode) {
       await dialogSmartPause();
     }
-
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
     await Future.delayed(const Duration(milliseconds: 5), () {});
 
     _transcriptOpenNotifier.value = true;
 
     _menuHideTimer?.cancel();
-    _isMenuHidden.value = true;
+    _isMenuHidden.value = !_isMenuShownPermanent.value;
 
     try {
       await appModel.temporarilyDisableStatusBarHiding(action: () async {
@@ -1019,8 +1046,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               onTap: (index) async {
                 final navigator = Navigator.of(context);
                 await Future.delayed(const Duration(milliseconds: 5), () {});
-                await SystemChrome.setEnabledSystemUIMode(
-                    SystemUiMode.immersiveSticky);
+                if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+                  await SystemChrome.setEnabledSystemUIMode(
+                      SystemUiMode.immersiveSticky);
+                }
                 navigator.pop();
                 await _playerController.seekTo(
                     _subtitleItem.controller.subtitles[index].start -
@@ -1068,7 +1097,6 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
       }
 
       await Future.delayed(const Duration(milliseconds: 5), () {});
-      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     }
   }
 
@@ -1124,7 +1152,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               if (!_isMenuHidden.value) {
                 _menuHideTimer = Timer(const Duration(seconds: 3), () {
                   if (_playingNotifier.value) {
-                    _isMenuHidden.value = true;
+                    // _isMenuHidden.value = true;
+                    _isMenuHidden.value = !_isMenuShownPermanent.value;
                   }
                 });
               }
@@ -1151,7 +1180,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               if (!_isMenuHidden.value) {
                 _menuHideTimer = Timer(const Duration(seconds: 3), () {
                   if (_playingNotifier.value) {
-                    _isMenuHidden.value = true;
+                    // _isMenuHidden.value = true;
+                    _isMenuHidden.value = !_isMenuShownPermanent.value;
                   }
                 });
               }
@@ -1184,7 +1214,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         valueListenable: _isMenuHidden,
         builder: (context, value, _) {
           return AnimatedOpacity(
-            opacity: value ? 0.0 : 1.0,
+            opacity: _isMenuHidden.value ? 0.0 : 1.0,
             duration: const Duration(milliseconds: 200),
             child: buildMenuContent(),
           );
@@ -1207,10 +1237,11 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             child: Row(
               children: [
                 const Space.small(),
+                buildPrevSubtitleSeekButton(),
                 buildPlayButton(),
+                buildNextSubtitleSeekButton(),
                 buildDurationAndPosition(),
                 buildSlider(),
-                buildSourceButton(),
                 buildAudioSubtitlesButton(),
                 buildOptionsButton(),
                 const Space.small(),
@@ -1218,6 +1249,36 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// This shows the Fast Rewind button in the bottomleft of the screen.
+  Widget buildPrevSubtitleSeekButton() {
+    return Material(
+      color: Colors.transparent,
+      child: JidoujishoIconButton(
+        size: 24,
+        icon: Icons.fast_rewind,
+        tooltip: t.seek_control,
+        onTap: () async {
+          seekPrevSubtitle();
+        },
+      ),
+    );
+  }
+
+  /// This shows the Fast Forward button in the bottomleft of the screen.
+  Widget buildNextSubtitleSeekButton() {
+    return Material(
+      color: Colors.transparent,
+      child: JidoujishoIconButton(
+        size: 24,
+        icon: Icons.fast_forward,
+        tooltip: t.seek_control,
+        onTap: () async {
+          seekNextSubtitle();
+        },
       ),
     );
   }
@@ -1431,7 +1492,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
               if (!_isMenuHidden.value) {
                 _menuHideTimer = Timer(const Duration(seconds: 3), () {
                   if (_playingNotifier.value) {
-                    _isMenuHidden.value = true;
+                    // _isMenuHidden.value = true;
+                    _isMenuHidden.value = !_isMenuShownPermanent.value;
                   }
                 });
               }
@@ -1484,8 +1546,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         onTap: () async {
           bool shouldResume = !_dialogSmartPaused;
           dialogSmartPause();
-
-          await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+            await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          }
           await Future.delayed(const Duration(milliseconds: 5), () {});
           if (context.mounted) {
             await source.pickVideoFile(
@@ -1501,8 +1564,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
           if (mounted) {
             await Future.delayed(const Duration(milliseconds: 5), () {});
-            await SystemChrome.setEnabledSystemUIMode(
-                SystemUiMode.immersiveSticky);
+            if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+              await SystemChrome.setEnabledSystemUIMode(
+                  SystemUiMode.immersiveSticky);
+            }
 
             if (shouldResume) {
               await dialogSmartResume();
@@ -1552,7 +1617,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           clearDictionaryResult();
 
           await dialogSmartPause();
-          await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+            await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          }
           await Future.delayed(const Duration(milliseconds: 5), () {});
 
           try {
@@ -1580,8 +1647,10 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           }
 
           await Future.delayed(const Duration(milliseconds: 5), () {});
-          await SystemChrome.setEnabledSystemUIMode(
-              SystemUiMode.immersiveSticky);
+          if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+            await SystemChrome.setEnabledSystemUIMode(
+                SystemUiMode.immersiveSticky);
+          }
           await dialogSmartResume();
         },
       ),
@@ -1700,8 +1769,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           bool shouldResume = !_dialogSmartPaused;
 
           await dialogSmartPause();
-
-          await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+            await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          }
           await Future.delayed(const Duration(milliseconds: 5), () {});
 
           _transcriptOpenNotifier.value = true;
@@ -1757,8 +1827,36 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           _transcriptOpenNotifier.value = false;
 
           await Future.delayed(const Duration(milliseconds: 5), () {});
-          await SystemChrome.setEnabledSystemUIMode(
-              SystemUiMode.immersiveSticky);
+          if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+            await SystemChrome.setEnabledSystemUIMode(
+                SystemUiMode.immersiveSticky);
+          }
+
+          if (shouldResume) {
+            await dialogSmartResume();
+          }
+        },
+      ),
+      JidoujishoBottomSheetOption(
+        label: t.seek_control,
+        icon: Icons.swipe_left,
+        action: () async {
+          bool shouldResume = !_dialogSmartPaused;
+          await dialogSmartPause();
+          if (context.mounted) {
+            await showDialog(
+              context: context,
+              builder: (context) => SubtitleSeekDialogPage(
+                playerController: _playerController,
+                subtitleOptionsNotifier: _subtitleOptionsNotifier,
+                positionNotifier: _positionNotifier,
+                currentSubtitle: _currentSubtitle,
+                durationNotifier: _durationNotifier,
+                endedNotifier: _endedNotifier,
+                autoPauseNotifier: _autoPauseNotifier,
+              ),
+            );
+          }
 
           if (shouldResume) {
             await dialogSmartResume();
@@ -2039,6 +2137,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   /// This lists the options available when the bottom-right option is tapped.
   List<JidoujishoBottomSheetOption> getOptions() {
+    MediaSource source = widget.item!.getMediaSource(appModel: appModel);
+
     List<JidoujishoBottomSheetOption> options = [
       JidoujishoBottomSheetOption(
         label: t.player_option_change_mode,
@@ -2064,6 +2164,149 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         action: () async {
           appModel.togglePlayerListeningComprehensionMode();
           refreshSubtitleWidget();
+        },
+      ),
+      if (source is PlayerLocalMediaSource)
+        JidoujishoBottomSheetOption(
+          label: t.pick_video_file,
+          icon: Icons.perm_media,
+          action: () async {
+            PlayerLocalMediaSource localMediaSource = source;
+            bool shouldResume = !_dialogSmartPaused;
+            dialogSmartPause();
+            if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+              await SystemChrome.setEnabledSystemUIMode(
+                  SystemUiMode.edgeToEdge);
+            }
+            await Future.delayed(const Duration(milliseconds: 5), () {});
+            if (context.mounted) {
+              await localMediaSource.pickVideoFile(
+                appModel: appModel,
+                context: context,
+                ref: ref,
+                pushReplacement: true,
+                onFileSelected: (path) async {
+                  await _playerController.stop();
+                },
+              );
+            }
+
+            if (mounted) {
+              await Future.delayed(const Duration(milliseconds: 5), () {});
+              if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+                await SystemChrome.setEnabledSystemUIMode(
+                    SystemUiMode.immersiveSticky);
+              }
+
+              if (shouldResume) {
+                await dialogSmartResume();
+              }
+            }
+          },
+        ),
+      if (source is PlayerYoutubeSource)
+        JidoujishoBottomSheetOption(
+          label: t.comments,
+          icon: Icons.comment_outlined,
+          action: () async {
+            clearDictionaryResult();
+
+            await dialogSmartPause();
+            if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+              await SystemChrome.setEnabledSystemUIMode(
+                  SystemUiMode.edgeToEdge);
+            }
+            await Future.delayed(const Duration(milliseconds: 5), () {});
+
+            try {
+              widget.source.setShouldGenerateAudio(value: false);
+
+              await appModel.temporarilyDisableStatusBarHiding(
+                  action: () async {
+                await Navigator.of(context).push(
+                  PageRouteBuilder(
+                    opaque: false,
+                    pageBuilder: (context, _, __) =>
+                        PlayerCommentsPage(videoUrl: widget.item!.uniqueKey),
+                    settings: RouteSettings(
+                      name: (PlayerCommentsPage).toString(),
+                    ),
+                  ),
+                );
+              });
+            } finally {
+              widget.source.setShouldGenerateAudio(value: true);
+              widget.source.setCurrentSentence(
+                selection: JidoujishoTextSelection(
+                  text: _currentSubtitle.value?.data ?? '',
+                ),
+              );
+            }
+
+            await Future.delayed(const Duration(milliseconds: 5), () {});
+            if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+              await SystemChrome.setEnabledSystemUIMode(
+                  SystemUiMode.immersiveSticky);
+            }
+            await dialogSmartResume();
+          },
+        ),
+      if (source is PlayerYoutubeSource)
+        JidoujishoBottomSheetOption(
+          label: t.change_quality,
+          icon: Icons.video_settings,
+          action: () async {
+            PlayerYoutubeSource youtubeSource = source;
+            StreamManifest manifest =
+                youtubeSource.getStreamManifest(widget.item!);
+
+            await showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              useRootNavigator: true,
+              builder: (context) => JidoujishoBottomSheet(
+                options: getQualityOptions(
+                  manifest: manifest,
+                ),
+              ),
+            );
+          },
+        ),
+      JidoujishoBottomSheetOption(
+        label: t.player_option_pin_bottom_bar,
+        icon: _isMenuShownPermanent.value
+            ? Icons.push_pin
+            : Icons.push_pin_outlined,
+        active: _isMenuShownPermanent.value,
+        action: () async {
+          _isMenuShownPermanent.value = !_isMenuShownPermanent.value;
+          _menuHideTimer?.cancel();
+          if (_isMenuShownPermanent.value) {
+            _isMenuHidden.value = false;
+          } else {
+            _menuHideTimer = Timer(const Duration(seconds: 3), () {
+              if (_playingNotifier.value) {
+                _isMenuHidden.value = true;
+              }
+            });
+          }
+
+          PlayerBasicOptions playerBasicOptions = appModel.playerBasicOptions;
+          playerBasicOptions.keepShown = _isMenuShownPermanent.value;
+          appModel.setPlayerBasicOptions(playerBasicOptions);
+        },
+      ),
+      JidoujishoBottomSheetOption(
+        label: t.player_option_fullscreen_mode,
+        icon: _playerBasicOptionsNotifier.value.keepSysNavbarShown
+            ? Icons.bolt
+            : Icons.bolt_outlined,
+        active: _playerBasicOptionsNotifier.value.keepSysNavbarShown,
+        action: () async {
+          _playerBasicOptionsNotifier.value.keepSysNavbarShown =
+              !_playerBasicOptionsNotifier.value.keepSysNavbarShown;
+          setScreenMode();
+          appModel.setPlayerBasicOptions(_playerBasicOptionsNotifier.value);
         },
       ),
       JidoujishoBottomSheetOption(
@@ -2148,6 +2391,27 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           bool shouldResume = !_dialogSmartPaused;
           await dialogSmartPause();
           await openCardCreator(subtitles);
+          if (shouldResume) {
+            await dialogSmartResume();
+          }
+        },
+      ),
+      JidoujishoBottomSheetOption(
+        label: t.player_option_volume_brightness,
+        icon: Icons.volume_up,
+        action: () async {
+          bool shouldResume = !_dialogSmartPaused;
+          await dialogSmartPause();
+          if (context.mounted) {
+            await showDialog(
+              context: context,
+              builder: (context) => PlayerVolumeBrightnessControlPage(
+                notifier: _playerBasicOptionsNotifier,
+                playerController: _playerController,
+              ),
+            );
+          }
+
           if (shouldResume) {
             await dialogSmartResume();
           }
@@ -2339,35 +2603,34 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
   Paint get subtitlePaintStyle => Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = _subtitleOptionsNotifier.value.subtitleOutlineWidth
-    ..color = Colors.black.withOpacity(
-        _subtitleOptionsNotifier.value.subtitleOutlineWidth == 0 ? 0 : 0.75);
+    ..color = Color(_subtitleOptionsNotifier.value.subtitleOutlineColor)
+        .withOpacity(_subtitleOptionsNotifier.value.subtitleOutlineWidth == 0
+            ? 0
+            : 0.75);
 
   /// Subtitle outline text style.
-  ///
-  TextStyle get subtitleOutlineStyle =>
-      _subtitleOptionsNotifier.value.fontName.trim().isEmpty
-          ? TextStyle(
-              fontSize: _subtitleOptionsNotifier.value.fontSize,
-              foreground: subtitlePaintStyle,
-            )
-          : GoogleFonts.getFont(
-              _subtitleOptionsNotifier.value.fontName,
-              fontSize: _subtitleOptionsNotifier.value.fontSize,
-              foreground: subtitlePaintStyle,
-            );
+  TextStyle get subtitleOutlineStyle => TextStyle(
+        fontFamily: _subtitleOptionsNotifier.value.fontName,
+        fontSize: _subtitleOptionsNotifier.value.fontSize,
+        fontWeight: _subtitleOptionsNotifier.value.fontWeight == 'Thin'
+            ? FontWeight.w300
+            : _subtitleOptionsNotifier.value.fontWeight == 'Normal'
+                ? FontWeight.normal
+                : FontWeight.bold,
+        foreground: subtitlePaintStyle,
+      );
 
   /// Subtitle text style.
-  TextStyle get subtitleTextStyle =>
-      _subtitleOptionsNotifier.value.fontName.trim().isEmpty
-          ? TextStyle(
-              fontSize: _subtitleOptionsNotifier.value.fontSize,
-              color: Colors.white,
-            )
-          : GoogleFonts.getFont(
-              _subtitleOptionsNotifier.value.fontName,
-              fontSize: _subtitleOptionsNotifier.value.fontSize,
-              color: Colors.white,
-            );
+  TextStyle get subtitleTextStyle => TextStyle(
+        fontFamily: _subtitleOptionsNotifier.value.fontName,
+        fontSize: _subtitleOptionsNotifier.value.fontSize,
+        fontWeight: _subtitleOptionsNotifier.value.fontWeight == 'Thin'
+            ? FontWeight.w100
+            : _subtitleOptionsNotifier.value.fontWeight == 'Normal'
+                ? FontWeight.normal
+                : FontWeight.bold,
+        color: Color(_subtitleOptionsNotifier.value.fontColor),
+      );
 
   /// This is used to set the search term upon pressing on a character
   /// or selecting text.
@@ -2437,8 +2700,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     }
 
     String sentence = buffer.toString().trim();
-
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
     await Future.delayed(const Duration(milliseconds: 5), () {});
 
     await appModel.openCreator(
@@ -2457,7 +2721,9 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     );
 
     await Future.delayed(const Duration(milliseconds: 5), () {});
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    if (!_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    }
   }
 
   /// This makes the subtitle widget force to reflect a change, for example
@@ -2500,15 +2766,19 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   /// This hides or shows the menu.
   void toggleMenuVisibility() async {
-    Wakelock.enable();
-    _menuHideTimer?.cancel();
-    _isMenuHidden.value = !_isMenuHidden.value;
-    if (!_isMenuHidden.value) {
-      _menuHideTimer = Timer(const Duration(seconds: 3), () {
-        if (_playingNotifier.value) {
-          _isMenuHidden.value = true;
-        }
-      });
+    if (_isMenuShownPermanent.value) {
+      _isMenuHidden.value = false;
+    } else {
+      Wakelock.enable();
+      _menuHideTimer?.cancel();
+      _isMenuHidden.value = !_isMenuHidden.value;
+      if (!_isMenuHidden.value) {
+        _menuHideTimer = Timer(const Duration(seconds: 3), () {
+          if (_playingNotifier.value) {
+            _isMenuHidden.value = true;
+          }
+        });
+      }
     }
   }
 
@@ -2535,7 +2805,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           _playPauseAnimationController.forward();
 
           _menuHideTimer?.cancel();
-          _isMenuHidden.value = true;
+          // _isMenuHidden.value = true;
+          _isMenuHidden.value = !_isMenuShownPermanent.value;
         });
       } else {
         _playPauseAnimationController.forward();
@@ -2546,7 +2817,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           _session.setActive(true);
           await Future.delayed(const Duration(seconds: 2), () async {
             _menuHideTimer?.cancel();
-            _isMenuHidden.value = true;
+            // _isMenuHidden.value = true;
+            _isMenuHidden.value = !_isMenuShownPermanent.value;
 
             await _playerController.seekTo(Duration.zero);
             _autoPauseNotifier.value = null;
@@ -2555,7 +2827,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           });
         } else {
           _menuHideTimer?.cancel();
-          _isMenuHidden.value = true;
+          // _isMenuHidden.value = true;
+          _isMenuHidden.value = !_isMenuShownPermanent.value;
 
           await _playerController.play();
           _session.setActive(true);
@@ -2634,11 +2907,13 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     if (_dialogSmartPaused) {
       if (hideInstantly) {
         _menuHideTimer?.cancel();
-        _isMenuHidden.value = true;
+        // _isMenuHidden.value = true;
+        _isMenuHidden.value = !_isMenuShownPermanent.value;
       } else {
         _menuHideTimer = Timer(const Duration(seconds: 3), () {
           if (_playingNotifier.value) {
-            _isMenuHidden.value = true;
+            // _isMenuHidden.value = true;
+            _isMenuHidden.value = !_isMenuShownPermanent.value;
           }
         });
       }
@@ -2693,5 +2968,86 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
     _currentSubtitle.value = null;
     widget.source.clearCurrentSentence();
     refreshSubtitleWidget();
+  }
+
+  Future<void> loadSavedFont() async {
+    try {
+      Directory appDirectory = await getApplicationDocumentsDirectory();
+      String savedFontFilePath =
+          '${appDirectory.path}/${_subtitleOptionsNotifier.value.fontName}';
+      File file = File(savedFontFilePath);
+      bool isExisting = file.existsSync();
+      if (isExisting) {
+        FontLoader custom = FontLoader(_subtitleOptionsNotifier.value.fontName);
+
+        Uint8List bytes = await file.readAsBytes();
+        custom.addFont(Future.value(ByteData.view(bytes.buffer)));
+        await custom.load();
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> setScreenMode() async {
+    if (_playerBasicOptionsNotifier.value.keepSysNavbarShown) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+          overlays: SystemUiOverlay.values);
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+    }
+  }
+
+  void seekPrevSubtitle() {
+    Duration duration = _durationNotifier.value;
+    Duration position = _positionNotifier.value;
+    bool isEnded = _endedNotifier.value;
+
+    bool validPosition = duration.compareTo(position) >= 0;
+    double sliderValue = validPosition ? position.inSeconds.toDouble() : 0;
+
+    if (isEnded) {
+      sliderValue = 1;
+    }
+    int prevIdx = _subtitleItem.controller.subtitles.lastIndexWhere(
+        (element) => _positionNotifier.value > (element.start + subtitleDelay));
+    if (validPosition && prevIdx != -1) {
+      // _playerController.setTime(
+      //     _subtitleItem.controller.subtitles[prevIdx].start.inSeconds -
+      //         subtitleDelay.inSeconds);
+      int deltaTime = _positionNotifier.value.inSeconds -
+          _subtitleItem.controller.subtitles[prevIdx].start.inSeconds +
+          subtitleDelay.inSeconds;
+      _playerController.setTime((sliderValue.toInt() - deltaTime) * 1000);
+      _autoPauseNotifier.value = null;
+      _autoPauseMemory = null;
+    }
+  }
+
+  void seekNextSubtitle() {
+    Duration duration = _durationNotifier.value;
+    Duration position = _positionNotifier.value;
+    bool isEnded = _endedNotifier.value;
+
+    bool validPosition = duration.compareTo(position) >= 0;
+    double sliderValue = validPosition ? position.inSeconds.toDouble() : 0;
+
+    if (isEnded) {
+      sliderValue = 1;
+    }
+    int nextIdx = _subtitleItem.controller.subtitles.indexWhere(
+        (element) => _positionNotifier.value < (element.start - subtitleDelay));
+    if (validPosition && nextIdx != -1) {
+      int deltaTime =
+          _subtitleItem.controller.subtitles[nextIdx].start.inSeconds -
+              _positionNotifier.value.inSeconds -
+              subtitleDelay.inSeconds;
+      _playerController.setTime((sliderValue.toInt() + deltaTime) * 1000);
+      // _playerController.setTime(
+      //     _subtitleItem.controller.subtitles[nextIdx].start.inSeconds -
+      //         subtitleDelay.inSeconds);
+      _autoPauseNotifier.value = null;
+      _autoPauseMemory = null;
+    }
   }
 }

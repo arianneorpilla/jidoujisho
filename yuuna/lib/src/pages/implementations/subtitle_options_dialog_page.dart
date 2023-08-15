@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+// import 'package:google_fonts/google_fonts.dart';
 import 'package:spaces/spaces.dart';
-import 'package:url_launcher/url_launcher_string.dart';
-import 'package:yuuna/language.dart';
+// import 'package:url_launcher/url_launcher_string.dart';
+// import 'package:yuuna/language.dart';
 import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'dart:io';
 
 /// The content of the dialog when editing [SubtitleOptions].
 class SubtitleOptionsDialogPage extends BasePage {
@@ -29,18 +34,24 @@ class _SubtitleOptionsDialogPage
   late final TextEditingController _delayController;
   late final TextEditingController _fontSizeController;
   late final TextEditingController _fontNameController;
+  late final TextEditingController _fontColorController;
+  late final TextEditingController _outlineColorController;
   late final TextEditingController _regexFilterController;
   late final TextEditingController _opacityController;
   late final TextEditingController _widthController;
   late final TextEditingController _blurController;
 
   late ValueNotifier<bool> _aboveBottomBarNotifier;
+  List<String> fontWeights = ['Thin', 'Normal', 'Bold'];
+
+  int fontWeightIdx = 1;
 
   @override
   void initState() {
     super.initState();
     _options = widget.notifier.value;
 
+    fontWeightIdx = fontWeights.indexOf(_options.fontWeight);
     _allowanceController =
         TextEditingController(text: _options.audioAllowance.toString());
     _delayController =
@@ -48,6 +59,10 @@ class _SubtitleOptionsDialogPage
     _fontSizeController =
         TextEditingController(text: _options.fontSize.toString());
     _fontNameController = TextEditingController(text: _options.fontName.trim());
+    _fontColorController =
+        TextEditingController(text: '#${_options.fontColor.toRadixString(16)}');
+    _outlineColorController = TextEditingController(
+        text: '#${_options.subtitleOutlineColor.toRadixString(16)}');
     _regexFilterController =
         TextEditingController(text: _options.regexFilter.trim());
     _opacityController = TextEditingController(
@@ -94,6 +109,7 @@ class _SubtitleOptionsDialogPage
             width: MediaQuery.of(context).size.width * (1 / 3),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TextField(
                   controller: _delayController,
@@ -293,11 +309,12 @@ class _SubtitleOptionsDialogPage
                           tooltip: t.google_fonts,
                           onTap: () async {
                             /// Language Customizable
-                            if (appModel.targetLanguage is JapaneseLanguage) {
-                              launchUrlString(
-                                  'https://fonts.google.com/?subset=japanese');
-                            }
-                            launchUrlString('https://fonts.google.com/');
+                            // if (appModel.targetLanguage is JapaneseLanguage) {
+                            //   launchUrlString(
+                            //       'https://fonts.google.com/?subset=japanese');
+                            // }
+                            // launchUrlString('https://fonts.google.com/');
+                            pickFontFile();
                           },
                           icon: Icons.font_download,
                         ),
@@ -306,6 +323,90 @@ class _SubtitleOptionsDialogPage
                           tooltip: t.reset,
                           onTap: () async {
                             _fontNameController.text = '';
+                            FocusScope.of(context).unfocus();
+                          },
+                          icon: Icons.undo,
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    ),
+                  ),
+                ),
+                TextField(
+                  controller: _fontColorController,
+                  decoration: InputDecoration(
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    labelText: t.player_option_font_color,
+                    suffixIcon: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        JidoujishoIconButton(
+                          size: 18,
+                          tooltip: t.pick_color,
+                          onTap: () async {
+                            showColorPicker('Font');
+                          },
+                          icon: Icons.color_lens,
+                        ),
+                        JidoujishoIconButton(
+                          size: 18,
+                          tooltip: t.reset,
+                          onTap: () async {
+                            _fontColorController.text = '';
+                            FocusScope.of(context).unfocus();
+                          },
+                          icon: Icons.undo,
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    ),
+                  ),
+                ),
+                const Space.small(),
+                Padding(
+                  padding: Spacing.of(context).insets.onlyTop.small,
+                  child: Text(
+                    t.player_option_font_weight,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.hintColor,
+                    ),
+                  ),
+                ),
+                JidoujishoDropdown<String>(
+                  options: fontWeights,
+                  initialOption: fontWeights[fontWeightIdx],
+                  generateLabel: (weight) => weight,
+                  onChanged: (weight) {
+                    fontWeightIdx = fontWeights.indexOf(weight ?? 'Normal');
+                    setState(() {});
+                  },
+                ),
+                Container(height: 0.45, color: Colors.black87),
+                const Space.small(),
+                TextField(
+                  controller: _outlineColorController,
+                  decoration: InputDecoration(
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    labelText: t.player_option_outline_color,
+                    suffixIcon: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        JidoujishoIconButton(
+                          size: 18,
+                          tooltip: t.pick_color,
+                          onTap: () async {
+                            showColorPicker('Outline');
+                          },
+                          icon: Icons.color_lens,
+                        ),
+                        JidoujishoIconButton(
+                          size: 18,
+                          tooltip: t.reset,
+                          onTap: () async {
+                            _outlineColorController.text = '';
                             FocusScope.of(context).unfocus();
                           },
                           icon: Icons.undo,
@@ -372,6 +473,13 @@ class _SubtitleOptionsDialogPage
     String fontSizeText = _fontSizeController.text;
     double? newFontSize = double.tryParse(fontSizeText);
 
+    String fontColorText = _fontColorController.text;
+    int? newFontColor = int.tryParse(fontColorText.replaceFirst('#', '0x'));
+
+    String outlineColorText = _outlineColorController.text;
+    int? newOutlineColor =
+        int.tryParse(outlineColorText.replaceFirst('#', '0x'));
+
     String newFontName = _fontNameController.text.trim();
     String newRegexFilter = _regexFilterController.text.trim();
 
@@ -389,6 +497,8 @@ class _SubtitleOptionsDialogPage
     if (newDelay != null &&
         newAllowance != null &&
         newFontSize != null &&
+        newFontColor != null &&
+        newOutlineColor != null &&
         newOpacity != null &&
         newWidth != null &&
         newBlur != null &&
@@ -397,11 +507,11 @@ class _SubtitleOptionsDialogPage
         newWidth >= 0 &&
         newBlur >= 0) {
       RegExp(newRegexFilter);
-      try {
-        GoogleFonts.getFont(newFontName);
-      } catch (e) {
-        newFontName = '';
-      }
+      // try {
+      //   GoogleFonts.getFont(newFontName);
+      // } catch (e) {
+      //   newFontName = '';
+      // }
 
       SubtitleOptions subtitleOptions = appModel.subtitleOptions;
 
@@ -410,8 +520,11 @@ class _SubtitleOptionsDialogPage
       subtitleOptions.regexFilter = newRegexFilter;
       subtitleOptions.fontName = newFontName;
       subtitleOptions.fontSize = newFontSize;
+      subtitleOptions.fontColor = newFontColor;
+      subtitleOptions.fontWeight = fontWeights[fontWeightIdx];
       subtitleOptions.subtitleBackgroundOpacity = newOpacity;
       subtitleOptions.subtitleOutlineWidth = newWidth;
+      subtitleOptions.subtitleOutlineColor = newOutlineColor;
       subtitleOptions.subtitleBackgroundBlurRadius = newBlur;
       subtitleOptions.alwaysAboveBottomBar = newAlwaysAboveBottomBar;
 
@@ -458,5 +571,73 @@ class _SubtitleOptionsDialogPage
 
   void executeSet() async {
     await setValues(saveOptions: false);
+  }
+
+  /// Pick a font file with a built-in file picker.
+  Future<bool> pickFontFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['ttf', 'otf'],
+    );
+    if (result != null) {
+      File file = File(result.files.single.path ?? '');
+      Directory appDirectory = await getApplicationDocumentsDirectory();
+      String savedFilePath =
+          '${appDirectory.path}/${result.files.single.name.split('.').first}';
+      File newFile = File(savedFilePath);
+      await newFile.writeAsBytes(await file.readAsBytes());
+      _fontNameController.text = result.files.single.name.split('.').first;
+      var custom = FontLoader(_fontNameController.text);
+
+      Uint8List bytes = await newFile.readAsBytes();
+      custom.addFont(Future.value(ByteData.view(bytes.buffer)));
+      await custom.load();
+      return true;
+    }
+    return false;
+  }
+
+  void showColorPicker(String target) {
+    Color newColor = target == 'Font'
+        ? Color(_options.fontColor)
+        : Color(_options.subtitleOutlineColor);
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: SingleChildScrollView(
+              child: ColorPicker(
+                pickerColor: target == 'Font'
+                    ? Color(_options.fontColor)
+                    : Color(_options.subtitleOutlineColor),
+                paletteType: PaletteType.hueWheel,
+                onColorChanged: (value) {
+                  newColor = value;
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                child: Text(t.dialog_save),
+                onPressed: () {
+                  if (target == 'Font') {
+                    _fontColorController.text =
+                        '#${newColor.value.toRadixString(16)}';
+                  } else {
+                    _outlineColorController.text =
+                        '#${newColor.value.toRadixString(16)}';
+                  }
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text(t.dialog_cancel),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        });
   }
 }
