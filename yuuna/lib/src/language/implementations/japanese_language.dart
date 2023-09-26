@@ -636,7 +636,7 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
       }
 
       if (a.term != b.term) {
-        int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
+        int popularityCompare = b.popularitySum.compareTo(a.popularitySum);
         if (popularityCompare != 0) {
           return popularityCompare;
         }
@@ -683,7 +683,7 @@ Future<int?> prepareSearchResultsJapaneseLanguage(
           }
         }
       } else {
-        int popularityCompare = (b.popularitySum).compareTo(a.popularitySum);
+        int popularityCompare = b.popularitySum.compareTo(a.popularitySum);
         if (popularityCompare != 0) {
           return popularityCompare;
         }

@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:yuuna/utils.dart';
 
@@ -102,7 +103,7 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
@@ -124,7 +125,7 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
     return JidoujishoSelectionToolbar(
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
-      clipboardStatus: clipboardStatus!,
+      clipboardStatus: clipboardStatus,
       creatorAction: (creatorAction != null)
           ? () {
               creatorAction?.call(
@@ -176,9 +177,8 @@ class JidoujishoTextSelectionControls extends MaterialTextSelectionControls {
 
         delegate.hideToolbar();
       },
-      handleCopy: canCopy(delegate) && allowCopy
-          ? () => handleCopy(delegate, clipboardStatus)
-          : null,
+      handleCopy:
+          canCopy(delegate) && allowCopy ? () => handleCopy(delegate) : null,
       handleCut:
           canCut(delegate) && allowCut ? () => handleCut(delegate) : null,
       handlePaste:
@@ -216,7 +216,7 @@ class JidoujishoSelectionToolbar extends StatefulWidget {
   final Offset anchorBelow;
 
   /// Current details on the clipboard.
-  final ClipboardStatusNotifier clipboardStatus;
+  final ValueListenable<ClipboardStatus>? clipboardStatus;
 
   /// Behaviour for the custom action.
   final Function()? searchAction;
@@ -261,26 +261,22 @@ class _JidoujishoSelectionToolbarState
   @override
   void initState() {
     super.initState();
-    widget.clipboardStatus.addListener(_onChangedClipboardStatus);
-    widget.clipboardStatus.update();
+    widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
   }
 
   @override
   void didUpdateWidget(JidoujishoSelectionToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.clipboardStatus != oldWidget.clipboardStatus) {
-      widget.clipboardStatus.addListener(_onChangedClipboardStatus);
-      oldWidget.clipboardStatus.removeListener(_onChangedClipboardStatus);
+      widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
+      oldWidget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
     }
-    widget.clipboardStatus.update();
   }
 
   @override
   void dispose() {
+    widget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
     super.dispose();
-    if (!widget.clipboardStatus.disposed) {
-      widget.clipboardStatus.removeListener(_onChangedClipboardStatus);
-    }
   }
 
   @override
@@ -316,7 +312,7 @@ class _JidoujishoSelectionToolbarState
           onPressed: widget.handleCopy,
         ),
       if (widget.handlePaste != null &&
-          widget.clipboardStatus.value == ClipboardStatus.pasteable)
+          widget.clipboardStatus?.value == ClipboardStatus.pasteable)
         _TextSelectionToolbarItemData(
           label: localizations.pasteButtonLabel,
           onPressed: widget.handlePaste,

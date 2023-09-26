@@ -177,6 +177,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
         break;
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
         _lifecycleActive = false;
         if (!appModel.playerBackgroundPlay) {
           _session.setActive(false);
@@ -2652,6 +2653,8 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
 
   /// Shows the dialog for importing an external subtitle.
   Future<void> importExternalSubtitle() async {
+    final themeData = Theme.of(context);
+
     Iterable<String>? filePaths = await FilesystemPicker.open(
       title: '',
       allowedExtensions: ['.ass', '.srt'],
@@ -2662,7 +2665,7 @@ class _PlayerSourcePageState extends BaseSourcePageState<PlayerSourcePage>
           .getFilePickerDirectoriesForMediaType(PlayerMediaType.instance),
       fsType: FilesystemType.file,
       folderIconColor: Colors.red,
-      themeData: Theme.of(context),
+      themeData: themeData,
     );
 
     if (filePaths == null || filePaths.isEmpty) {

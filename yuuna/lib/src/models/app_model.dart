@@ -2705,12 +2705,12 @@ class AppModel with ChangeNotifier {
   }) async {
     if (isCollapsed) {
       mapping.creatorCollapsedFieldKeys = [
-        ...(mapping.creatorCollapsedFieldKeys)
+        ...mapping.creatorCollapsedFieldKeys
             .whereNot((key) => key == field.uniqueKey)
       ];
     } else {
       mapping.creatorFieldKeys = [
-        ...(mapping.creatorFieldKeys).whereNot((key) => key == field.uniqueKey)
+        ...mapping.creatorFieldKeys.whereNot((key) => key == field.uniqueKey)
       ];
     }
 
