@@ -1,9 +1,9 @@
 /// Generated file. Do not edit.
 ///
 /// Locales: 1
-/// Strings: 395
+/// Strings: 397
 ///
-/// Built on 2023-07-02 at 01:09 UTC
+/// Built on 2023-09-30 at 09:59 UTC
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
@@ -233,6 +233,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get import_in_progress => 'Import in progress';
 	String get import_start => 'Preparing for import...';
 	String get import_clean => 'Cleaning working space...';
+	String import_extract_count({required Object n}) => 'Extracted ${n} files...';
 	String get import_extract => 'Extracting files...';
 	String import_name({required Object name}) => 'Importing 『${name}』...';
 	String get import_entries => 'Processing entries...';
@@ -407,6 +408,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get stream_url => 'Stream URL';
 	String get default_option => 'Default';
 	String get paste => 'Paste';
+	String get select_all => 'Select all';
 	String get lyrics_title => 'Title';
 	String get lyrics_artist => 'Artist';
 	String get set_media => 'Set Media';
@@ -660,6 +662,7 @@ extension on _StringsEn {
 			case 'import_in_progress': return 'Import in progress';
 			case 'import_start': return 'Preparing for import...';
 			case 'import_clean': return 'Cleaning working space...';
+			case 'import_extract_count': return ({required Object n}) => 'Extracted ${n} files...';
 			case 'import_extract': return 'Extracting files...';
 			case 'import_name': return ({required Object name}) => 'Importing 『${name}』...';
 			case 'import_entries': return 'Processing entries...';
@@ -834,6 +837,7 @@ extension on _StringsEn {
 			case 'stream_url': return 'Stream URL';
 			case 'default_option': return 'Default';
 			case 'paste': return 'Paste';
+			case 'select_all': return 'Select all';
 			case 'lyrics_title': return 'Title';
 			case 'lyrics_artist': return 'Artist';
 			case 'set_media': return 'Set Media';

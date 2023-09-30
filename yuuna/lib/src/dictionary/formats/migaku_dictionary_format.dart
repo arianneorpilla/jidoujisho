@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_archive/flutter_archive.dart';
+import 'package:isar/isar.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:yuuna/dictionary.dart';
@@ -43,7 +44,7 @@ class MigakuFormat extends DictionaryFormat {
 Future<void> prepareDirectoryMigakuFormat(PrepareDirectoryParams params) async {
   await ZipFile.extractToDirectory(
     zipFile: params.file,
-    destinationDir: params.workingDirectory,
+    destinationDir: params.resourceDirectory,
   );
 }
 
@@ -54,12 +55,14 @@ Future<String> prepareNameMigakuFormat(PrepareDirectoryParams params) async {
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<Map<DictionaryHeading, List<DictionaryEntry>>>
-    prepareEntriesMigakuFormat(PrepareDictionaryParams params) async {
-  Map<DictionaryHeading, List<DictionaryEntry>> entriesByHeading = {};
-
-  final List<FileSystemEntity> entities = params.workingDirectory.listSync();
+void prepareEntriesMigakuFormat({
+  required PrepareDictionaryParams params,
+  required Isar isar,
+}) async {
+  final List<FileSystemEntity> entities = params.resourceDirectory.listSync();
   final Iterable<File> files = entities.whereType<File>();
+
+  int count = 0;
 
   for (File file in files) {
     List<dynamic> items = List.from(jsonDecode(file.readAsStringSync()));
@@ -74,44 +77,47 @@ Future<Map<DictionaryHeading, List<DictionaryEntry>>>
           .replaceAll('<br>', '\n')
           .replaceAll(RegExp('<[^<]+?>'), '');
 
-      DictionaryHeading heading = DictionaryHeading(
-        term: term,
-      );
+      int headingId = DictionaryHeading.hash(term: term, reading: '');
+      DictionaryHeading heading = isar.dictionaryHeadings.getSync(headingId) ??
+          DictionaryHeading(term: term);
+
       DictionaryEntry entry = DictionaryEntry(
         definitions: [definition],
-        entryTagNames: [],
-        headingTagNames: [],
         popularity: 0,
       );
 
-      entriesByHeading.putIfAbsent(heading, () => []);
-      entriesByHeading[heading]!.add(entry);
+      entry.heading.value = heading;
+      entry.dictionary.value = params.dictionary;
+      isar.dictionaryEntrys.putSync(entry);
 
-      if (entriesByHeading.length % 1000 == 0) {
-        params.send(t.import_found_entry(count: entriesByHeading.length));
-      }
+      heading.entries.add(entry);
+
+      isar.dictionaryHeadings.putSync(heading);
+
+      count++;
+      params.send(t.import_found_entry(
+        count: count,
+      ));
     }
   }
 
-  params.send(t.import_found_entry(count: entriesByHeading.length));
-
-  return entriesByHeading;
+  params.send(t.import_found_entry(count: count));
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<List<DictionaryTag>> prepareTagsMigakuFormat(
-    PrepareDictionaryParams params) async {
-  return [];
-}
+void prepareTagsMigakuFormat({
+  required PrepareDictionaryParams params,
+  required Isar isar,
+}) async {}
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<Map<DictionaryHeading, List<DictionaryPitch>>>
-    preparePitchesMigakuFormat(PrepareDictionaryParams params) async {
-  return {};
-}
+void preparePitchesMigakuFormat({
+  required PrepareDictionaryParams params,
+  required Isar isar,
+}) async {}
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<Map<DictionaryHeading, List<DictionaryFrequency>>>
-    prepareFrequenciesMigakuFormat(PrepareDictionaryParams params) async {
-  return {};
-}
+void prepareFrequenciesMigakuFormat({
+  required PrepareDictionaryParams params,
+  required Isar isar,
+}) async {}

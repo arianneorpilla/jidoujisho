@@ -5,6 +5,7 @@ import 'package:spaces/spaces.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/pages.dart';
 import 'package:yuuna/utils.dart';
 
 /// Returns the widget for a [DictionaryEntry] making up a collection of
@@ -41,15 +42,10 @@ class DictionaryEntryPage extends ConsumerStatefulWidget {
 }
 
 class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
+  String selectedText = '';
+
   @override
   Widget build(BuildContext context) {
-    AppModel appModel = ref.watch(appProvider);
-
-    final JidoujishoSelectableTextController selectableTextController =
-        JidoujishoSelectableTextController();
-
-    bool isSearching = false;
-
     return Padding(
       padding: EdgeInsets.only(
         top: Spacing.of(context).spaces.extraSmall,
@@ -73,90 +69,58 @@ class _DictionaryEntryPageState extends ConsumerState<DictionaryEntryPage> {
             top: Spacing.of(context).spaces.small,
             left: Spacing.of(context).spaces.normal,
           ),
-          child: ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: widget.entry.definitions.length,
-            itemBuilder: (context, index) {
-              String definition = widget.entry.definitions[index];
-              Dictionary dictionary = widget.entry.dictionary.value!;
-              DictionaryFormat format =
-                  appModel.getDictionaryFormat(dictionary);
-              if (format.shouldUseCustomDefinitionWidget(definition)) {
-                return format.customDefinitionWidget(
-                  context: context,
-                  ref: ref,
-                  definition: definition,
-                );
+          child: SelectionArea(
+            onSelectionChanged: (selection) {
+              if (selection?.plainText != null && selection?.plainText != '_') {
+                selectedText = selection?.plainText ?? '';
               }
-
-              return JidoujishoSelectableText(
-                definition,
-                style: TextStyle(
-                    fontSize: appModel.dictionaryFontSize,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white
-                        : Colors.black),
-                controller: selectableTextController,
-                selectionControls: JidoujishoTextSelectionControls(
-                  searchAction: widget.onSearch,
-                  stashAction: widget.onStash,
-                  shareAction: widget.onShare,
-                  allowCopy: true,
-                  allowSelectAll: true,
-                  allowCut: true,
-                  allowPaste: true,
+            },
+            contextMenuBuilder: (context, state) {
+              return AdaptiveTextSelectionToolbar.buttonItems(
+                anchors: TextSelectionToolbarAnchors(
+                  primaryAnchor: state.contextMenuAnchors.primaryAnchor,
                 ),
-                onSelectionChanged: (selection, cause) async {
-                  if (appModel.targetLanguage.isSpaceDelimited) {
-                    return;
-                  }
-
-                  if (cause == SelectionChangedCause.doubleTap &&
-                      !isSearching) {
-                    isSearching = true;
-                    try {
-                      String searchTerm = widget.entry.compactDefinitions
-                          .substring(selection.baseOffset);
-
-                      int whitespaceOffset =
-                          searchTerm.length - searchTerm.trimLeft().length;
-                      int offsetIndex =
-                          appModel.targetLanguage.getStartingIndex(
-                                text: widget.entry.compactDefinitions,
-                                index: selection.baseOffset,
-                              ) +
-                              whitespaceOffset;
-                      int length =
-                          appModel.targetLanguage.getGuessHighlightLength(
-                        searchTerm: searchTerm,
-                      );
-
-                      selectableTextController.setSelection(
-                        offsetIndex,
-                        offsetIndex + length,
-                      );
-
-                      DictionarySearchResult result =
-                          await appModel.searchDictionary(
-                        searchTerm: searchTerm,
-                        searchWithWildcards: false,
-                      );
-
-                      length = appModel.targetLanguage.getFinalHighlightLength(
-                        result: result,
-                        searchTerm: searchTerm,
-                      );
-
-                      selectableTextController.setSelection(
-                          offsetIndex, offsetIndex + length);
-                    } finally {
-                      isSearching = false;
-                    }
-                  }
-                },
+                buttonItems: <ContextMenuButtonItem>[
+                  ContextMenuButtonItem(
+                    onPressed: () {
+                      widget.onSearch(selectedText);
+                      state.hideToolbar();
+                    },
+                    label: t.search,
+                  ),
+                  ContextMenuButtonItem(
+                    onPressed: () {
+                      widget.onStash(selectedText);
+                      state.hideToolbar();
+                    },
+                    label: t.stash,
+                  ),
+                  ...AdaptiveTextSelectionToolbar.selectableRegion(
+                              selectableRegionState: state)
+                          .buttonItems
+                          ?.where(
+                              (e) => e.type == ContextMenuButtonType.copy) ??
+                      [],
+                  ...AdaptiveTextSelectionToolbar.selectableRegion(
+                              selectableRegionState: state)
+                          .buttonItems
+                          ?.where((e) =>
+                              e.type == ContextMenuButtonType.selectAll) ??
+                      [],
+                  ContextMenuButtonItem(
+                    onPressed: () {
+                      widget.onShare(selectedText);
+                      state.hideToolbar();
+                    },
+                    label: t.share,
+                  ),
+                ],
               );
             },
+            child: DictionaryHtmlWidget(
+              entry: widget.entry,
+              onSearch: widget.onSearch,
+            ),
           ),
         ),
       ),

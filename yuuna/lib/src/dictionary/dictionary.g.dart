@@ -193,6 +193,7 @@ Dictionary _dictionaryDeserialize(
     collapsedLanguages: reader.readStringList(offsets[0]) ?? const [],
     formatKey: reader.readString(offsets[1]),
     hiddenLanguages: reader.readStringList(offsets[3]) ?? const [],
+    id: id,
     name: reader.readString(offsets[4]),
     order: reader.readLong(offsets[5]),
   );

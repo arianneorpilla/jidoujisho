@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar/isar.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:flutter/widgets.dart';
 
@@ -86,26 +87,34 @@ abstract class DictionaryFormat {
   /// Prepares a list of tags that will be added to the database.
   /// See [PrepareDictionaryParams] for how to work with the individual input
   /// parameters.
-  Future<List<DictionaryTag>> Function(PrepareDictionaryParams params)
-      prepareTags;
+  void Function({
+    required PrepareDictionaryParams params,
+    required Isar isar,
+  }) prepareTags;
 
-  /// Prepares a map with entries that will be added to the database.
+  /// Prepares entries that will be added to the database.
   /// See [PrepareDictionaryParams] for how to work with the individual input
   /// parameters.
-  Future<Map<DictionaryHeading, List<DictionaryEntry>>> Function(
-      PrepareDictionaryParams params) prepareEntries;
+  void Function({
+    required PrepareDictionaryParams params,
+    required Isar isar,
+  }) prepareEntries;
 
-  /// Prepares a map with pitch entries that will be added to the database.
+  /// Prepares pitch entries that will be added to the database.
   /// See [PrepareDictionaryParams] for how to work with the individual input
   /// parameters.
-  Future<Map<DictionaryHeading, List<DictionaryPitch>>> Function(
-      PrepareDictionaryParams params) preparePitches;
+  void Function({
+    required PrepareDictionaryParams params,
+    required Isar isar,
+  }) preparePitches;
 
-  /// Prepares a map with frequency entries that will be added to the database.
+  /// Prepares frequency entries that will be added to the database.
   /// See [PrepareDictionaryParams] for how to work with the individual input
   /// parameters.
-  Future<Map<DictionaryHeading, List<DictionaryFrequency>>> Function(
-      PrepareDictionaryParams params) prepareFrequencies;
+  void Function({
+    required PrepareDictionaryParams params,
+    required Isar isar,
+  }) prepareFrequencies;
 
   /// Used to allow a format to render its dictionary entries with a custom
   /// widget.

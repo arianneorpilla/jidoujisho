@@ -13,6 +13,7 @@ part 'dictionary.g.dart';
 class Dictionary {
   /// Initialise a dictionary with details determined from import.
   Dictionary({
+    required this.id,
     required this.name,
     required this.formatKey,
     required this.order,
@@ -20,13 +21,8 @@ class Dictionary {
     this.collapsedLanguages = const [],
   });
 
-  /// Function to generate a lookup ID for heading by its unique string key.
-  static int hash({required String name}) {
-    return fastHash(name);
-  }
-
   /// Identifier for database purposes.
-  Id get id => hash(name: name);
+  final Id id;
 
   /// The name of the dictionary. For example, this could be 'Merriam-Webster
   /// Dictionary' or '大辞林' or 'JMdict'.

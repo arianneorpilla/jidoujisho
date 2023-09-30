@@ -31,7 +31,7 @@ class PrepareDirectoryParams extends IsolateParams {
   PrepareDirectoryParams({
     required this.file,
     required this.charset,
-    required this.workingDirectory,
+    required this.resourceDirectory,
     required this.dictionaryFormat,
     required super.sendPort,
     required super.directoryPath,
@@ -47,7 +47,7 @@ class PrepareDirectoryParams extends IsolateParams {
 
   /// A working directory to be used in isolation and where data is to be
   /// handled in later steps.
-  final Directory workingDirectory;
+  final Directory resourceDirectory;
 
   /// The dictionary format to be used for entry processing.
   final DictionaryFormat dictionaryFormat;
@@ -62,8 +62,7 @@ class PrepareDictionaryParams extends IsolateParams {
   PrepareDictionaryParams({
     required this.dictionary,
     required this.dictionaryFormat,
-    required this.workingDirectory,
-    required this.useSlowImport,
+    required this.resourceDirectory,
     required this.alertSendPort,
     required super.sendPort,
     required super.directoryPath,
@@ -75,11 +74,8 @@ class PrepareDictionaryParams extends IsolateParams {
   /// The dictionary format to be used for entry processing.
   final DictionaryFormat dictionaryFormat;
 
-  /// A working directory from which to extract dictionary data from.
-  final Directory workingDirectory;
-
-  /// Whether or not to use ACID-compliant importing.
-  final bool useSlowImport;
+  /// A working directory to extract dictionary data to.
+  final Directory resourceDirectory;
 
   /// For communication with a [ReceivePort] to show a dialog message to notify
   /// the user of critical information relating to import.

@@ -14,7 +14,7 @@
         android:icon="@mipmap/launcher_icon"
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
-        android:enableOnBackInvokedCallback="true"
+        android:enableOnBackInvokedCallback="false"
         xmlns:tools="http://schemas.android.com/tools"
         tools:replace="android:label">
         <activity

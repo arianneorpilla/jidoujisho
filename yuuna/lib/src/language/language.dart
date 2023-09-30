@@ -275,6 +275,44 @@ abstract class Language {
     }
   }
 
+  /// Returns the starting index from which the search term should be chopped
+  /// from, given a clicked index and full text. For a space-delimited language,
+  /// this will return the starting index of a clicked word. Otherwise, this
+  /// returns the clicked index itself.
+  TextRange getWordRange({
+    required JidoujishoTextSelection selection,
+  }) {
+    final workingBuffer = StringBuffer();
+    String selectedWord = '';
+    int start = 0;
+
+    List<String> words = textToWords(selection.text.replaceAll('\n', ' '));
+
+    for (String word in words) {
+      workingBuffer.write(word);
+      selectedWord = word;
+
+      if (workingBuffer.length > selection.range.start) {
+        start = workingBuffer.length - word.length;
+        break;
+      }
+    }
+
+    int end = start + selectedWord.length;
+
+    return TextRange(start: start, end: end);
+  }
+
+  /// Get preliminary highlight length before a dictionary search.
+  JidoujishoTextSelection getGuessHighlight({
+    required JidoujishoTextSelection selection,
+  }) {
+    return JidoujishoTextSelection(
+      text: selection.text,
+      range: getWordRange(selection: selection),
+    );
+  }
+
   /// Get preliminary highlight length before a dictionary search.
   int getGuessHighlightLength({
     required String searchTerm,

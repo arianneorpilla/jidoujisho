@@ -1,100 +1,308 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:spaces/spaces.dart';
-import 'package:yuuna/models.dart';
-import 'package:yuuna/pages.dart';
+import 'dart:convert';
+import 'dart:io';
 
-/// Custom widget for structured content HTML from a Yomichan dictionary.
-/// See resource for solution:
-/// https://stackoverflow.com/questions/66477207/flutter-and-inappwebview-how-to-get-height
-class DictionaryStructuredContentPage extends BasePage {
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html_table/flutter_html_table.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:html/dom.dart' as dom;
+import 'package:path/path.dart' as path;
+import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/models.dart';
+import 'package:yuuna/utils.dart';
+
+/// Provides and caches the processed HTML of a [DictionaryEntry] to improve
+/// performance.
+final dictionaryEntryHtmlProvider =
+    Provider.family<String, DictionaryEntry>((ref, entry) {
+  return entry.definitions
+      .map((e) {
+        try {
+          final node =
+              StructuredContent.processContent(jsonDecode(e))?.toNode();
+          if (node == null) {
+            return '';
+          }
+
+          final document = dom.Document.html('');
+          document.body?.append(node);
+          final html = document.body?.innerHtml ?? '';
+
+          return html;
+        } catch (_) {
+          return e.replaceAll('\n', '<br>');
+        }
+      })
+      .toList()
+      .join('<br>');
+});
+
+/// Get the [Directory] used as a resource directory for a certain [Dictionary].
+final dictionaryResourceDirectoryProvider =
+    Provider.family<Directory, int>((ref, dictionaryId) {
+  final appModel = ref.watch(appProvider);
+
+  return Directory(
+      path.join(appModel.dictionaryResourceDirectory.path, '$dictionaryId'));
+});
+
+/// HTML renderer for dictionary definitions.
+class DictionaryHtmlWidget extends ConsumerWidget {
   /// Create an instance of this page.
-  const DictionaryStructuredContentPage({
-    required this.html,
+  const DictionaryHtmlWidget({
+    required this.entry,
+    required this.onSearch,
     super.key,
   });
 
-  /// Definition to display as HTML.
-  final String html;
+  /// Dictionary entry to be rendered.
+  final DictionaryEntry entry;
+
+  /// Action to be done upon selecting the search option.
+  final Function(String) onSearch;
 
   @override
-  BasePageState createState() => _DictionaryStructuredContentPageState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final textColor = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : Colors.black;
+    final linkColor = Theme.of(context).colorScheme.error;
+    final dictionaryFontSize = ref.read(appProvider).dictionaryFontSize;
+    final fontSize = FontSize(dictionaryFontSize);
+    const tableWidth = 0.3;
+    final tableBorder = Border.all(color: textColor, width: tableWidth);
+    final tableStyle = Style(
+      border: tableBorder,
+    );
+
+    return Html(
+      data: ref.watch(dictionaryEntryHtmlProvider(entry)),
+      shrinkWrap: true,
+      onAnchorTap: (url, attributes, element) {
+        onSearch.call(attributes['query'] ?? element?.text ?? 'f');
+      },
+      style: {
+        '*': Style(
+          fontSize: fontSize,
+          color: textColor,
+        ),
+        'td': tableStyle,
+        'th': tableStyle,
+        'ul': Style(
+          padding: HtmlPaddings.zero,
+        ),
+        'li': Style(
+          padding: HtmlPaddings.zero,
+        ),
+        'a': Style(color: linkColor),
+      },
+      extensions: [
+        const TableHtmlExtension(),
+        ImageExtension.inline(
+          networkSchemas: {'jidoujisho'},
+          builder: (extensionContext) => WidgetSpan(
+            child: JidoujishoDictionaryImage(
+              entry: entry,
+              extensionContext: extensionContext,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
-class _DictionaryStructuredContentPageState
-    extends BasePageState<DictionaryStructuredContentPage> {
-  /// To be used as data in the [InAppWebView];
-  late final String data;
+/// Handles image rendering of images in a dictionary definition.
+class JidoujishoDictionaryImage extends ConsumerWidget {
+  /// Initialise this widget.
+  const JidoujishoDictionaryImage({
+    required this.entry,
+    required this.extensionContext,
+    super.key,
+  });
 
-  double height = 1;
+  /// Dictionary entry to be rendered.
+  final DictionaryEntry entry;
+
+  /// Provides attributes for building the image.
+  final ExtensionContext extensionContext;
 
   @override
-  void initState() {
-    super.initState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final src = (extensionContext.attributes['src'] ?? '')
+        .replaceFirst('jidoujisho://', '');
 
-    String color = ref.read(appProvider).isDarkMode ? 'white' : 'black';
-    data = '''
-<html>
-    <head>
-    <style>
-    ul {
-      padding-left: 6;
+    final width = double.tryParse((extensionContext.attributes['width'] ?? '')
+        .replaceAll(RegExp(r'\D'), ''));
+    final height = double.tryParse((extensionContext.attributes['height'] ?? '')
+        .replaceAll(RegExp(r'\D'), ''));
+
+    final directory = ref
+        .read(dictionaryResourceDirectoryProvider(entry.dictionary.value!.id));
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.file(
+          File(path.join(directory.path, src)),
+          height: height,
+          width: width,
+          scale: 3,
+        )
+      ],
+    );
+  }
+}
+
+/// Special delegate for text selection from a dictionary search result.
+class DictionarySelectionDelegate
+    extends MultiSelectableSelectionContainerDelegate {
+  /// Initialise this widget.
+  DictionarySelectionDelegate({
+    required this.onTextSelectionGuessLength,
+  });
+
+  /// Callback with a [JidoujishoTextSelection] which contains the text of all
+  /// selectables as well as a [TextRange] representing the substring to use
+  /// for dictionary search. Returns the guess length of the text selection.
+  final JidoujishoTextSelection Function(JidoujishoTextSelection)
+      onTextSelectionGuessLength;
+
+  // This method is called when newly added selectable is in the current
+  // selected range.
+  @override
+  void ensureChildUpdated(Selectable selectable) {}
+
+  /// Handles a [JidoujishoTextSelection].
+  SelectionResult handleTextSelection(
+      SelectWordSelectionEvent event, JidoujishoTextSelection selection) {
+    handleClearSelection(const ClearSelectionEvent());
+
+    super.handleSelectWord(event);
+    while ((getSelectedContent()?.plainText ?? '').length > 1) {
+      super.handleGranularlyExtendSelection(
+        const GranularlyExtendSelectionEvent(
+            forward: false,
+            isEnd: true,
+            granularity: TextGranularity.character),
+      );
     }
-    li {
-      margin: 0;
-      padding-left: 0.2em;
+
+    final highlightLength = selection.textInside.length;
+
+    SelectionResult? result;
+    for (int i = 0; i < highlightLength - 1; i++) {
+      result = super.handleGranularlyExtendSelection(
+        const GranularlyExtendSelectionEvent(
+          forward: true,
+          isEnd: true,
+          granularity: TextGranularity.character,
+        ),
+      );
     }
-    body {
-      color: $color;
-    }
-    </style>
-    </head>
-    <meta name="viewport" content="width=device-width user-scalable=no zoom=1">
-    <style>img {max-width: 100%; height: auto}</style>
-    <body>
-    <div class="container" id="_flutter_target_do_not_delete">${widget.html}</div>
-    <script>
-    function outputsize() {
-        if (typeof window.flutter_inappwebview !== "undefined" && typeof window.flutter_inappwebview.callHandler !== "undefined")
-            window.flutter_inappwebview.callHandler('newHeight', document.getElementById("_flutter_target_do_not_delete").offsetHeight);
-        }
-      new ResizeObserver(outputsize).observe(_flutter_target_do_not_delete)
-    </script>
-  </body>
-</html>
-''';
+
+    return result ?? super.handleSelectWord(event);
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: height + Spacing.of(context).spaces.normal,
-      child: InAppWebView(
-        initialOptions: InAppWebViewGroupOptions(
-          crossPlatform: InAppWebViewOptions(
-            supportZoom: false,
-            disableHorizontalScroll: true,
-            disableVerticalScroll: true,
-            transparentBackground: true,
+  SelectionResult dispatchSelectionEvent(SelectionEvent event) {
+    // _expectSearchSelection = event is SelectWordSelectionEvent;
+    return super.dispatchSelectionEvent(event);
+  }
+
+  //  bool _expectSearchSelection = false;
+  SelectionEvent? _lastEvent;
+  JidoujishoTextSelection? _guessSelection;
+  JidoujishoTextSelection? _searchSelection;
+
+  @override
+  SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
+    if (_searchSelection != null && _lastEvent == event) {
+      final selection = _searchSelection;
+      _searchSelection = null;
+
+      final startDiff = selection!.range.start - _guessSelection!.range.start;
+      final endDiff = selection.range.end - _guessSelection!.range.end;
+
+      SelectionResult? result;
+      for (int i = 0; i < startDiff.abs(); i++) {
+        result = super.handleGranularlyExtendSelection(
+          GranularlyExtendSelectionEvent(
+            forward: !startDiff.isNegative,
+            isEnd: true,
+            granularity: TextGranularity.character,
           ),
-          android: AndroidInAppWebViewOptions(
-              defaultFontSize: appModel.dictionaryFontSize.toInt() + 1),
-        ),
-        initialData: InAppWebViewInitialData(data: data),
-        onWebViewCreated: (controller) {
-          controller.addJavaScriptHandler(
-              handlerName: 'newHeight',
-              callback: (arguments) async {
-                int height = arguments.firstOrNull ??
-                    await controller.getContentHeight();
-                if (mounted) {
-                  setState(() {
-                    this.height = height.toDouble();
-                  });
-                }
-              });
-        },
+        );
+      }
+
+      for (int i = 0; i < endDiff.abs(); i++) {
+        result = super.handleGranularlyExtendSelection(
+          GranularlyExtendSelectionEvent(
+            forward: !endDiff.isNegative,
+            isEnd: true,
+            granularity: TextGranularity.character,
+          ),
+        );
+      }
+
+      return result!;
+    }
+
+    super.handleSelectWord(event);
+    _lastEvent = event;
+    // _expectSearchSelection = true;
+
+    if (!(currentSelectionEndIndex < selectables.length &&
+        currentSelectionEndIndex >= 0)) {
+      return handleClearSelection(const ClearSelectionEvent());
+    }
+
+    handleGranularlyExtendSelection(
+      const GranularlyExtendSelectionEvent(
+        forward: false,
+        isEnd: true,
+        granularity: TextGranularity.document,
       ),
     );
+
+    handleClearSelection(const ClearSelectionEvent());
+
+    final textBefore = getSelectedContent()?.plainText ?? '';
+
+    super.handleSelectWord(event);
+    handleGranularlyExtendSelection(
+      const GranularlyExtendSelectionEvent(
+        forward: true,
+        isEnd: true,
+        granularity: TextGranularity.document,
+      ),
+    );
+
+    final textAfter = getSelectedContent()?.plainText ?? '';
+
+    final text = '$textBefore$textAfter';
+
+    final eventSelection = JidoujishoTextSelection(
+      text: text,
+      range: TextRange(
+        start: textBefore.length,
+        end: text.length,
+      ),
+    );
+
+    late SelectionResult result;
+    final guessSelection = onTextSelectionGuessLength(eventSelection);
+    result = handleTextSelection(event, guessSelection);
+
+    // onTextSelectionSearchLength(eventSelection, (searchSelection) {
+    //   _guessSelection = guessSelection;
+    //   _searchSelection = searchSelection;
+    //   if (getSelectedContent()?.plainText == guessSelection.textInside &&
+    //       searchSelection.textInside != guessSelection.textInside) {
+    //     dispatchSelectionEvent(event);
+    //   }
+    // });
+
+    return result;
   }
 }

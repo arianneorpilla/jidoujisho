@@ -74,17 +74,7 @@ class MeaningField extends Field {
               meaning = dictionaryFormat.getCustomDefinitionText(meaning);
             }
             meaning = meaning.trim();
-            if (meaningsCount == 1) {
-              meaningBuffer.write('$meaning\n');
-            } else {
-              if (index == 0) {
-                meaningBuffer.write('• ');
-              }
-              meaningBuffer.write(meaning);
-              if (index != entry.definitions.length - 1) {
-                meaningBuffer.write('; ');
-              }
-            }
+            meaningBuffer.write('$meaning\n');
           });
         }
 

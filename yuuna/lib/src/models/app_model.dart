@@ -197,6 +197,10 @@ class AppModel with ChangeNotifier {
   Directory get databaseDirectory => _databaseDirectory;
   late final Directory _databaseDirectory;
 
+  /// Directory where database data is persisted.
+  Directory get dictionaryResourceDirectory => _dictionaryResourceDirectory;
+  late final Directory _dictionaryResourceDirectory;
+
   /// Directory where browser cache data may be persisted.
   Directory get browserDirectory => _browserDirectory;
   late final Directory _browserDirectory;
@@ -1155,6 +1159,9 @@ class AppModel with ChangeNotifier {
         Directory(path.join(appDirectory.path, 'thumbnails'));
     _hiveDirectory = Directory(path.join(appDirectory.path, 'hive'));
 
+    _dictionaryResourceDirectory =
+        Directory(path.join(appDirectory.path, 'dictionaryResources'));
+
     _dictionaryImportWorkingDirectory = Directory(
         path.join(appDirectory.path, 'dictionaryImportWorkingDirectory'));
     _exportDirectory = await prepareJidoujishoDirectory();
@@ -1165,6 +1172,7 @@ class AppModel with ChangeNotifier {
     thumbnailsDirectory.createSync();
     hiveDirectory.createSync();
     dictionaryImportWorkingDirectory.createSync();
+    dictionaryResourceDirectory.createSync();
 
     /// Inject open source licenses for non-Flutter dependencies that are
     /// included as assets.
@@ -1433,7 +1441,6 @@ class AppModel with ChangeNotifier {
     /// done.
     clearDictionaryResultsCache();
 
-    Directory workingDirectory = _dictionaryImportWorkingDirectory;
     DictionaryFormat dictionaryFormat = lastSelectedDictionaryFormat;
 
     /// Importing makes heavy use of isolates as it is very performance
@@ -1458,15 +1465,6 @@ class AppModel with ChangeNotifier {
     /// shown below. A dialog is shown to show the progress of the dictionary
     /// file import, with messages pertaining to the above [ValueNotifier].
     try {
-      /// The working directory should always be emptied before and after
-      /// dictionary import to ensure that no files bloat the system and that
-      /// files from previous imports do not carry over.
-      if (workingDirectory.existsSync()) {
-        progressNotifier.value = t.import_clean;
-        workingDirectory.deleteSync(recursive: true);
-        workingDirectory.createSync();
-      }
-
       String charset = '';
 
       /// Find a way to check if this is a text file or a binary file instead
@@ -1479,14 +1477,30 @@ class AppModel with ChangeNotifier {
         charset = result.charset;
       }
 
+      final int highestId = _database.dictionarys
+              .where(sort: Sort.desc)
+              .anyId()
+              .findFirstSync()
+              ?.id ??
+          1;
+      final int id = highestId + 1;
+      final Directory resourceDirectory =
+          Directory(path.join(dictionaryResourceDirectory.path, id.toString()));
+      if (resourceDirectory.existsSync()) {
+        resourceDirectory.deleteSync(recursive: true);
+      }
+
+      resourceDirectory.createSync(recursive: true);
+
       PrepareDirectoryParams prepareDirectoryParams = PrepareDirectoryParams(
         file: file,
         charset: charset,
         directoryPath: _databaseDirectory.path,
-        workingDirectory: workingDirectory,
+        resourceDirectory: resourceDirectory,
         dictionaryFormat: dictionaryFormat,
         sendPort: receivePort.sendPort,
       );
+
       progressNotifier.value = t.import_extract;
       await dictionaryFormat.prepareDirectory(prepareDirectoryParams);
 
@@ -1506,6 +1520,7 @@ class AppModel with ChangeNotifier {
       int order = (bottomMostDictionary?.order ?? 0) + 1;
 
       Dictionary dictionary = Dictionary(
+        id: id,
         order: order,
         name: name,
         formatKey: dictionaryFormat.uniqueKey,
@@ -1513,24 +1528,14 @@ class AppModel with ChangeNotifier {
 
       PrepareDictionaryParams prepareDictionaryParams = PrepareDictionaryParams(
         dictionary: dictionary,
-        workingDirectory: workingDirectory,
+        resourceDirectory: resourceDirectory,
         directoryPath: _databaseDirectory.path,
         dictionaryFormat: dictionaryFormat,
-        useSlowImport: useSlowImport,
         sendPort: receivePort.sendPort,
         alertSendPort: alertReceivePort.sendPort,
       );
 
       await compute(depositDictionaryDataHelper, prepareDictionaryParams);
-
-      /// The working directory should always be emptied before and after
-      /// dictionary import to ensure that no files bloat the system and that
-      /// files from previous imports do not carry over.
-      if (workingDirectory.existsSync()) {
-        progressNotifier.value = t.import_clean;
-        workingDirectory.deleteSync(recursive: true);
-        workingDirectory.createSync();
-      }
 
       progressNotifier.value = t.import_complete;
       onImportSuccess();
@@ -1594,6 +1599,10 @@ class AppModel with ChangeNotifier {
     await compute(deleteDictionariesHelper, params);
     await _dictionaryHistory.clear();
 
+    if (dictionaryResourceDirectory.existsSync()) {
+      dictionaryResourceDirectory.deleteSync(recursive: true);
+    }
+
     dictionarySearchAgainNotifier.notifyListeners();
   }
 
@@ -1612,6 +1621,13 @@ class AppModel with ChangeNotifier {
 
     await compute(deleteDictionaryHelper, params);
     await _dictionaryHistory.clear();
+
+    final directory = Directory(
+        path.join(dictionaryResourceDirectory.path, dictionary.id.toString()));
+
+    if (directory.existsSync()) {
+      directory.deleteSync(recursive: true);
+    }
 
     dictionarySearchAgainNotifier.notifyListeners();
   }
@@ -3422,17 +3438,6 @@ class AppModel with ChangeNotifier {
         rewindInterval: Duration(seconds: 5),
       ),
     );
-  }
-
-  /// Whether or not the app should use slow import. This is to prevent
-  /// crashing on older devices and make performance faster for newer devices.
-  bool get useSlowImport {
-    return _preferences.get('use_slow_import', defaultValue: false);
-  }
-
-  /// Toggle slow import option.
-  void toggleSlowImport() async {
-    await _preferences.put('use_slow_import', !useSlowImport);
   }
 
   /// Whether or not searching in the app is performed without hitting the

@@ -263,7 +263,6 @@ class _DictionaryDialogPageState extends BasePageState with ChangeNotifier {
                   ),
                 const JidoujishoDivider(),
                 buildImportDropdown(),
-                buildSlowImportSwitch(),
               ],
             ),
           ),
@@ -570,28 +569,6 @@ class _DictionaryDialogPageState extends BasePageState with ChangeNotifier {
             ),
           ],
         ),
-      ],
-    );
-  }
-
-  Widget buildSlowImportSwitch() {
-    ValueNotifier<bool> notifier = ValueNotifier<bool>(appModel.useSlowImport);
-
-    return Row(
-      children: [
-        Expanded(child: Text(t.use_slow_import)),
-        ValueListenableBuilder<bool>(
-          valueListenable: notifier,
-          builder: (_, value, __) {
-            return Switch(
-              value: value,
-              onChanged: (value) {
-                appModel.toggleSlowImport();
-                notifier.value = appModel.useSlowImport;
-              },
-            );
-          },
-        )
       ],
     );
   }

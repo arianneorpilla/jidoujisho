@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:isar/isar.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:yuuna/dictionary.dart';
@@ -42,7 +43,7 @@ class AbbyyLingvoFormat extends DictionaryFormat {
 Future<void> prepareDirectoryAbbyyLingvoFormat(
     PrepareDirectoryParams params) async {
   String dictionaryFilePath =
-      path.join(params.workingDirectory.path, 'dictionary.dsl');
+      path.join(params.resourceDirectory.path, 'dictionary.dsl');
   File originalFile = params.file;
   File newFile = File(dictionaryFilePath);
 
@@ -60,7 +61,7 @@ Future<void> prepareDirectoryAbbyyLingvoFormat(
 Future<String> prepareNameAbbyyLingvoFormat(
     PrepareDirectoryParams params) async {
   String dictionaryFilePath =
-      path.join(params.workingDirectory.path, 'dictionary.dsl');
+      path.join(params.resourceDirectory.path, 'dictionary.dsl');
   File dictionaryFile = File(dictionaryFilePath);
 
   String nameLine =
@@ -71,12 +72,14 @@ Future<String> prepareNameAbbyyLingvoFormat(
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<Map<DictionaryHeading, List<DictionaryEntry>>>
-    prepareEntriesAbbyyLingvoFormat(PrepareDictionaryParams params) async {
-  Map<DictionaryHeading, List<DictionaryEntry>> entriesByHeading = {};
+Future<void> prepareEntriesAbbyyLingvoFormat({
+  required PrepareDictionaryParams params,
+  required Isar isar,
+}) async {
+  int count = 0;
 
   String dictionaryFilePath =
-      path.join(params.workingDirectory.path, 'dictionary.dsl');
+      path.join(params.resourceDirectory.path, 'dictionary.dsl');
   File dictionaryFile = File(dictionaryFilePath);
 
   String text = dictionaryFile
@@ -115,47 +118,48 @@ Future<Map<DictionaryHeading, List<DictionaryEntry>>>
       buffer.clear();
 
       if (term.isNotEmpty && definition.isNotEmpty) {
-        DictionaryHeading heading = DictionaryHeading(
-          term: term,
-        );
+        int headingId = DictionaryHeading.hash(term: term, reading: '');
+        DictionaryHeading heading =
+            isar.dictionaryHeadings.getSync(headingId) ??
+                DictionaryHeading(term: term);
+
         DictionaryEntry entry = DictionaryEntry(
           definitions: [definition],
-          entryTagNames: [],
-          headingTagNames: [],
           popularity: 0,
         );
 
-        entriesByHeading.putIfAbsent(heading, () => []);
-        entriesByHeading[heading]!.add(entry);
+        entry.heading.value = heading;
+        entry.dictionary.value = params.dictionary;
+        isar.dictionaryEntrys.putSync(entry);
 
-        if (entriesByHeading.length % 1000 == 0) {
-          params.send(t.import_found_entry(count: entriesByHeading.length));
-        }
+        heading.entries.add(entry);
+
+        isar.dictionaryHeadings.putSync(heading);
+
+        params.send(t.import_found_entry(count: count));
+
+        count++;
       }
 
       term = line.trim();
     }
   }
-
-  params.send(t.import_found_entry(count: entriesByHeading.length));
-
-  return entriesByHeading;
 }
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<List<DictionaryTag>> prepareTagsAbbyyLingvoFormat(
-    PrepareDictionaryParams params) async {
-  return [];
-}
+void prepareTagsAbbyyLingvoFormat({
+  required PrepareDictionaryParams params,
+  required Isar isar,
+}) async {}
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<Map<DictionaryHeading, List<DictionaryPitch>>>
-    preparePitchesAbbyyLingvoFormat(PrepareDictionaryParams params) async {
-  return {};
-}
+void preparePitchesAbbyyLingvoFormat({
+  required PrepareDictionaryParams params,
+  required Isar isar,
+}) async {}
 
 /// Top-level function for use in compute. See [DictionaryFormat] for details.
-Future<Map<DictionaryHeading, List<DictionaryFrequency>>>
-    prepareFrequenciesAbbyyLingvoFormat(PrepareDictionaryParams params) async {
-  return {};
-}
+void prepareFrequenciesAbbyyLingvoFormat({
+  required PrepareDictionaryParams params,
+  required Isar isar,
+}) async {}
