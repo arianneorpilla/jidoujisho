@@ -92,15 +92,11 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
 
     HeadlessInAppWebView webView = HeadlessInAppWebView(
         initialUrlRequest: URLRequest(
-          url: Uri.parse(
+          url: WebUri(
             "https://www.bing.com/images/search?q=$searchTerm')",
           ),
         ),
-        initialOptions: InAppWebViewGroupOptions(
-          android: AndroidInAppWebViewOptions(
-            blockNetworkImage: true,
-          ),
-        ),
+        initialSettings: InAppWebViewSettings(blockNetworkImage: true),
         onLoadStop: (controller, uri) async {
           Directory appDirDoc = await getApplicationSupportDirectory();
           String bingImagesPath = '${appDirDoc.path}/bingImages';

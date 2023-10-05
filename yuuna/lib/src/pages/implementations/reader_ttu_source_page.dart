@@ -254,13 +254,13 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
     return selectedText;
   }
 
-  AndroidCacheMode get cacheMode {
+  CacheMode get cacheMode {
     if (mediaSource.currentTtuInternalVersion ==
         ReaderTtuSource.ttuInternalVersion) {
-      return AndroidCacheMode.LOAD_CACHE_ELSE_NETWORK;
+      return CacheMode.LOAD_CACHE_ELSE_NETWORK;
     } else {
       mediaSource.setTtuInternalVersion();
-      return AndroidCacheMode.LOAD_NO_CACHE;
+      return CacheMode.LOAD_NO_CACHE;
     }
   }
 
@@ -277,37 +277,32 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
   Widget buildReaderArea(LocalAssetsServer server) {
     return InAppWebView(
       initialUrlRequest: URLRequest(
-        url: Uri.parse(
+        url: WebUri(
           widget.item?.mediaIdentifier ??
               'http://localhost:${server.boundPort}/manage.html',
         ),
       ),
-      androidOnPermissionRequest: (controller, origin, resources) async {
-        return PermissionRequestResponse(
-          resources: resources,
-          action: PermissionRequestResponseAction.GRANT,
+      onPermissionRequest: (controller, origin) async {
+        return PermissionResponse(
+          action: PermissionResponseAction.GRANT,
         );
       },
-      initialOptions: InAppWebViewGroupOptions(
-        crossPlatform: InAppWebViewOptions(
-          allowFileAccessFromFileURLs: true,
-          allowUniversalAccessFromFileURLs: true,
-          mediaPlaybackRequiresUserGesture: false,
-          verticalScrollBarEnabled: false,
-          horizontalScrollBarEnabled: false,
-          javaScriptCanOpenWindowsAutomatically: true,
-          useOnDownloadStart: true,
-        ),
-        android: AndroidInAppWebViewOptions(
-          verticalScrollbarThumbColor: Colors.transparent,
-          verticalScrollbarTrackColor: Colors.transparent,
-          horizontalScrollbarThumbColor: Colors.transparent,
-          horizontalScrollbarTrackColor: Colors.transparent,
-          scrollbarFadingEnabled: false,
-          appCachePath: appModel.browserDirectory.path,
-          cacheMode: cacheMode,
-          supportMultipleWindows: true,
-        ),
+      initialSettings: InAppWebViewSettings(
+        allowFileAccessFromFileURLs: true,
+        allowUniversalAccessFromFileURLs: true,
+        mediaPlaybackRequiresUserGesture: false,
+        verticalScrollBarEnabled: false,
+        horizontalScrollBarEnabled: false,
+        javaScriptCanOpenWindowsAutomatically: true,
+        useOnDownloadStart: true,
+        verticalScrollbarThumbColor: Colors.transparent,
+        verticalScrollbarTrackColor: Colors.transparent,
+        horizontalScrollbarThumbColor: Colors.transparent,
+        horizontalScrollbarTrackColor: Colors.transparent,
+        scrollbarFadingEnabled: false,
+        appCachePath: appModel.browserDirectory.path,
+        cacheMode: cacheMode,
+        supportMultipleWindows: true,
       ),
       contextMenu: contextMenu,
       onConsoleMessage: onConsoleMessage,
@@ -336,29 +331,25 @@ class _ReaderTtuSourcePageState extends BaseSourcePageState<ReaderTtuSourcePage>
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height * (3 / 4),
                 child: InAppWebView(
-                  initialOptions: InAppWebViewGroupOptions(
-                    crossPlatform: InAppWebViewOptions(
-                      supportZoom: false,
-                      disableContextMenu: true,
-                      allowFileAccessFromFileURLs: true,
-                      allowUniversalAccessFromFileURLs: true,
-                      mediaPlaybackRequiresUserGesture: false,
-                      verticalScrollBarEnabled: false,
-                      horizontalScrollBarEnabled: false,
-                      javaScriptCanOpenWindowsAutomatically: true,
-                      userAgent: 'random',
-                      useOnDownloadStart: true,
-                    ),
-                    android: AndroidInAppWebViewOptions(
-                      verticalScrollbarThumbColor: Colors.transparent,
-                      verticalScrollbarTrackColor: Colors.transparent,
-                      horizontalScrollbarThumbColor: Colors.transparent,
-                      horizontalScrollbarTrackColor: Colors.transparent,
-                      scrollbarFadingEnabled: false,
-                      appCachePath: appModel.browserDirectory.path,
-                      cacheMode: cacheMode,
-                      supportMultipleWindows: true,
-                    ),
+                  initialSettings: InAppWebViewSettings(
+                    supportZoom: false,
+                    disableContextMenu: true,
+                    allowFileAccessFromFileURLs: true,
+                    allowUniversalAccessFromFileURLs: true,
+                    mediaPlaybackRequiresUserGesture: false,
+                    verticalScrollBarEnabled: false,
+                    horizontalScrollBarEnabled: false,
+                    javaScriptCanOpenWindowsAutomatically: true,
+                    userAgent: 'random',
+                    useOnDownloadStart: true,
+                    verticalScrollbarThumbColor: Colors.transparent,
+                    verticalScrollbarTrackColor: Colors.transparent,
+                    horizontalScrollbarThumbColor: Colors.transparent,
+                    horizontalScrollbarTrackColor: Colors.transparent,
+                    scrollbarFadingEnabled: false,
+                    appCachePath: appModel.browserDirectory.path,
+                    cacheMode: cacheMode,
+                    supportMultipleWindows: true,
                   ),
                   windowId: createWindowRequest.windowId,
                   onDownloadStartRequest: onDownloadStartRequest,
@@ -580,7 +571,7 @@ if (!window.getSelection().isCollapsed) {
   /// Get the default context menu for sources that make use of embedded web
   /// views.
   ContextMenu get contextMenu => ContextMenu(
-        options: ContextMenuOptions(
+        settings: ContextMenuSettings(
           hideDefaultSystemContextMenuItems: true,
         ),
         menuItems: [
@@ -595,7 +586,7 @@ if (!window.getSelection().isCollapsed) {
   /// Get the default context menu for sources that make use of embedded web
   /// views.
   ContextMenu get emptyContextMenu => ContextMenu(
-        options: ContextMenuOptions(
+        settings: ContextMenuSettings(
           hideDefaultSystemContextMenuItems: true,
         ),
         menuItems: [],
@@ -603,8 +594,7 @@ if (!window.getSelection().isCollapsed) {
 
   ContextMenuItem searchMenuItem() {
     return ContextMenuItem(
-      iosId: '1',
-      androidId: 1,
+      id: 1,
       title: t.search,
       action: searchMenuAction,
     );
@@ -612,8 +602,7 @@ if (!window.getSelection().isCollapsed) {
 
   ContextMenuItem stashMenuItem() {
     return ContextMenuItem(
-      iosId: '2',
-      androidId: 2,
+      id: 2,
       title: t.stash,
       action: stashMenuAction,
     );
@@ -621,8 +610,7 @@ if (!window.getSelection().isCollapsed) {
 
   ContextMenuItem copyMenuItem() {
     return ContextMenuItem(
-      iosId: '3',
-      androidId: 3,
+      id: 3,
       title: t.copy,
       action: copyMenuAction,
     );
@@ -630,8 +618,7 @@ if (!window.getSelection().isCollapsed) {
 
   ContextMenuItem shareMenuItem() {
     return ContextMenuItem(
-      iosId: '4',
-      androidId: 4,
+      id: 4,
       title: t.share,
       action: shareMenuAction,
     );
@@ -639,8 +626,7 @@ if (!window.getSelection().isCollapsed) {
 
   ContextMenuItem creatorMenuItem() {
     return ContextMenuItem(
-      iosId: '5',
-      androidId: 5,
+      id: 5,
       title: t.creator,
       action: creatorMenuAction,
     );

@@ -248,15 +248,12 @@ class ReaderMokuroSource extends ReaderMediaSource {
     );
 
     HeadlessInAppWebView webView = HeadlessInAppWebView(
-      initialOptions: InAppWebViewGroupOptions(
-        crossPlatform: InAppWebViewOptions(
-          allowFileAccessFromFileURLs: true,
-          allowUniversalAccessFromFileURLs: true,
-        ),
-        android: AndroidInAppWebViewOptions(),
+      initialSettings: InAppWebViewSettings(
+        allowFileAccessFromFileURLs: true,
+        allowUniversalAccessFromFileURLs: true,
       ),
       initialUrlRequest: URLRequest(
-        url: Uri.parse(
+        url: WebUri(
             'file://$parentDirectory/${Uri.encodeComponent(directoryBasename)}/${Uri.encodeComponent(fileBasename)}'),
       ),
       onLoadStop: (controller, url) async {

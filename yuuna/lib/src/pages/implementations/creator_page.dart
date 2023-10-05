@@ -209,20 +209,8 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
       onWillPop: onWillPop,
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-        child: Stack(
-          children: [
-            buildBlur(),
-            buildScaffold(),
-          ],
-        ),
+        child: buildScaffold(),
       ),
-    );
-  }
-
-  Widget buildBlur() {
-    return BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-      child: Container(),
     );
   }
 
@@ -463,7 +451,7 @@ class _CreatorPageState extends BasePageState<CreatorPage> {
 
     return Scaffold(
       backgroundColor:
-          theme.colorScheme.background.withOpacity(isCardEditing ? 0.5 : 1),
+          theme.colorScheme.background.withOpacity(isCardEditing ? 0.96 : 1),
       key: _scaffoldKey,
       resizeToAvoidBottomInset: true,
       appBar: showPortrait ? buildAppBar() : null,

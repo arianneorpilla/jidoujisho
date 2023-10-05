@@ -319,7 +319,7 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
         text: Uri.decodeFull(
             _uriNotifier.value?.removeFragment().toString() ?? ''),
         onBrowse: (url) {
-          _controller.loadUrl(urlRequest: URLRequest(url: Uri.parse(url)));
+          _controller.loadUrl(urlRequest: URLRequest(url: WebUri(url)));
         },
       ),
     );
@@ -328,7 +328,7 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
   /// Get the default context menu for sources that make use of embedded web
   /// views.
   ContextMenu get contextMenu => ContextMenu(
-        options: ContextMenuOptions(
+        settings: ContextMenuSettings(
           hideDefaultSystemContextMenuItems: true,
         ),
         menuItems: [
@@ -343,7 +343,7 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
   /// Get the default context menu for sources that make use of embedded web
   /// views.
   ContextMenu get emptyContextMenu => ContextMenu(
-        options: ContextMenuOptions(
+        settings: ContextMenuSettings(
           hideDefaultSystemContextMenuItems: true,
         ),
         menuItems: [],
@@ -351,8 +351,7 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
 
   ContextMenuItem searchMenuItem() {
     return ContextMenuItem(
-      iosId: '1',
-      androidId: 1,
+      id: 1,
       title: t.search,
       action: searchMenuAction,
     );
@@ -360,8 +359,7 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
 
   ContextMenuItem stashMenuItem() {
     return ContextMenuItem(
-      iosId: '2',
-      androidId: 2,
+      id: 2,
       title: t.stash,
       action: stashMenuAction,
     );
@@ -369,8 +367,7 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
 
   ContextMenuItem copyMenuItem() {
     return ContextMenuItem(
-      iosId: '3',
-      androidId: 3,
+      id: 3,
       title: t.copy,
       action: copyMenuAction,
     );
@@ -378,8 +375,7 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
 
   ContextMenuItem shareMenuItem() {
     return ContextMenuItem(
-      iosId: '4',
-      androidId: 4,
+      id: 4,
       title: t.share,
       action: shareMenuAction,
     );
@@ -387,8 +383,7 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
 
   ContextMenuItem creatorMenuItem() {
     return ContextMenuItem(
-      iosId: '5',
-      androidId: 5,
+      id: 5,
       title: t.creator,
       action: creatorMenuAction,
     );
@@ -478,13 +473,10 @@ class _BrowserSourcePageState extends BaseSourcePageState<BrowserSourcePage> {
         scrollX = newX;
         scrollY = newY;
       },
-      initialOptions: InAppWebViewGroupOptions(
-        crossPlatform: InAppWebViewOptions(
-          userAgent: userAgent,
-        ),
+      initialSettings: InAppWebViewSettings(
+        userAgent: userAgent,
       ),
-      initialUrlRequest:
-          URLRequest(url: Uri.parse(widget.item!.mediaIdentifier)),
+      initialUrlRequest: URLRequest(url: WebUri(widget.item!.mediaIdentifier)),
       contextMenu: contextMenu,
       onConsoleMessage: onConsoleMessage,
       onWebViewCreated: (controller) {

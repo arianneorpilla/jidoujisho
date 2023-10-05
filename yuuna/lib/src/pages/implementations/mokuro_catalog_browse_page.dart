@@ -183,7 +183,7 @@ class _MokuroCatalogBrowsePageState
   /// Get the default context menu for sources that make use of embedded web
   /// views.
   ContextMenu get contextMenu => ContextMenu(
-        options: ContextMenuOptions(
+        settings: ContextMenuSettings(
           hideDefaultSystemContextMenuItems: true,
         ),
         menuItems: [
@@ -198,7 +198,7 @@ class _MokuroCatalogBrowsePageState
   /// Get the default context menu for sources that make use of embedded web
   /// views.
   ContextMenu get emptyContextMenu => ContextMenu(
-        options: ContextMenuOptions(
+        settings: ContextMenuSettings(
           hideDefaultSystemContextMenuItems: true,
         ),
         menuItems: [],
@@ -206,8 +206,7 @@ class _MokuroCatalogBrowsePageState
 
   ContextMenuItem searchMenuItem() {
     return ContextMenuItem(
-      iosId: '1',
-      androidId: 1,
+      id: 1,
       title: t.search,
       action: searchMenuAction,
     );
@@ -215,8 +214,7 @@ class _MokuroCatalogBrowsePageState
 
   ContextMenuItem stashMenuItem() {
     return ContextMenuItem(
-      iosId: '2',
-      androidId: 2,
+      id: 2,
       title: t.stash,
       action: stashMenuAction,
     );
@@ -224,8 +222,7 @@ class _MokuroCatalogBrowsePageState
 
   ContextMenuItem copyMenuItem() {
     return ContextMenuItem(
-      iosId: '3',
-      androidId: 3,
+      id: 3,
       title: t.copy,
       action: copyMenuAction,
     );
@@ -233,8 +230,7 @@ class _MokuroCatalogBrowsePageState
 
   ContextMenuItem shareMenuItem() {
     return ContextMenuItem(
-      iosId: '4',
-      androidId: 4,
+      id: 4,
       title: t.share,
       action: shareMenuAction,
     );
@@ -242,8 +238,7 @@ class _MokuroCatalogBrowsePageState
 
   ContextMenuItem creatorMenuItem() {
     return ContextMenuItem(
-      iosId: '5',
-      androidId: 5,
+      id: 5,
       title: t.creator,
       action: creatorMenuAction,
     );
@@ -327,17 +322,13 @@ class _MokuroCatalogBrowsePageState
 
   Widget buildBody() {
     return InAppWebView(
-      initialOptions: InAppWebViewGroupOptions(
-        crossPlatform: InAppWebViewOptions(
-          verticalScrollBarEnabled: false,
-          horizontalScrollBarEnabled: false,
-        ),
-        android: AndroidInAppWebViewOptions(
-          initialScale: MediaQuery.of(context).size.width ~/ 1.5,
-        ),
+      initialSettings: InAppWebViewSettings(
+        verticalScrollBarEnabled: false,
+        horizontalScrollBarEnabled: false,
+        initialScale: MediaQuery.of(context).size.width ~/ 1.5,
       ),
       initialUrlRequest: URLRequest(
-          url: Uri.parse(widget.catalog?.url ?? widget.item!.mediaIdentifier)),
+          url: WebUri(widget.catalog?.url ?? widget.item!.mediaIdentifier)),
       contextMenu: contextMenu,
       onConsoleMessage: onConsoleMessage,
       onWebViewCreated: (controller) {

@@ -140,16 +140,12 @@ class ReaderLyricsSource extends ReaderMediaSource {
     bool webViewBusy = true;
 
     HeadlessInAppWebView webView = HeadlessInAppWebView(
-      initialOptions: InAppWebViewGroupOptions(
-        crossPlatform: InAppWebViewOptions(
-          userAgent: userAgent,
-        ),
-        android: AndroidInAppWebViewOptions(
-          blockNetworkImage: true,
-        ),
+      initialSettings: InAppWebViewSettings(
+        userAgent: userAgent,
+        blockNetworkImage: true,
       ),
       initialUrlRequest: URLRequest(
-        url: Uri.parse(searchUrl),
+        url: WebUri(searchUrl),
       ),
       onLoadStop: (controller, uri) async {
         text = await controller.evaluateJavascript(source: '''
@@ -186,16 +182,12 @@ class ReaderLyricsSource extends ReaderMediaSource {
       bool googleWebViewBusy = true;
 
       HeadlessInAppWebView googleWebView = HeadlessInAppWebView(
-        initialOptions: InAppWebViewGroupOptions(
-          crossPlatform: InAppWebViewOptions(
-            userAgent: userAgent,
-          ),
-          android: AndroidInAppWebViewOptions(
-            blockNetworkImage: true,
-          ),
+        initialSettings: InAppWebViewSettings(
+          userAgent: userAgent,
+          blockNetworkImage: true,
         ),
         initialUrlRequest: URLRequest(
-          url: Uri.parse(
+          url: WebUri(
               'https://google.com/search?q=$artist+$title+歌詞+site:uta-net.com/song'),
         ),
         onLoadStop: (controller, uri) async {
@@ -216,16 +208,12 @@ class ReaderLyricsSource extends ReaderMediaSource {
       if (firstResultUrl != null) {
         bool utanetWebViewBusy = true;
         HeadlessInAppWebView utanetWebView = HeadlessInAppWebView(
-          initialOptions: InAppWebViewGroupOptions(
-            crossPlatform: InAppWebViewOptions(
-              userAgent: userAgent,
-            ),
-            android: AndroidInAppWebViewOptions(
-              blockNetworkImage: true,
-            ),
+          initialSettings: InAppWebViewSettings(
+            userAgent: userAgent,
+            blockNetworkImage: true,
           ),
           initialUrlRequest: URLRequest(
-            url: Uri.parse(firstResultUrl!),
+            url: WebUri(firstResultUrl!),
           ),
           onLoadStop: (controller, uri) async {
             text = await controller.evaluateJavascript(source: '''

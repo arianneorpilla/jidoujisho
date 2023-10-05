@@ -55,7 +55,7 @@ dependencies:
   flutter_inappwebview:
     git:
       url: https://github.com/lrorpilla/flutter_inappwebview
-      ref: 759bd376214a763ab17ce2ede2c5a00b38330e13
+      ref: ffd182431017ec919ece3f80bf5e22a9286189af
   flutter_launcher_icons: ^0.12.0
   flutter_logs: ^2.1.11 
   flutter_native_splash: ^2.2.8

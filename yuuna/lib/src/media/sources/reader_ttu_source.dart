@@ -256,7 +256,7 @@ class ReaderTtuSource extends ReaderMediaSource {
 
     HeadlessInAppWebView webView = HeadlessInAppWebView(
       initialUrlRequest: URLRequest(
-        url: Uri.parse('http://localhost:$port/'),
+        url: WebUri('http://localhost:$port/'),
       ),
       onLoadStop: (controller, url) async {
         controller.evaluateJavascript(source: getHistoryJs);
