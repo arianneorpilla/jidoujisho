@@ -34,7 +34,7 @@
 ---
 
 <p align="center" style="margin:0"><b>‍🧪 Preview Release:
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.9.0-preview">2.9.0-preview</a>
+  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.9.0-preview2">2.9.0-preview2</a>
 </b></p>
 
 <p align="center" style="margin:0"><b>✨ Latest Release:
