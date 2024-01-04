@@ -12,7 +12,7 @@ jobs:
             - name: Contribute List
               uses: akhilmhdh/contributors-readme-action@v2.3.6
               with:
-                use_username: false
+                use_username: true
                 image_size: 50
                 columns_per_row: 10
               env:
