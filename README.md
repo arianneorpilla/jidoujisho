@@ -202,6 +202,9 @@ A primer on the basics of the application is as follows.
 
 # 👥 Contribution and attribution
 
+<!-- readme: contributors -start -->
+<!-- readme: contributors -end -->
+
 jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>, and is made available under the <b><a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GNU General Public License 3.0</a></b>.
 
 Database enabled by <b><a href="https://isar.dev">Isar</a></b> and <b><a href="https://docs.hivedb.dev/">Hive</a></b>. Reader via a self-hosted <b><a href="https://reader.ttsu.app/">ッツ Ebook Reader</b></a>. <b><a href="https://github.com/kha-white/mokuro">Mokuro</b></a> for manga reading. Video streaming via <b><a href="https://youtube.com/">YouTube</a></b>. Chat service via <a href="https://chat.openai.com"><b>ChatGPT</a></b>.
