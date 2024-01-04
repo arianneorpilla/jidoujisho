@@ -207,42 +207,42 @@ A primer on the basics of the application is as follows.
 <tr>
     <td align="center">
         <a href="https://github.com/lrorpilla">
-            <img src="https://avatars.githubusercontent.com/u/11363922?v=4" width="100;" alt="lrorpilla"/>
+            <img src="https://avatars.githubusercontent.com/u/11363922?v=4" width="50;" alt="lrorpilla"/>
             <br />
             <sub><b>Null</b></sub>
         </a>
     </td>
     <td align="center">
         <a href="https://github.com/m-edlund">
-            <img src="https://avatars.githubusercontent.com/u/44649263?v=4" width="100;" alt="m-edlund"/>
+            <img src="https://avatars.githubusercontent.com/u/44649263?v=4" width="50;" alt="m-edlund"/>
             <br />
             <sub><b>Null</b></sub>
         </a>
     </td>
     <td align="center">
         <a href="https://github.com/Aegyo">
-            <img src="https://avatars.githubusercontent.com/u/4183969?v=4" width="100;" alt="Aegyo"/>
+            <img src="https://avatars.githubusercontent.com/u/4183969?v=4" width="50;" alt="Aegyo"/>
             <br />
             <sub><b>Jessica Chen</b></sub>
         </a>
     </td>
     <td align="center">
         <a href="https://github.com/Aquafina-water-bottle">
-            <img src="https://avatars.githubusercontent.com/u/17107540?v=4" width="100;" alt="Aquafina-water-bottle"/>
+            <img src="https://avatars.githubusercontent.com/u/17107540?v=4" width="50;" alt="Aquafina-water-bottle"/>
             <br />
             <sub><b>Austin S.</b></sub>
         </a>
     </td>
     <td align="center">
         <a href="https://github.com/Natsume-197">
-            <img src="https://avatars.githubusercontent.com/u/36428207?v=4" width="100;" alt="Natsume-197"/>
+            <img src="https://avatars.githubusercontent.com/u/36428207?v=4" width="50;" alt="Natsume-197"/>
             <br />
             <sub><b>Jonathan</b></sub>
         </a>
     </td>
     <td align="center">
         <a href="https://github.com/MarvNC">
-            <img src="https://avatars.githubusercontent.com/u/17340496?v=4" width="100;" alt="MarvNC"/>
+            <img src="https://avatars.githubusercontent.com/u/17340496?v=4" width="50;" alt="MarvNC"/>
             <br />
             <sub><b>Marv</b></sub>
         </a>
