@@ -72,14 +72,15 @@ void prepareEntriesMigakuFormat({
 
       String term = (map['term'] as String).trim();
       String definition = map['definition'] as String;
+      String reading = map['pronunciation'] ?? '';
 
       definition = definition
           .replaceAll('<br>', '\n')
           .replaceAll(RegExp('<[^<]+?>'), '');
 
-      int headingId = DictionaryHeading.hash(term: term, reading: '');
+      int headingId = DictionaryHeading.hash(term: term, reading: reading);
       DictionaryHeading heading = isar.dictionaryHeadings.getSync(headingId) ??
-          DictionaryHeading(term: term);
+          DictionaryHeading(term: term, reading: reading);
 
       DictionaryEntry entry = DictionaryEntry(
         definitions: [definition],
