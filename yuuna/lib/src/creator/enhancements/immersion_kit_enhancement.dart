@@ -24,6 +24,7 @@ class ImmersionKitResult {
     required this.audioUrl,
     required this.wordList,
     required this.wordIndices,
+    required this.calculateRange,
   });
 
   /// The sentence in plain unformatted form.
@@ -44,19 +45,15 @@ class ImmersionKitResult {
   /// Index of the words to highlight.
   List<int> wordIndices;
 
-  /// Get the range for this result for cloze purposes.
-  TextRange get range {
-    if (wordIndices.isEmpty) {
-      return TextRange.empty;
-    } else {
-      int length = wordList[wordIndices.first].length;
-      String beforeFirst = wordList.sublist(0, wordIndices.first).join();
+  TextRange? _calculatedRange;
 
-      return TextRange(
-        start: beforeFirst.length,
-        end: beforeFirst.length + length,
-      );
-    }
+  /// Function to calculate the range of search term
+  TextRange Function() calculateRange;
+
+  /// Get the range for this result for cloze purposes
+  TextRange get range {
+    _calculatedRange ??= calculateRange();
+    return _calculatedRange!;
   }
 
   /// Get a selection with this result's text and range.
@@ -179,6 +176,55 @@ class ImmersionKitEnhancement extends Enhancement {
     );
   }
 
+  TextRange _getLongestSubstring(
+      {required String text, required String substring}) {
+    var bestIndex = -1;
+    var bestLength = -1;
+    for (int i = substring.length; i > -1; i--) {
+      var subString = substring.substring(0, i);
+      int start = text.indexOf(subString);
+      if (start != -1) {
+        bestIndex = start;
+        bestLength = subString.length;
+        break;
+      }
+    }
+
+    return TextRange(start: bestIndex, end: bestIndex + bestLength);
+  }
+
+  TextRange _getRangeFromIndexedList({
+    required List<int> wordIndices,
+    required List<String> wordList,
+  }) {
+    if (wordIndices.isEmpty) {
+      return TextRange.empty;
+    } else {
+      int length = wordList[wordIndices.first].length;
+      String beforeFirst = wordList.sublist(0, wordIndices.first).join();
+
+      return TextRange(
+        start: beforeFirst.length,
+        end: beforeFirst.length + length,
+      );
+    }
+  }
+
+  TextRange _getBestClozeCandidate({
+    required String text,
+    required String term,
+    required List<int> wordIndices,
+    required List<String> wordList,
+  }) {
+    var range1 = _getLongestSubstring(text: text, substring: term);
+    var range2 =
+        _getRangeFromIndexedList(wordIndices: wordIndices, wordList: wordList);
+
+    return (range1.end - range1.start) > (range2.end - range2.start)
+        ? range1
+        : range2;
+  }
+
   /// Search the Massif API for example sentences and return a list of results.
   Future<List<ImmersionKitResult>> searchForSentences({
     required AppModel appModel,
@@ -239,6 +285,12 @@ class ImmersionKitEnhancement extends Enhancement {
           audioUrl: audioUrl,
           wordList: wordList,
           wordIndices: wordIndices,
+          calculateRange: () => _getBestClozeCandidate(
+            term: searchTerm,
+            text: text,
+            wordIndices: wordIndices,
+            wordList: wordList,
+          ),
         );
 
         /// Sentence examples that are merely the word itself are pretty
