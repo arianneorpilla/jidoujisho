@@ -13,6 +13,63 @@ import 'package:yuuna/models.dart';
 import 'package:http/http.dart' as http;
 import 'package:yuuna/utils.dart';
 
+const List<String> _godanEndings = [
+  'う',
+  'つ',
+  'る',
+  'ぶ',
+  'む',
+  'ぬ',
+  'く',
+  'ぐ',
+  'す'
+];
+const List<String> _ichidanAndRuGodanConjugations = [
+  // Ichidan with ru ending
+  'る',
+  'ない',
+  'ます',
+  'ません',
+  'た',
+  'なかった',
+  'ました',
+  'ませんでした',
+  'て',
+  'なくて',
+  'られる',
+  'られない',
+  'られる',
+  // られる & られない, passive and potential are the same
+  'させる',
+  'させない',
+  'させられる',
+  'させられない',
+  'ろ',
+  'るな',
+  'たら',
+  // Godan with ru ending
+  // る, non-past same as ichidan
+  'らない',
+  'ります',
+  'りません',
+  'った',
+  'らなかった',
+  'りました',
+  'りませんでした',
+  'って',
+  'らなくて',
+  'れる',
+  'れない',
+  // られる & られない, passive same as ichidan
+  'らせる',
+  'らせない',
+  'らせられる',
+  'らせられない',
+  'れ',
+  // るな, negative imperative same as Ichidan
+  'ったら'
+];
+
 /// An entity used to neatly return and organise results fetched from
 /// ImmersionKit.
 class ImmersionKitResult {
@@ -176,53 +233,50 @@ class ImmersionKitEnhancement extends Enhancement {
     );
   }
 
-  TextRange _getLongestSubstring(
-      {required String text, required String substring}) {
-    var bestIndex = -1;
-    var bestLength = -1;
-    for (int i = substring.length; i > -1; i--) {
-      var subString = substring.substring(0, i);
-      int start = text.indexOf(subString);
-      if (start != -1) {
-        bestIndex = start;
-        bestLength = subString.length;
-        break;
-      }
-    }
-
-    return TextRange(start: bestIndex, end: bestIndex + bestLength);
-  }
-
   TextRange _getRangeFromIndexedList({
     required List<int> wordIndices,
     required List<String> wordList,
+    required String term,
   }) {
     if (wordIndices.isEmpty) {
       return TextRange.empty;
     } else {
-      int length = wordList[wordIndices.first].length;
       String beforeFirst = wordList.sublist(0, wordIndices.first).join();
+
+      bool maybeIchidan = term.endsWith('る');
+      bool maybeGodan = _godanEndings.contains(term.characters.last);
+
+      var length = wordList[wordIndices.first].length;
+      var index = wordIndices.first + 1;
+      // Keep adding to the cloze, if:
+      // - it is shorter than the term
+      // - it might be a conjugated godan verb (longer than term)
+      // - we are not at the end of the sentence
+      while ((length < term.length ||
+              (maybeGodan &&
+                  length == term.length &&
+                  wordList[index - 1].endsWith('っ'))) &&
+          index < wordList.length) {
+        var nextWord = wordList[index];
+
+        // If the term could be an ichidan verb, we are one letter short of the
+        // whole term, and the next word is not a possible conjugation for
+        // ichidan or godan with る, break and return the stem
+        if (maybeIchidan &&
+            length == term.length - 1 &&
+            !_ichidanAndRuGodanConjugations.contains(nextWord)) {
+          break;
+        }
+
+        length += nextWord.length;
+        index++;
+      }
 
       return TextRange(
         start: beforeFirst.length,
         end: beforeFirst.length + length,
       );
     }
-  }
-
-  TextRange _getBestClozeCandidate({
-    required String text,
-    required String term,
-    required List<int> wordIndices,
-    required List<String> wordList,
-  }) {
-    var range1 = _getLongestSubstring(text: text, substring: term);
-    var range2 =
-        _getRangeFromIndexedList(wordIndices: wordIndices, wordList: wordList);
-
-    return (range1.end - range1.start) > (range2.end - range2.start)
-        ? range1
-        : range2;
   }
 
   /// Search the Massif API for example sentences and return a list of results.
@@ -285,11 +339,10 @@ class ImmersionKitEnhancement extends Enhancement {
           audioUrl: audioUrl,
           wordList: wordList,
           wordIndices: wordIndices,
-          calculateRange: () => _getBestClozeCandidate(
-            term: searchTerm,
-            text: text,
+          calculateRange: () => _getRangeFromIndexedList(
             wordIndices: wordIndices,
             wordList: wordList,
+            term: searchTerm,
           ),
         );
 
