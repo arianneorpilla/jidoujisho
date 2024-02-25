@@ -11,19 +11,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 import 'package:http/http.dart' as http;
+import 'package:yuuna/src/creator/enhancements/jp_conjugations.dart';
 import 'package:yuuna/utils.dart';
 
-const List<String> _godanEndings = [
-  'う',
-  'つ',
-  'る',
-  'ぶ',
-  'む',
-  'ぬ',
-  'く',
-  'ぐ',
-  'す'
-];
 const List<String> _ichidanAndRuGodanConjugations = [
   // Ichidan with ru ending
   'る',
@@ -244,19 +234,31 @@ class ImmersionKitEnhancement extends Enhancement {
       String beforeFirst = wordList.sublist(0, wordIndices.first).join();
 
       bool maybeIchidan = term.endsWith('る');
-      bool maybeGodan = _godanEndings.contains(term.characters.last);
+      String? godanEnding =
+          godanConjugations.keys.contains(term.characters.last)
+              ? term.characters.last
+              : null;
 
       var length = wordList[wordIndices.first].length;
       var index = wordIndices.first + 1;
       // Keep adding to the cloze, if:
       // - it is shorter than the term
       // - it might be a conjugated godan verb (longer than term)
+      //    AND the next word is a valid conjugation for the godan verb
       // - we are not at the end of the sentence
-      while ((length < term.length ||
-              (maybeGodan &&
-                  length == term.length &&
-                  wordList[index - 1].endsWith('っ'))) &&
-          index < wordList.length) {
+      while (
+          // - we are not at the end of the sentence
+          index < wordList.length &&
+              (
+                  // - it is shorter than the term
+                  length < term.length ||
+                      // - it might be a conjugated godan verb (longer than term)
+                      (godanEnding != null &&
+                          length == term.length &&
+                          // AND the next word is a valid conjugation for the godan verb
+                          godanConjugations[godanEnding]!.contains(
+                              wordList[index - 1].characters.last +
+                                  wordList[index])))) {
         var nextWord = wordList[index];
 
         // If the term could be an ichidan verb, we are one letter short of the
@@ -264,7 +266,8 @@ class ImmersionKitEnhancement extends Enhancement {
         // ichidan or godan with る, break and return the stem
         if (maybeIchidan &&
             length == term.length - 1 &&
-            !_ichidanAndRuGodanConjugations.contains(nextWord)) {
+            !ichidanConjugations.contains(nextWord) &&
+            !godanConjugations['る']!.contains(nextWord)) {
           break;
         }
 
