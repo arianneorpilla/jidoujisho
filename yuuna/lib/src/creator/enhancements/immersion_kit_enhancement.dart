@@ -14,52 +14,6 @@ import 'package:http/http.dart' as http;
 import 'package:yuuna/src/creator/enhancements/jp_conjugations.dart';
 import 'package:yuuna/utils.dart';
 
-const List<String> _ichidanAndRuGodanConjugations = [
-  // Ichidan with ru ending
-  'る',
-  'ない',
-  'ます',
-  'ません',
-  'た',
-  'なかった',
-  'ました',
-  'ませんでした',
-  'て',
-  'なくて',
-  'られる',
-  'られない',
-  'られる',
-  // られる & られない, passive and potential are the same
-  'させる',
-  'させない',
-  'させられる',
-  'させられない',
-  'ろ',
-  'るな',
-  'たら',
-  // Godan with ru ending
-  // る, non-past same as ichidan
-  'らない',
-  'ります',
-  'りません',
-  'った',
-  'らなかった',
-  'りました',
-  'りませんでした',
-  'って',
-  'らなくて',
-  'れる',
-  'れない',
-  // られる & られない, passive same as ichidan
-  'らせる',
-  'らせない',
-  'らせられる',
-  'らせられない',
-  'れ',
-  // るな, negative imperative same as Ichidan
-  'ったら'
-];
-
 /// An entity used to neatly return and organise results fetched from
 /// ImmersionKit.
 class ImmersionKitResult {
