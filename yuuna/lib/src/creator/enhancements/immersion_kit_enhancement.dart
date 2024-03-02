@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 import 'package:http/http.dart' as http;
+import 'package:yuuna/src/creator/enhancements/jp_conjugations.dart';
 import 'package:yuuna/utils.dart';
 
 /// An entity used to neatly return and organise results fetched from
@@ -24,6 +25,7 @@ class ImmersionKitResult {
     required this.audioUrl,
     required this.wordList,
     required this.wordIndices,
+    required this.calculateRange,
   });
 
   /// The sentence in plain unformatted form.
@@ -44,19 +46,15 @@ class ImmersionKitResult {
   /// Index of the words to highlight.
   List<int> wordIndices;
 
-  /// Get the range for this result for cloze purposes.
-  TextRange get range {
-    if (wordIndices.isEmpty) {
-      return TextRange.empty;
-    } else {
-      int length = wordList[wordIndices.first].length;
-      String beforeFirst = wordList.sublist(0, wordIndices.first).join();
+  TextRange? _calculatedRange;
 
-      return TextRange(
-        start: beforeFirst.length,
-        end: beforeFirst.length + length,
-      );
-    }
+  /// Function to calculate the range of search term
+  TextRange Function() calculateRange;
+
+  /// Get the range for this result for cloze purposes
+  TextRange get range {
+    _calculatedRange ??= calculateRange();
+    return _calculatedRange!;
   }
 
   /// Get a selection with this result's text and range.
@@ -179,6 +177,65 @@ class ImmersionKitEnhancement extends Enhancement {
     );
   }
 
+  TextRange _getRangeFromIndexedList({
+    required List<int> wordIndices,
+    required List<String> wordList,
+    required String term,
+  }) {
+    if (wordIndices.isEmpty) {
+      return TextRange.empty;
+    } else {
+      String beforeFirst = wordList.sublist(0, wordIndices.first).join();
+
+      bool maybeIchidan = term.endsWith('る');
+      String? godanEnding =
+          godanConjugations.keys.contains(term.characters.last)
+              ? term.characters.last
+              : null;
+
+      var length = wordList[wordIndices.first].length;
+      var index = wordIndices.first + 1;
+      // Keep adding to the cloze, if:
+      // - it is shorter than the term
+      // - it might be a conjugated godan verb (longer than term)
+      //    AND the next word is a valid conjugation for the godan verb
+      // - we are not at the end of the sentence
+      while (
+          // - we are not at the end of the sentence
+          index < wordList.length &&
+              (
+                  // - it is shorter than the term
+                  length < term.length ||
+                      // - it might be a conjugated godan verb (longer than term)
+                      (godanEnding != null &&
+                          length == term.length &&
+                          // AND the next word is a valid conjugation for the godan verb
+                          godanConjugations[godanEnding]!.contains(
+                              wordList[index - 1].characters.last +
+                                  wordList[index])))) {
+        var nextWord = wordList[index];
+
+        // If the term could be an ichidan verb, we are one letter short of the
+        // whole term, and the next word is not a possible conjugation for
+        // ichidan or godan with る, break and return the stem
+        if (maybeIchidan &&
+            length == term.length - 1 &&
+            !ichidanConjugations.contains(nextWord) &&
+            !godanConjugations['る']!.contains(nextWord)) {
+          break;
+        }
+
+        length += nextWord.length;
+        index++;
+      }
+
+      return TextRange(
+        start: beforeFirst.length,
+        end: beforeFirst.length + length,
+      );
+    }
+  }
+
   /// Search the Massif API for example sentences and return a list of results.
   Future<List<ImmersionKitResult>> searchForSentences({
     required AppModel appModel,
@@ -239,6 +296,11 @@ class ImmersionKitEnhancement extends Enhancement {
           audioUrl: audioUrl,
           wordList: wordList,
           wordIndices: wordIndices,
+          calculateRange: () => _getRangeFromIndexedList(
+            wordIndices: wordIndices,
+            wordList: wordList,
+            term: searchTerm,
+          ),
         );
 
         /// Sentence examples that are merely the word itself are pretty
