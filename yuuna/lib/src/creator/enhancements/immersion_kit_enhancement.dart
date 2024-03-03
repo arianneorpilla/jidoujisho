@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -251,19 +250,14 @@ class ImmersionKitEnhancement extends Enhancement {
     int textPosition = wordList.sublist(0, wordIndices.first).join().length;
     int termPosition = 0;
 
-    int longest = 0;
-
-    var termChar = term.characters.elementAtOrNull(termPosition);
-    var textChar = text.characters.elementAtOrNull(textPosition);
-    while (textChar != null && termChar != null && termChar == textChar) {
-      longest++;
+    while (textPosition < text.length &&
+        termPosition < term.length &&
+        term[termPosition] == text[textPosition]) {
       termPosition++;
       textPosition++;
-      termChar = term.characters.elementAtOrNull(termPosition);
-      textChar = text.characters.elementAtOrNull(textPosition);
     }
 
-    return longest;
+    return termPosition;
   }
 
   /// Search the Massif API for example sentences and return a list of results.
