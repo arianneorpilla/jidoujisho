@@ -26,6 +26,7 @@ class ImmersionKitResult {
     required this.wordList,
     required this.wordIndices,
     required this.calculateRange,
+    required this.longestExactMatch,
   });
 
   /// The sentence in plain unformatted form.
@@ -47,6 +48,9 @@ class ImmersionKitResult {
   List<int> wordIndices;
 
   TextRange? _calculatedRange;
+
+  /// How many consecutive characters match the search term exactly
+  int longestExactMatch;
 
   /// Function to calculate the range of search term
   TextRange Function() calculateRange;
@@ -236,6 +240,26 @@ class ImmersionKitEnhancement extends Enhancement {
     }
   }
 
+  int _longestExactRangeForResult({
+    required List<int> wordIndices,
+    required List<String> wordList,
+    required String term,
+    required String text,
+  }) {
+    /// Start at the first character of the given cloze
+    int textPosition = wordList.sublist(0, wordIndices.first).join().length;
+    int termPosition = 0;
+
+    while (textPosition < text.length &&
+        termPosition < term.length &&
+        term[termPosition] == text[textPosition]) {
+      termPosition++;
+      textPosition++;
+    }
+
+    return termPosition;
+  }
+
   /// Search the Massif API for example sentences and return a list of results.
   Future<List<ImmersionKitResult>> searchForSentences({
     required AppModel appModel,
@@ -290,18 +314,23 @@ class ImmersionKitEnhancement extends Enhancement {
         String audioUrl = example['sound_url'];
 
         ImmersionKitResult result = ImmersionKitResult(
-          text: text,
-          source: source,
-          imageUrl: imageUrl,
-          audioUrl: audioUrl,
-          wordList: wordList,
-          wordIndices: wordIndices,
-          calculateRange: () => _getRangeFromIndexedList(
-            wordIndices: wordIndices,
+            text: text,
+            source: source,
+            imageUrl: imageUrl,
+            audioUrl: audioUrl,
             wordList: wordList,
-            term: searchTerm,
-          ),
-        );
+            wordIndices: wordIndices,
+            calculateRange: () => _getRangeFromIndexedList(
+                  wordIndices: wordIndices,
+                  wordList: wordList,
+                  term: searchTerm,
+                ),
+            longestExactMatch: _longestExactRangeForResult(
+              wordIndices: wordIndices,
+              wordList: wordList,
+              text: text,
+              term: searchTerm,
+            ));
 
         /// Sentence examples that are merely the word itself are pretty
         /// redundant.
@@ -313,7 +342,7 @@ class ImmersionKitEnhancement extends Enhancement {
       /// Make sure series aren't too consecutive.
       results.shuffle();
 
-      /// Results with images come first.
+      /// Sort by: has image -> has audio -> longest exact match -> shortest sentence
       results.sort((a, b) {
         int hasImage = (a.imageUrl.isNotEmpty ? -1 : 1)
             .compareTo(b.imageUrl.isNotEmpty ? -1 : 1);
@@ -327,6 +356,13 @@ class ImmersionKitEnhancement extends Enhancement {
 
         if (hasAudio != 0) {
           return hasAudio;
+        }
+
+        /// Sort by longest subterm
+        int longestMatch = b.longestExactMatch.compareTo(a.longestExactMatch);
+
+        if (longestMatch != 0) {
+          return longestMatch;
         }
 
         return a.text.length.compareTo(b.text.length);
