@@ -135,6 +135,7 @@ class StructuredContentImage extends StructuredContent
     this.width,
     this.height,
     this.title,
+    this.alt,
     this.description,
     this.pixelated = false,
     this.imageRendering = 'auto',
@@ -143,6 +144,8 @@ class StructuredContentImage extends StructuredContent
     this.collapsed = false,
     this.collapsible = true,
     this.verticalAlign,
+    this.border,
+    this.borderRadius,
     this.sizeUnits,
   });
 
@@ -157,6 +160,9 @@ class StructuredContentImage extends StructuredContent
 
   /// Hover text for the image.
   final String? title;
+
+  /// Alt text for the image.
+  final String? alt;
 
   /// Description of the image.
   final String? description;
@@ -184,6 +190,12 @@ class StructuredContentImage extends StructuredContent
 
   /// The vertical alignment of the image.
   final String? verticalAlign;
+
+  /// Shorthand for border width, style, and color.
+  final String? border;
+
+  /// Roundness of the corners of the image's outer border edge.
+  final String? borderRadius;
 
   /// The units for the width and height.
   final String? sizeUnits;
@@ -334,6 +346,7 @@ class StructuredContentStyledContainer extends StructuredContent
     super.content,
     this.style,
     this.data,
+    this.title,
     this.lang,
   });
 
@@ -344,6 +357,10 @@ class StructuredContentStyledContainer extends StructuredContent
     'ol',
     'ul',
     'li',
+    /// FIXME: Tags found in Yomitan schema
+    /// Remove once implemented
+    'details',
+    'summary'
   ];
 
   /// Tag name. Must be any of the [validTags].
@@ -354,6 +371,9 @@ class StructuredContentStyledContainer extends StructuredContent
 
   /// Additional attributes.
   final Map<String, String>? data;
+
+  /// Hover text for the element
+  final String? title;
 
   /// Defines the language of an element in the format defined by RFC 5646.
   final String? lang;
@@ -469,19 +489,59 @@ class StructuredContentStyle with StructuredContentStyleMappable {
     this.fontStyle = 'normal',
     this.fontWeight = 'normal',
     this.fontSize = 'medium',
+    // FIXME: Placeholder
+    this.color = 'currentColor',
+    this.background = 'transparent',
+    this.backgroundColor = 'transparent',
     this.textDecorationLine = const [],
+    this.textDecorationStyle = const [],
+    // FIXME: Placeholder
+    this.textDecorationColor = 'currentColor',
+    this.borderColor = 'currentColor',
+    this.borderStyle = 'none',
+    this.borderRadius = '0',
+    this.borderWidth = '0',
+    this.clipPath = 'none',
+    // FIXME: These two don't implement v3 schema
     this.verticalAlign = 'baseline',
     this.textAlign = 'start',
+    // FIXME: Placeholders
+    this.textEmphasis = 'none',
+    this.textShadow = 'none',
+    this.margin = '0',
     this.marginTop = 0,
     this.marginLeft = 0,
     this.marginRight = 0,
     this.marginBottom = 0,
+    this.padding = '0',
+    this.paddingTop = '0',
+    this.paddingLeft = '0',
+    this.paddingRight = '0',
+    this.paddingBottom = '0',
+    this.wordBreak = const [],
+    this.whiteSpace = 'normal',
+    this.cursor = 'auto',
     this.listStyleType = 'disc',
   });
 
   /// Valid list types.
   static List<String> validListStyleTypes =
       ListStyleType.values.map((e) => e.counterStyle).toList();
+
+  static List<String> validWordBreaks = [
+    'normal',
+    'break-all',
+    'keep-all',
+  ];
+
+  /// [textDecorationStyle] must match one of these styles.
+  static List<String> validTextDecorationStyles = [
+    'solid',
+    'double',
+    'dotted',
+    'dashed',
+    'wavy'
+  ];
 
   /// Equivalent to 'font-style'.
   final String fontStyle;
@@ -492,9 +552,40 @@ class StructuredContentStyle with StructuredContentStyleMappable {
   /// Equivalent to 'font-size'.
   final String fontSize;
 
+  /// Equivalent to 'color'.
+  final String color;
+
+  /// Equivalent to 'background'.
+  final String background;
+
+  /// Equivalent to 'background-color'.
+  final String backgroundColor;
+
   /// Equivalent to 'text-decoration-line'.
   @MappableField(hook: TextDecorationLineHooker())
   final List<String> textDecorationLine;
+
+  /// Equivalent to 'text-decoration-style'.
+  /// Must be one of [validTextDecorationStyles].
+  final List<String> textDecorationStyle;
+
+  /// Equivalent to 'text-decoration-color'.
+  final String textDecorationColor;
+
+  /// Equivalent to 'border-color'.
+  final String borderColor;
+
+  /// Equivalent to 'border-style'.
+  final String borderStyle;
+
+  /// Equivalent to 'border-radius'.
+  final String borderRadius;
+
+  /// Equivalent to 'border-width'.
+  final String borderWidth;
+
+  /// Equivalent to 'clip-path'.
+  final String clipPath;
 
   /// Equivalent to 'vertical-align'.
   final String verticalAlign;
@@ -502,6 +593,16 @@ class StructuredContentStyle with StructuredContentStyleMappable {
   /// Equivalent to 'text-align'.
   final String textAlign;
 
+  /// Equivalent to 'text-emphasis'.
+  final String textEmphasis;
+
+  /// Equivalent to 'text-shadow'.
+  final String textShadow;
+
+  /// Equivalent to 'margin'.
+  final String margin;
+
+  /// TODO: Can either be number or string
   /// Equivalent to 'margin-top'.
   final double marginTop;
 
@@ -514,6 +615,30 @@ class StructuredContentStyle with StructuredContentStyleMappable {
   /// Equivalent to 'margin-bottom'.
   final double marginBottom;
 
+  /// Equivalent to 'padding'.
+  final String padding;
+
+  /// Equivalent to 'padding-top'.
+  final String paddingTop;
+
+  /// Equivalent to 'padding-left'.
+  final String paddingLeft;
+
+  /// Equivalent to 'padding-right'.
+  final String paddingRight;
+
+  /// Equivalent to 'padding-bottom'.
+  final String paddingBottom;
+
+  /// Equivalent to 'word-break'.
+  final List<String> wordBreak;
+
+  /// Equivalent to 'white-space'.
+  final String whiteSpace;
+
+  /// Equivalent to 'cursor'.
+  final String cursor;
+
   /// Equivalent to 'list-style-type'.
   final String listStyleType;
 
@@ -523,13 +648,34 @@ class StructuredContentStyle with StructuredContentStyleMappable {
       'font-style': fontStyle,
       'font-weight': fontWeight,
       'font-size': fontSize,
+      'color': color,
+      'background': background,
+      'background-color': backgroundColor,
       'text-decoration-line': textDecorationLine.join(' '),
+      'text-decoration-style': textDecorationStyle,
+      'text-decoration-color': textDecorationColor,
+      'border-color': borderColor,
+      'border-style': borderStyle,
+      'border-radius': borderRadius,
+      'border-width': borderWidth,
+      'clip-path': clipPath,
       'vertical-align': verticalAlign,
       'text-align': textAlign,
+      'text-emphasis': textEmphasis,
+      'text-shadow': textShadow,
+      'margin': margin,
       'margin-top': marginTop.toString(),
       'margin-left': marginLeft.toString(),
       'margin-right': marginRight.toString(),
       'margin-bottom': marginBottom.toString(),
+      'padding': padding,
+      'padding-top': paddingTop,
+      'padding-left': paddingLeft,
+      'padding-right': paddingRight,
+      'padding-bottom': paddingBottom,
+      'word-break': wordBreak.join(' '),
+      'white-space': whiteSpace,
+      'cursor': cursor,
       'list-style-type': listStyleType == 'disc' ||
               (!validListStyleTypes.contains(listStyleType))
           ? 'square'
