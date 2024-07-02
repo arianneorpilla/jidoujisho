@@ -305,6 +305,8 @@ class StructuredContent {
       }
     }
 
+    /// text-emphasis is not supported by flutter_html, so let's just underline
+    /// instead
     if (style['textEmphasis'] is String) {
       styleAttributes.add('text-decoration-line: underline');
     }
