@@ -56,11 +56,7 @@ class YomichanFormat extends DictionaryFormat {
 
   @override
   String getCustomDefinitionText(String meaning) {
-    final node =
-        StructuredContent.processContent(jsonDecode(meaning))?.toNode();
-    if (node == null) {
-      return '';
-    }
+    final node = StructuredContent.processContent(jsonDecode(meaning));
 
     final document = dom.Document.html('');
     document.body?.append(node);
@@ -269,10 +265,12 @@ void prepareEntriesYomichanFormat({
         isar.dictionaryHeadings.putSync(heading);
 
         n++;
-        params.send(t.import_write_entry(
-          count: n,
-          total: total,
-        ));
+        if (n % 1000 == 0) {
+          params.send(t.import_write_entry(
+            count: n,
+            total: total,
+          ));
+        }
       }
     } else if (filename.startsWith('kanji_bank')) {
       List<dynamic> items = jsonDecode(file.readAsStringSync());
@@ -341,10 +339,12 @@ void prepareEntriesYomichanFormat({
           isar.dictionaryHeadings.putSync(heading);
 
           n++;
-          params.send(t.import_write_entry(
-            count: n,
-            total: total,
-          ));
+          if (n % 1000 == 0) {
+            params.send(t.import_write_entry(
+              count: n,
+              total: total,
+            ));
+          }
         }
       }
     }

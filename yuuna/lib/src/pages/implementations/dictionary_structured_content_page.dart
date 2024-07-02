@@ -12,6 +12,40 @@ import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/utils.dart';
 
+/// Wraps a [JidoujishoTag] around a span of text.
+class JidoujishoTagExtension extends HtmlExtension {
+
+  /// Create an instance of this extension.
+  const JidoujishoTagExtension();
+
+  @override
+  Set<String> get supportedTags => {'span'};
+
+  @override
+  bool matches(ExtensionContext context) {
+    if (context.currentStep != CurrentStep.building) {
+      return false;
+    }
+
+    /// Matching titles is a bit hacky, but it works for now.
+    return context.attributes.containsKey('data-sc-code') ||
+        context.attributes['title'] == 'spelling and reading variants';
+  }
+
+  @override
+  InlineSpan build(ExtensionContext context) {
+    final text = context.element?.text;
+    final String infoText = context.attributes['title'] ?? 'no description';
+
+    return WidgetSpan(
+        child: JidoujishoTag(
+            text: '$text',
+            message: infoText,
+            backgroundColor: Colors.red.shade900)
+    );
+  }
+}
+
 /// Provides and caches the processed HTML of a [DictionaryEntry] to improve
 /// performance.
 final dictionaryEntryHtmlProvider =
@@ -19,15 +53,12 @@ final dictionaryEntryHtmlProvider =
   return entry.definitions
       .map((e) {
         try {
-          final node =
-              StructuredContent.processContent(jsonDecode(e))?.toNode();
-          if (node == null) {
-            return '';
-          }
+          final node = StructuredContent.processContent(jsonDecode(e));
 
           final document = dom.Document.html('');
           document.body?.append(node);
           final html = document.body?.innerHtml ?? '';
+          print('Processed content: $html');
 
           return html;
         } catch (_) {
@@ -64,6 +95,13 @@ class DictionaryHtmlWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    /// Fixes Intrinsics not available for PlaceholderAlignment caused by nested
+    /// tables
+    /// Currently, the branch that fixes this also breaks nested lists text
+    /// alignment.
+    /// So we are using this workaround for now.
+    /// See https://github.com/Sub6Resources/flutter_html/pull/1306 for updates.
+    RenderObject.debugCheckingIntrinsics = true;
     final textColor = Theme.of(context).brightness == Brightness.dark
         ? Colors.white
         : Colors.black;
@@ -74,11 +112,13 @@ class DictionaryHtmlWidget extends ConsumerWidget {
     final tableBorder = Border.all(color: textColor, width: tableWidth);
     final tableStyle = Style(
       border: tableBorder,
+      /// Hack for misaligned text in tables
+      padding: HtmlPaddings.only(right: 5),
     );
 
     return Html(
       data: ref.watch(dictionaryEntryHtmlProvider(entry)),
-      shrinkWrap: true,
+      shrinkWrap: false,
       onAnchorTap: (url, attributes, element) {
         onSearch.call(attributes['query'] ?? element?.text ?? 'f');
       },
@@ -89,15 +129,20 @@ class DictionaryHtmlWidget extends ConsumerWidget {
         ),
         'td': tableStyle,
         'th': tableStyle,
-        'ul': Style(
-          padding: HtmlPaddings.zero,
+        'ul, ol': Style(
+          display: Display.block,
+          padding: HtmlPaddings.only(left: 0),
         ),
-        'li': Style(
-          padding: HtmlPaddings.zero,
-        ),
+        'ul ul, ul ol, ol ul, ol ol':
+            Style(padding: HtmlPaddings.only(left: 15)),
+        'ul ul ul, ul ul ol, ul ol ul, ul ol ol, ol ul ul, ol ul ol, ol ol ul, ol ol ol':
+          Style(padding: HtmlPaddings.only(left: 15)),
         'a': Style(color: linkColor),
+        'a ruby': Style(color: linkColor),
+        'a ruby rt': Style(color: linkColor),
       },
       extensions: [
+        const JidoujishoTagExtension(),
         const TableHtmlExtension(),
         ImageExtension.inline(
           networkSchemas: {'jidoujisho'},

@@ -693,10 +693,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_layout_grid
-      sha256: "3529b7aa7ed2cb9861a0bbaa5c14d4be2beaf5a070ce0176077159f80c5de094"
+      sha256: "88b4f8484a0874962e27c47733ad256aeb26acc694a9f029edbef771d301885a"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.5"
+    version: "2.0.7"
   flutter_lints:
     dependency: "direct dev"
     description:

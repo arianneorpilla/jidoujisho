@@ -52,7 +52,7 @@ class DictionaryTermPage extends ConsumerWidget {
   /// Lists the order of dictionaries.
   final Map<String, int> dictionaryNamesByOrder;
 
-  /// Optional footer foor use in [DictionaryHistoryPage].
+  /// Optional footer for use in [DictionaryHistoryPage].
   final Widget? footerWidget;
 
   /// Override color for card background color.
