@@ -61,6 +61,8 @@ class DictionaryEntry {
   @Index()
   final double popularity;
 
+  /// TODO: Add deflection
+
   /// Returns all definitions bullet pointed if multiple, and returns the
   /// single definition if otherwise.
   String get compactDefinitions {
