@@ -2115,14 +2115,14 @@ class _HomeState extends State<Home> {
         );
         break;
       case "View repository on GitHub":
-        await launch("https://github.com/lrorpilla/jidoujisho");
+        await launch("https://github.com/arianneorpilla/jidoujisho");
         break;
       case "Report a bug or problem":
-        await launch("https://github.com/lrorpilla/jidoujisho/issues/new");
+        await launch("https://github.com/arianneorpilla/jidoujisho/issues/new");
         break;
       case "About this app":
         const String legalese = "A mobile video player, reader assistant, image mining workflow and card creation toolkit tailored for language learners.\n\n" +
-            "Built for the Japanese language learning community by Leo Rafael Orpilla. " +
+            "Built for the Japanese language learning community by Arianne Orpilla. " +
             "Bilingual online definitions queried from Jisho.org. Monolingual online definitions queried from Sora. Pitch accent patterns from Kanjium. " +
             "Reader WebView linked to ッツ Ebook Reader. Video streaming via YouTube. Image search via Bing. Logo by Aaron Marbella.\n\n" +
             "jidoujisho is free and open source software. Liking the application? " +

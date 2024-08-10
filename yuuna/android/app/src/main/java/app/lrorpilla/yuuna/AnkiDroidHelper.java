@@ -1,6 +1,6 @@
 // Derived from the AnkiDroid API Sample
 
-package app.lrorpilla.yuuna;
+package app.arianneorpilla.yuuna;
 
 import android.app.Activity;
 import android.content.Context;

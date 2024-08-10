@@ -14,7 +14,7 @@ dependencies:
   audioplayers:
   audio_service: 
     git:
-      url: https://github.com/lrorpilla/audio_service
+      url: https://github.com/arianneorpilla/audio_service
       ref: 1820d8cd19d8248fbfc48ff01a5bee939ea0b858
   auto_orientation:
   async:
@@ -51,7 +51,7 @@ dependencies:
   lazy_load_scrollview: ^1.3.0
   mecab_dart:
     git:
-      url: https://github.com/lrorpilla/mecab_dart
+      url: https://github.com/arianneorpilla/mecab_dart
       ref: a822b1ac54ce1fbde33ca7d445c1bfd7dd51ae7c
   minimize_app:
   objectbox:
@@ -61,7 +61,7 @@ dependencies:
   permission_handler:
   photo_view:
       git:
-        url: https://github.com/lrorpilla/photo_view
+        url: https://github.com/arianneorpilla/photo_view
         ref: ae70414abe711b115657fd640527a2a148871847
   progress_indicators:
   receive_sharing_intent:
@@ -77,12 +77,12 @@ dependencies:
   transparent_image: ^2.0.0
   unofficial_jisho_api:
     git:
-      url: https://github.com/lrorpilla/unofficial_jisho_api_dart
+      url: https://github.com/arianneorpilla/unofficial_jisho_api_dart
       ref: 80eb2c7872fc4d5a8c4df141cace39f782987ae8
   url_launcher:
   ve_dart:
     git:
-      url: https://github.com/lrorpilla/ve_dart
+      url: https://github.com/arianneorpilla/ve_dart
       ref: 3ff2d0dcd5dc0fe7e4983f85f9c540d22af1715d
   xml2json:
   youtube_explode_dart:

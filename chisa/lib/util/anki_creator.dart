@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' as intl;
 
 const MethodChannel ankiDroidMethodChannel =
-    MethodChannel('com.lrorpilla.api/ankidroid');
+    MethodChannel('com.arianneorpilla.api/ankidroid');
 
 Future<void> requestAnkiDroidPermissions() async {
   await ankiDroidMethodChannel.invokeMethod('requestPermissions');

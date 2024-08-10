@@ -366,7 +366,7 @@ packages:
       path: package
       ref: "968a4b3e04c4b19de5f3ae8e9c922a220ec67c62"
       resolved-ref: "968a4b3e04c4b19de5f3ae8e9c922a220ec67c62"
-      url: "https://github.com/lrorpilla/filesystem_picker"
+      url: "https://github.com/arianneorpilla/filesystem_picker"
     source: git
     version: "2.0.0-nullsafety.0"
   firebase_analytics:
@@ -1284,7 +1284,7 @@ packages:
       path: "."
       ref: "9c5307d1cbe3a9ca84c387e2023251896c9ff47f"
       resolved-ref: "9c5307d1cbe3a9ca84c387e2023251896c9ff47f"
-      url: "https://github.com/lrorpilla/subtitle"
+      url: "https://github.com/arianneorpilla/subtitle"
     source: git
     version: "0.1.0-beta.2"
   synchronized:
@@ -1419,7 +1419,7 @@ packages:
       path: "."
       ref: c366bb1ae24f6fad4f5c7e3a1efad5f2b8122e58
       resolved-ref: c366bb1ae24f6fad4f5c7e3a1efad5f2b8122e58
-      url: "https://github.com/lrorpilla/ve_dart"
+      url: "https://github.com/arianneorpilla/ve_dart"
     source: git
     version: "0.2.1"
   vector_math:

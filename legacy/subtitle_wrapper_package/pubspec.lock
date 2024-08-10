@@ -870,7 +870,7 @@ packages:
       path: "."
       ref: "177cbf14d383b5a3b85bc41c65524c22efff04c4"
       resolved-ref: "177cbf14d383b5a3b85bc41c65524c22efff04c4"
-      url: "https://github.com/lrorpilla/ve_dart"
+      url: "https://github.com/arianneorpilla/ve_dart"
     source: git
     version: "0.2.0"
   vector_math:

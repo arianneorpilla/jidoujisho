@@ -109,7 +109,7 @@
     "dialog_content_dictionary_delete": "Deleting a single dictionary may take longer than clearing the entire dictionary database. This will also clear all search results in history.",
     "delete_dictionary_data": "Clearing all dictionary data...",
     "dictionary_tag": "Imported from $name",
-    "legalese": "A full-featured immersion language learning suite for mobile.\n\nOriginally built for the Japanese language learning community by Leo Rafael Orpilla. Logo by suzy and Aaron Marbella.\n\njidoujisho is free and open source software. See the project repository for a comprehensive list of other licenses and attribution notices. Enjoying the application? Help out by providing feedback, making a donation, reporting issues or contributing improvements on GitHub.",
+    "legalese": "A full-featured immersion language learning suite for mobile.\n\nOriginally built for the Japanese language learning community by Arianne Orpilla. Logo by suzy and Aaron Marbella.\n\njidoujisho is free and open source software. See the project repository for a comprehensive list of other licenses and attribution notices. Enjoying the application? Help out by providing feedback, making a donation, reporting issues or contributing improvements on GitHub.",
     "same_name_dictionary_found": "Dictionary with same name found.",
     "import_file_extension_invalid":
         "This format expects files with the following extensions: $extensions",

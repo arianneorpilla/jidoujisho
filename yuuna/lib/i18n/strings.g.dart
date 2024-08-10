@@ -254,7 +254,7 @@ class _StringsEn implements BaseTranslations<AppLocale, _StringsEn> {
 	String get dialog_content_dictionary_delete => 'Deleting a single dictionary may take longer than clearing the entire dictionary database. This will also clear all search results in history.';
 	String get delete_dictionary_data => 'Clearing all dictionary data...';
 	String dictionary_tag({required Object name}) => 'Imported from ${name}';
-	String get legalese => 'A full-featured immersion language learning suite for mobile.\n\nOriginally built for the Japanese language learning community by Leo Rafael Orpilla. Logo by suzy and Aaron Marbella.\n\njidoujisho is free and open source software. See the project repository for a comprehensive list of other licenses and attribution notices. Enjoying the application? Help out by providing feedback, making a donation, reporting issues or contributing improvements on GitHub.';
+	String get legalese => 'A full-featured immersion language learning suite for mobile.\n\nOriginally built for the Japanese language learning community by Arianne Orpilla. Logo by suzy and Aaron Marbella.\n\njidoujisho is free and open source software. See the project repository for a comprehensive list of other licenses and attribution notices. Enjoying the application? Help out by providing feedback, making a donation, reporting issues or contributing improvements on GitHub.';
 	String get same_name_dictionary_found => 'Dictionary with same name found.';
 	String import_file_extension_invalid({required Object extensions}) => 'This format expects files with the following extensions: ${extensions}';
 	String get field_label_empty => 'Empty';
@@ -683,7 +683,7 @@ extension on _StringsEn {
 			case 'dialog_content_dictionary_delete': return 'Deleting a single dictionary may take longer than clearing the entire dictionary database. This will also clear all search results in history.';
 			case 'delete_dictionary_data': return 'Clearing all dictionary data...';
 			case 'dictionary_tag': return ({required Object name}) => 'Imported from ${name}';
-			case 'legalese': return 'A full-featured immersion language learning suite for mobile.\n\nOriginally built for the Japanese language learning community by Leo Rafael Orpilla. Logo by suzy and Aaron Marbella.\n\njidoujisho is free and open source software. See the project repository for a comprehensive list of other licenses and attribution notices. Enjoying the application? Help out by providing feedback, making a donation, reporting issues or contributing improvements on GitHub.';
+			case 'legalese': return 'A full-featured immersion language learning suite for mobile.\n\nOriginally built for the Japanese language learning community by Arianne Orpilla. Logo by suzy and Aaron Marbella.\n\njidoujisho is free and open source software. See the project repository for a comprehensive list of other licenses and attribution notices. Enjoying the application? Help out by providing feedback, making a donation, reporting issues or contributing improvements on GitHub.';
 			case 'same_name_dictionary_found': return 'Dictionary with same name found.';
 			case 'import_file_extension_invalid': return ({required Object extensions}) => 'This format expects files with the following extensions: ${extensions}';
 			case 'field_label_empty': return 'Empty';

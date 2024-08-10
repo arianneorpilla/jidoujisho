@@ -1,6 +1,6 @@
 // Derived from the AnkiDroid API Sample
 
-package com.lrorpilla.jidoujisho;
+package com.arianneorpilla.jidoujisho;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -45,7 +45,7 @@ import java.util.Set;
 
 
 public class MainActivity extends FlutterActivity {
-    private static final String ANKIDROID_CHANNEL = "com.lrorpilla.api/ankidroid";
+    private static final String ANKIDROID_CHANNEL = "com.arianneorpilla.api/ankidroid";
     private static final String YOUTUDEDL_CHANNEL = "flutter_youtube_dl/nativelibdir";
 
     private static final int AD_PERM_REQUEST = 0;

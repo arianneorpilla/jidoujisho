@@ -1040,7 +1040,7 @@ class AppModel with ChangeNotifier {
 
     List<BrowserBookmark> defaultBookmarks = [
       BrowserBookmark(
-          name: 'jidoujisho', url: 'https://github.com/lrorpilla/jidoujisho'),
+          name: 'jidoujisho', url: 'https://github.com/arianneorpilla/jidoujisho'),
       BrowserBookmark(name: 'Google', url: 'https://google.com/'),
       BrowserBookmark(name: 'DuckDuckGo', url: 'https://duckduckgo.com/'),
       BrowserBookmark(name: 'Wikipedia', url: 'https://wikipedia.org/'),
@@ -1868,7 +1868,7 @@ class AppModel with ChangeNotifier {
 
   /// Used to communicate back and forth with Dart and native code.
   static const MethodChannel methodChannel =
-      MethodChannel('app.lrorpilla.yuuna/anki');
+      MethodChannel('app.arianneorpilla.yuuna/anki');
 
   /// Shows the AnkiDroid API message. Called when an Anki-related API get call
   /// fails.
@@ -3430,7 +3430,7 @@ class AppModel with ChangeNotifier {
         },
       ),
       config: const ag.AudioServiceConfig(
-        androidNotificationChannelId: 'app.lrorpilla.yuuna.channel.audio',
+        androidNotificationChannelId: 'app.arianneorpilla.yuuna.channel.audio',
         androidNotificationChannelName: 'jidoujisho',
         androidNotificationIcon: 'drawable/splash',
         notificationColor: Colors.black,

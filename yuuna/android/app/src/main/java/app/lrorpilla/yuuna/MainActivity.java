@@ -1,6 +1,6 @@
 // Derived from the AnkiDroid API Sample
 
-package app.lrorpilla.yuuna;
+package app.arianneorpilla.yuuna;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -32,7 +32,7 @@ import com.ryanheise.audioservice.AudioServiceActivity;
 import android.content.res.Configuration;
 
 public class MainActivity extends AudioServiceActivity {
-    private static final String ANKIDROID_CHANNEL = "app.lrorpilla.yuuna/anki";
+    private static final String ANKIDROID_CHANNEL = "app.arianneorpilla.yuuna/anki";
     private static final int AD_PERM_REQUEST = 0;
 
     private Activity context;

@@ -239,7 +239,7 @@ class AppModel with ChangeNotifier {
         },
       ),
       config: const AudioServiceConfig(
-        androidNotificationChannelId: 'app.lrorpilla.jidoujisho.channel.audio',
+        androidNotificationChannelId: 'app.arianneorpilla.jidoujisho.channel.audio',
         androidNotificationChannelName: 'jidoujisho',
       ),
     );

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/lrorpilla/jidoujisho/blob/main/chisa/assets/icon/icon.png" width="120" height="120">
+  <img src="https://github.com/arianneorpilla/jidoujisho/blob/main/chisa/assets/icon/icon.png" width="120" height="120">
 </p>
 
 
@@ -7,34 +7,34 @@
 <p align="center">A mobile video player, reader assistant, image mining workflow and card creation toolkit tailored for language learners.</p>
 
 <p align="center" style="margin:0"><b>Latest GitHub Release:<br>
-<a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.26.3-beta">0.26.3-beta 🇯🇵 → 🇬🇧</a></b><br>
+<a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.26.3-beta">0.26.3-beta 🇯🇵 → 🇬🇧</a></b><br>
 </p>
 
 <p align="center" style="margin:0"><b>Release Archive:<br>
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.3.0-beta">0.3</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.4-beta">0.4</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.2-beta">0.5</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.6.1-beta">0.6</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.7.2-beta">0.7</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.8.1-beta">0.8</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.9.3-beta">0.9</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.10.0-beta">0.10</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.11.3-beta">0.11</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.12.4-beta">0.12</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.13.7-beta">0.13</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.14.2-beta">0.14</a> ·
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.15.8-beta">0.15</a> ·
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.7-beta">0.16</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.17.4-beta">0.17</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.18.1-beta">0.18</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.19.1-beta">0.19</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.20.1-beta">0.20</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.21.2-beta">0.21</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.22.1-beta">0.22</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.23.2-beta">0.23</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.24.5-beta">0.24</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.25.12-beta">0.25</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.26.3-beta">0.26</a>
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.3.0-beta">0.3</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.4-beta">0.4</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.5.2-beta">0.5</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.6.1-beta">0.6</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.7.2-beta">0.7</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.8.1-beta">0.8</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.9.3-beta">0.9</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.10.0-beta">0.10</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.11.3-beta">0.11</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.12.4-beta">0.12</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.13.7-beta">0.13</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.14.2-beta">0.14</a> ·
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.15.8-beta">0.15</a> ·
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.16.7-beta">0.16</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.17.4-beta">0.17</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.18.1-beta">0.18</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.19.1-beta">0.19</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.20.1-beta">0.20</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.21.2-beta">0.21</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.22.1-beta">0.22</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.23.2-beta">0.23</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.24.5-beta">0.24</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.25.12-beta">0.25</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.26.3-beta">0.26</a>
 </b></p>
 
 # 📚 Uninterrupted language immersion at your fingertips
@@ -60,7 +60,7 @@
 
 **jidoujisho is still in development, and is currently in hiatus. The project will receive fixes to critical bugs and issues. Rollout of new features will resume in time.** 
 
-Built for the Japanese language learning community, the application is free and open source software, and is <b><a href="https://github.com/lrorpilla/jidoujisho/releases">available to download here on GitHub.</a></b> Current features planned on the roadmap are listed below, but as of now there is no estimate on any updates.
+Built for the Japanese language learning community, the application is free and open source software, and is <b><a href="https://github.com/arianneorpilla/jidoujisho/releases">available to download here on GitHub.</a></b> Current features planned on the roadmap are listed below, but as of now there is no estimate on any updates.
 
 Please note that the development of the app switches between changes being implemented and being left alone for daily use. Update frequency may depend on the gravity of any issues that arise. **Hiatuses provide practical insight on usage and where development should go next.**
 
@@ -122,7 +122,7 @@ If you wish to use external subtitles, they may be in **SRT, ASS or SSA format**
 ### ☝️ Important Links
 
 Below are some links that some users might find useful.
-* <b><a href="https://github.com/lrorpilla/jidoujisho/blob/main/TEMPLATE.md">jidoujisho Anki Template</a></b>
+* <b><a href="https://github.com/arianneorpilla/jidoujisho/blob/main/TEMPLATE.md">jidoujisho Anki Template</a></b>
 * <b><a href="https://reddit.com/r/LearnJapanese/comments/lcf9wi/jidoujisho_a_mobile_video_player_tailored_for/">Debut Reddit discussion thread</a></b>
 * <b><a href="https://old.reddit.com/r/LearnJapanese/comments/mp75r3/jidoujisho_09_development_update/">Dev update (0.9) Reddit discussion thread</a></b>
 
@@ -130,7 +130,7 @@ Below are some links that some users might find useful.
 
 A primer on the basics of the application is as follows.
 
-* 📲 <a href="https://github.com/lrorpilla/jidoujisho/releases/"/>**Download and install the latest beta**</a> onto your Android device
+* 📲 <a href="https://github.com/arianneorpilla/jidoujisho/releases/"/>**Download and install the latest beta**</a> onto your Android device
 * ⏯️ Watch a video with the *Player* selecting from your **local media library** or **picking a YouTube video**
 * 📚 Start a novel with the *Reader* to launch ッツ Ebook Reader to read an **EPUB** or **HTMLZ** file
 * 🖼 Read manga from your [**Tachiyomi**](https://tachiyomi.org/) library with the *Viewer* and launch [**Kaku**](https://kaku.fuwafuwa.ca/) to pass text to the app 
@@ -176,7 +176,7 @@ A primer on the basics of the application is as follows.
 
 jidoujisho is written in <b><a href="https://dart.dev/">Dart</a></b> and powered by <b><a href="https://flutter.dev/">Flutter</a></b>. Bilingual online dictionary definitions are queried from <b><a href="https://jisho.org/">Jisho.org</a></b> and monolingual online dictionary definitions are from <b><a href="https://sakura-paris.org/">Sora</a></b>. Pitch accent patterns are sourced from <b><a href="https://github.com/mifunetoshiro/kanjium">Kanjium</a></b>. Reader WebView linked to <b><a href="https://ttu-ebook.web.app">ッツ Ebook Reader</b></a>. Video streaming via <b><a href="https://youtube.com/">YouTube</a></b>. Image search via <b><a href="https://bing.com//">Bing</a></b>.
 
-If you like what I've done so far, you can help me out by testing the application on various devices so that I can gauge the compatibility of the application with different versions of Android, <b><a href="https://www.buymeacoffee.com/lrorpilla">making a donation</a></b> or collaborating with me on further improvements.
+If you like what I've done so far, you can help me out by testing the application on various devices so that I can gauge the compatibility of the application with different versions of Android, <b><a href="https://www.buymeacoffee.com/arianneorpilla">making a donation</a></b> or collaborating with me on further improvements.
 
 The logo of the application is by <b><a href="https://www.buymeacoffee.com/marblesaa">Aaron Marbella</a></b>, support his awesome work if you can!
 
