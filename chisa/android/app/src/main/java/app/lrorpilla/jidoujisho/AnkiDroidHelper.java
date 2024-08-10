@@ -1,6 +1,6 @@
 // Derived from the AnkiDroid API Sample
 
-package app.lrorpilla.jidoujisho;
+package app.arianneorpilla.jidoujisho;
 
 import android.app.Activity;
 import android.content.Context;

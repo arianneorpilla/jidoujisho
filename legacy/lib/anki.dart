@@ -17,7 +17,7 @@ import 'package:jidoujisho/preferences.dart';
 import 'package:jidoujisho/util.dart';
 
 Future<void> requestAnkiDroidPermissions() async {
-  const platform = const MethodChannel('com.lrorpilla.api/ankidroid');
+  const platform = const MethodChannel('com.arianneorpilla.api/ankidroid');
   await platform.invokeMethod('requestPermissions');
 }
 
@@ -594,7 +594,7 @@ Future<void> addNote(
   String meaning,
   String reading,
 ) async {
-  const platform = const MethodChannel('com.lrorpilla.api/ankidroid');
+  const platform = const MethodChannel('com.arianneorpilla.api/ankidroid');
 
   try {
     await platform.invokeMethod('addNote', <String, dynamic>{
@@ -621,7 +621,7 @@ Future<void> addCreatorNote(
   String meaning,
   String reading,
 ) async {
-  const platform = const MethodChannel('com.lrorpilla.api/ankidroid');
+  const platform = const MethodChannel('com.arianneorpilla.api/ankidroid');
 
   try {
     await platform.invokeMethod("addNote", <String, dynamic>{
@@ -640,7 +640,7 @@ Future<void> addCreatorNote(
 }
 
 Future<List<String>> getDecks() async {
-  const platform = const MethodChannel('com.lrorpilla.api/ankidroid');
+  const platform = const MethodChannel('com.arianneorpilla.api/ankidroid');
   Map<dynamic, dynamic> deckMap = await platform.invokeMethod('getDecks');
 
   return deckMap.values.toList().cast<String>();
@@ -651,7 +651,7 @@ Future<String> addMediaFromUri(
   String preferredName,
   String mimeType,
 ) async {
-  const platform = const MethodChannel('com.lrorpilla.api/ankidroid');
+  const platform = const MethodChannel('com.arianneorpilla.api/ankidroid');
 
   try {
     return await platform.invokeMethod('addMediaFromUri', <String, dynamic>{

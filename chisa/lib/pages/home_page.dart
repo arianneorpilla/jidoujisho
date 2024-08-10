@@ -354,7 +354,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           label: appModel.translate("options_github"),
           icon: Icons.code,
           action: () async {
-            await launch("https://github.com/lrorpilla/jidoujisho");
+            await launch("https://github.com/arianneorpilla/jidoujisho");
           },
         ),
         popupItem(
@@ -364,7 +364,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
             const String legalese = "A highly versatile and modular framework "
             "enabling language-agnostic immersion learning on mobile. \n\n"
             "Originally built for the Japanese language learning "
-            "community by Leo Rafael Orpilla. Logo by suzy and Aaron Marbella."
+            "community by Arianne Orpilla. Logo by suzy and Aaron Marbella."
             "\n\njidoujisho is free and open source software. Visit the "
                 "repository for a more comprehensive list of other licenses "
                 "and attribution notices. Liking the application? Help out by "

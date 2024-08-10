@@ -16,6 +16,7 @@ class MassifResult {
     required this.range,
     required this.source,
     required this.spans,
+    required this.longestExactMatch,
   });
 
   /// The sentence in plain unformatted form.
@@ -26,6 +27,9 @@ class MassifResult {
 
   /// A formatted widget which may contain highlighted text.
   List<InlineSpan> spans;
+
+  /// How many consecutive characters match the search term exactly
+  int longestExactMatch;
 
   /// First selected range.
   TextRange range;
@@ -100,6 +104,29 @@ class MassifExampleSentencesEnhancement extends Enhancement {
         }
       },
     );
+  }
+
+  int _longestExactRangeForResult({
+    required int? start,
+    required String term,
+    required String text,
+  }) {
+    if (start == null) {
+      return 0;
+    }
+
+    /// Start at the first character of the given cloze
+    int textPosition = start;
+    int termPosition = 0;
+
+    while (textPosition < text.length &&
+        termPosition < term.length &&
+        term[termPosition] == text[textPosition]) {
+      termPosition++;
+      textPosition++;
+    }
+
+    return termPosition;
   }
 
   /// Search the Massif API for example sentences and return a list of results.
@@ -209,11 +236,27 @@ class MassifExampleSentencesEnhancement extends Enhancement {
         }
 
         MassifResult result = MassifResult(
-          text: text,
-          range: range,
-          source: source,
-          spans: spans,
-        );
+            text: text,
+            range: range,
+            source: source,
+            spans: spans,
+            longestExactMatch: _longestExactRangeForResult(
+              start: start,
+              term: searchTerm,
+              text: text,
+            ));
+
+        /// Sort by: longest exact match -> shortest sentence
+        results.sort((a, b) {
+          /// Sort by longest subterm
+          int longestMatch = b.longestExactMatch.compareTo(a.longestExactMatch);
+
+          if (longestMatch != 0) {
+            return longestMatch;
+          }
+
+          return a.text.length.compareTo(b.text.length);
+        });
 
         results.add(result);
       }

@@ -1,31 +1,31 @@
 <p align="center">
-  <img src="https://github.com/lrorpilla/jidoujisho/blob/main/yuuna/assets/meta/icon.png" width="250" height="250">
+  <img src="https://github.com/arianneorpilla/jidoujisho/blob/main/yuuna/assets/meta/icon.png" width="250" height="250">
 </p>
 <h3 align="center">jidoujisho</h3>
 <p align="center">A full-featured immersion language learning suite for mobile.</p>
 <p align="center">
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.8.9">
-    <img src="https://img.shields.io/github/v/release/lrorpilla/jidoujisho" alt="latest release" />
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/2.8.9">
+    <img src="https://img.shields.io/github/v/release/arianneorpilla/jidoujisho" alt="latest release" />
   </a>
-  <a href="https://github.com/lrorpilla/jidoujisho/commits/main">
-    <img src="https://img.shields.io/github/last-commit/lrorpilla/jidoujisho" alt="latest commit" />
+  <a href="https://github.com/arianneorpilla/jidoujisho/commits/main">
+    <img src="https://img.shields.io/github/last-commit/arianneorpilla/jidoujisho" alt="latest commit" />
   </a>
-  <a href="https://github.com/lrorpilla/jidoujisho/actions">
-    <img src="https://img.shields.io/github/actions/workflow/status/lrorpilla/jidoujisho/main.yml" alt="actions" />
+  <a href="https://github.com/arianneorpilla/jidoujisho/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/arianneorpilla/jidoujisho/main.yml" alt="actions" />
   </a>
-  <a href="https://github.com/lrorpilla/jidoujisho/stargazers">
-    <img src="https://img.shields.io/github/stars/lrorpilla/jidoujisho" alt="stars" />
+  <a href="https://github.com/arianneorpilla/jidoujisho/stargazers">
+    <img src="https://img.shields.io/github/stars/arianneorpilla/jidoujisho" alt="stars" />
   </a>
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/">
-    <img src="https://img.shields.io/github/downloads/lrorpilla/jidoujisho/total" alt="downloads" />
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/">
+    <img src="https://img.shields.io/github/downloads/arianneorpilla/jidoujisho/total" alt="downloads" />
   </a>
-  <a href="https://github.com/lrorpilla/jidoujisho/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/lrorpilla/jidoujisho" alt="license" />
+  <a href="https://github.com/arianneorpilla/jidoujisho/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/arianneorpilla/jidoujisho" alt="license" />
   </a>
   <a href="https://crowdin.com/project/jidoujisho">
     <img src="https://img.shields.io/badge/translate-crowdin-9C86B8" alt="translate" />
   </a>
-  <a href="https://ko-fi.com/lrorpilla">
+  <a href="https://ko-fi.com/arianneorpilla">
     <img src="https://img.shields.io/badge/donate-ko--fi-ff5f5f" alt="donate" />
   </a>
 </p>
@@ -34,67 +34,67 @@
 ---
 
 <p align="center" style="margin:0"><b>‍🧪 Preview Release:
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.9.0-preview2">2.9.0-preview2</a>
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/2.9.0-preview2">2.9.0-preview2</a>
 </b></p>
 
 <p align="center" style="margin:0"><b>✨ Latest Release:
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.8.9">2.8.9</a>
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/2.8.9">2.8.9</a>
 </b></p>
 
 <b>
 <p align="center" style="margin:0"><b>📚 Resources:</b><br>
-  🏠 <a href="https://github.com/lrorpilla/jidoujisho/wiki">Wiki</a> · 
-  ❓ <a href="https://github.com/lrorpilla/jidoujisho/wiki/1.-FAQ">FAQ</a> · 
-  🩺 <a href="https://github.com/lrorpilla/jidoujisho/wiki/2.-Troubleshooting">Troubleshooting</a> · 
-  🚀 <a href="https://github.com/lrorpilla/jidoujisho/wiki/3.-Getting-Started">Getting Started</a> ·
-  🃏 <a href="https://github.com/lrorpilla/jidoujisho/wiki/4.-Flashcard-Creation">Flashcard Creation</a> ·
-  🗃️ <a href="https://github.com/lrorpilla/jidoujisho/wiki/5.-Workflow-Setup">Workflow Setup</a> · 
-  🎥 <a href="https://github.com/lrorpilla/jidoujisho/wiki/6.-Viewing-Media">Viewing Media</a> · 
-  💡 <a href="https://github.com/lrorpilla/jidoujisho/wiki/7.-Tips-and-Tricks">Tips and Tricks</a> · 
-  🧑‍💻 <a href="https://github.com/lrorpilla/jidoujisho/wiki/8.-Development">Development</a> · 
-  👥 <a href="https://github.com/lrorpilla/jidoujisho/wiki/9.-Contribution">Contribution</a> · 
-  📑 <a href="https://lrorpilla.github.io/jidoujisho">API Documentation</a>
+  🏠 <a href="https://github.com/arianneorpilla/jidoujisho/wiki">Wiki</a> · 
+  ❓ <a href="https://github.com/arianneorpilla/jidoujisho/wiki/1.-FAQ">FAQ</a> · 
+  🩺 <a href="https://github.com/arianneorpilla/jidoujisho/wiki/2.-Troubleshooting">Troubleshooting</a> · 
+  🚀 <a href="https://github.com/arianneorpilla/jidoujisho/wiki/3.-Getting-Started">Getting Started</a> ·
+  🃏 <a href="https://github.com/arianneorpilla/jidoujisho/wiki/4.-Flashcard-Creation">Flashcard Creation</a> ·
+  🗃️ <a href="https://github.com/arianneorpilla/jidoujisho/wiki/5.-Workflow-Setup">Workflow Setup</a> · 
+  🎥 <a href="https://github.com/arianneorpilla/jidoujisho/wiki/6.-Viewing-Media">Viewing Media</a> · 
+  💡 <a href="https://github.com/arianneorpilla/jidoujisho/wiki/7.-Tips-and-Tricks">Tips and Tricks</a> · 
+  🧑‍💻 <a href="https://github.com/arianneorpilla/jidoujisho/wiki/8.-Development">Development</a> · 
+  👥 <a href="https://github.com/arianneorpilla/jidoujisho/wiki/9.-Contribution">Contribution</a> · 
+  📑 <a href="https://arianneorpilla.github.io/jidoujisho">API Documentation</a>
 </p>
 </b>
 
 <p align="center" style="margin:0"><b>🗒️ Release Notes:</b><br>
-<i>(Legacy)</i> <b><a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.3.0-beta">0.3</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.4-beta">0.4</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.5.2-beta">0.5</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.6.1-beta">0.6</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.7.2-beta">0.7</a> ·
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.8.1-beta">0.8</a> ·
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.9.3-beta">0.9</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.10.0-beta">0.10</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.11.3-beta">0.11</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.12.4-beta">0.12</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.13.7-beta">0.13</a> ·
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.14.2-beta">0.14</a> ·
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.15.8-beta">0.15</a> ·
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.16.7-beta">0.16</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.17.4-beta">0.17</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.18.1-beta">0.18</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.19.1-beta">0.19</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.20.1-beta">0.20</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.21.2-beta">0.21</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.22.1-beta">0.22</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.23.2-beta">0.23</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.24.5-beta">0.24</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.25.12-beta">0.25</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/0.26.3-beta">0.26</a><br>
+<i>(Legacy)</i> <b><a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.3.0-beta">0.3</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.4-beta">0.4</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.5.2-beta">0.5</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.6.1-beta">0.6</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.7.2-beta">0.7</a> ·
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.8.1-beta">0.8</a> ·
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.9.3-beta">0.9</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.10.0-beta">0.10</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.11.3-beta">0.11</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.12.4-beta">0.12</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.13.7-beta">0.13</a> ·
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.14.2-beta">0.14</a> ·
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.15.8-beta">0.15</a> ·
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.16.7-beta">0.16</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.17.4-beta">0.17</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.18.1-beta">0.18</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.19.1-beta">0.19</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.20.1-beta">0.20</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.21.2-beta">0.21</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.22.1-beta">0.22</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.23.2-beta">0.23</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.24.5-beta">0.24</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.25.12-beta">0.25</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/0.26.3-beta">0.26</a><br>
 </b><i>(Chisa)</i> <b>
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/1.0.0">1.0</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/1.1">1.1</a><br>
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/1.0.0">1.0</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/1.1">1.1</a><br>
 </b><i>(Yuuna)</i> <b>
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.0.0">2.0</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.1">2.1</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.2">2.2</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.3">2.3</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.4">2.4</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.5">2.5</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.6.0">2.6</a> · 
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.7.0">2.7</a> ·
-  <a href="https://github.com/lrorpilla/jidoujisho/releases/tag/2.8.0">2.8</a></b>
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/2.0.0">2.0</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/2.1">2.1</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/2.2">2.2</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/2.3">2.3</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/2.4">2.4</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/2.5">2.5</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/2.6.0">2.6</a> · 
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/2.7.0">2.7</a> ·
+  <a href="https://github.com/arianneorpilla/jidoujisho/releases/tag/2.8.0">2.8</a></b>
 </p>
 
 
@@ -140,7 +140,7 @@
 
 **jidoujisho is eagerly looking for contributors.** If you are interested in maintaining a dictionary format, media source, an enhancement or quick action or even a new language for the application, user and developer documentation is coming soon.
 
-Originally built for the Japanese language learning community, jidoujisho is free and open source software, and is <b><a href="https://github.com/lrorpilla/jidoujisho/releases">available to download here on GitHub.</a></b>
+Originally built for the Japanese language learning community, jidoujisho is free and open source software, and is <b><a href="https://github.com/arianneorpilla/jidoujisho/releases">available to download here on GitHub.</a></b>
 
 Please note that the development of the app switches between changes being implemented and being left alone for daily use. Update frequency may depend on the gravity of any issues that arise. **Hiatuses provide practical insight on usage and where development should go next.**
 
@@ -162,7 +162,7 @@ Please note that the development of the app switches between changes being imple
 
 A primer on the basics of the application is as follows.
 
-* 📲 <a href="https://github.com/lrorpilla/jidoujisho/releases/"/>**Download and install the latest release**</a> onto your Android device
+* 📲 <a href="https://github.com/arianneorpilla/jidoujisho/releases/"/>**Download and install the latest release**</a> onto your Android device
 * ⏯️ Watch a video with the *Player* selecting from your **local media library** or **picking a YouTube video**
 * 📚 Start a novel with the *Reader* to launch ッツ Ebook Reader to read an **EPUB** or **HTMLZ** file
 * 🖼️ Read pre-processed manga in HTML with the **Mokuro** media source
@@ -206,10 +206,10 @@ A primer on the basics of the application is as follows.
 <table>
 <tr>
     <td align="center">
-        <a href="https://github.com/lrorpilla">
-            <img src="https://avatars.githubusercontent.com/u/11363922?v=4" width="100;" alt="lrorpilla"/>
+        <a href="https://github.com/arianneorpilla">
+            <img src="https://avatars.githubusercontent.com/u/11363922?v=4" width="100;" alt="arianneorpilla"/>
             <br />
-            <sub><b>lrorpilla</b></sub>
+            <sub><b>arianneorpilla</b></sub>
         </a>
     </td>
     <td align="center">
@@ -258,6 +258,6 @@ Image search via <b><a href="https://bing.com//">Bing</a></b>. Audio search via 
 
 Natural language processing tools include <b><a href="https://github.com/Kimtaro/ve">Ve</a></b> and <b><a href="https://pub.dev/packages/mecab_dart">MeCab</a></b> for Japanese. Special thanks to the <b><a href="https://foosoft.net/projects/yomichan/">Yomichan</b></a> project.
 
-If you like what I've done so far, you can help me out by testing the application on various devices so that I can gauge the compatibility of the application with different versions of Android, <b><a href="https://www.ko-fi.com/lrorpilla">making a donation</a></b> or collaborating with me on further improvements.
+If you like what I've done so far, you can help me out by testing the application on various devices so that I can gauge the compatibility of the application with different versions of Android, <b><a href="https://www.ko-fi.com/arianneorpilla">making a donation</a></b> or collaborating with me on further improvements.
 
 The logo of the application is both by <b><a href="https://88suzysuzy.carrd.co/">suzy</b></a> and <b><a href="https://www.buymeacoffee.com/marblesaa">Aaron Marbella</a></b>, support their awesome work if you can!

@@ -42,7 +42,7 @@ packages:
       path: "."
       ref: "1820d8cd19d8248fbfc48ff01a5bee939ea0b858"
       resolved-ref: "1820d8cd19d8248fbfc48ff01a5bee939ea0b858"
-      url: "https://github.com/lrorpilla/audio_service"
+      url: "https://github.com/arianneorpilla/audio_service"
     source: git
     version: "0.17.1"
   audio_session:
@@ -609,7 +609,7 @@ packages:
       path: "."
       ref: a822b1ac54ce1fbde33ca7d445c1bfd7dd51ae7c
       resolved-ref: a822b1ac54ce1fbde33ca7d445c1bfd7dd51ae7c
-      url: "https://github.com/lrorpilla/mecab_dart"
+      url: "https://github.com/arianneorpilla/mecab_dart"
     source: git
     version: "0.1.2"
   meta:
@@ -751,7 +751,7 @@ packages:
       path: "."
       ref: ae70414abe711b115657fd640527a2a148871847
       resolved-ref: ae70414abe711b115657fd640527a2a148871847
-      url: "https://github.com/lrorpilla/photo_view"
+      url: "https://github.com/arianneorpilla/photo_view"
     source: git
     version: "0.11.1"
   platform:
@@ -1031,7 +1031,7 @@ packages:
       path: "."
       ref: "80eb2c7872fc4d5a8c4df141cace39f782987ae8"
       resolved-ref: "80eb2c7872fc4d5a8c4df141cace39f782987ae8"
-      url: "https://github.com/lrorpilla/unofficial_jisho_api_dart"
+      url: "https://github.com/arianneorpilla/unofficial_jisho_api_dart"
     source: git
     version: "1.1.0"
   url_launcher:
@@ -1089,7 +1089,7 @@ packages:
       path: "."
       ref: "3ff2d0dcd5dc0fe7e4983f85f9c540d22af1715d"
       resolved-ref: "3ff2d0dcd5dc0fe7e4983f85f9c540d22af1715d"
-      url: "https://github.com/lrorpilla/ve_dart"
+      url: "https://github.com/arianneorpilla/ve_dart"
     source: git
     version: "0.2.1"
   vector_math:

@@ -103,7 +103,7 @@ packages:
       path: "."
       ref: fb26dd1fa81edeb048b14703f1c1f28e93ee43d0
       resolved-ref: fb26dd1fa81edeb048b14703f1c1f28e93ee43d0
-      url: "https://github.com/lrorpilla/blurry_container/"
+      url: "https://github.com/arianneorpilla/blurry_container/"
     source: git
     version: "0.0.2"
   boolean_selector:
@@ -520,7 +520,7 @@ packages:
       path: package
       ref: jidoujisho
       resolved-ref: aedba6189cd6e995c1ff0f8451d1d5e31c2ce7c1
-      url: "https://github.com/lrorpilla/filesystem_picker"
+      url: "https://github.com/arianneorpilla/filesystem_picker"
     source: git
     version: "2.0.0-nullsafety.0"
   fixnum:
@@ -670,7 +670,7 @@ packages:
       path: "."
       ref: ffd182431017ec919ece3f80bf5e22a9286189af
       resolved-ref: ffd182431017ec919ece3f80bf5e22a9286189af
-      url: "https://github.com/lrorpilla/flutter_inappwebview"
+      url: "https://github.com/arianneorpilla/flutter_inappwebview"
     source: git
     version: "6.0.0-beta.25"
   flutter_inappwebview_internal_annotations:
@@ -767,7 +767,7 @@ packages:
       path: flutter_vlc_player
       ref: "013632b4cc591c68ced04ccc0244c2770daca633"
       resolved-ref: "013632b4cc591c68ced04ccc0244c2770daca633"
-      url: "https://github.com/lrorpilla/flutter_vlc_player"
+      url: "https://github.com/arianneorpilla/flutter_vlc_player"
     source: git
     version: "7.2.0"
   flutter_vlc_player_platform_interface:
@@ -1133,7 +1133,7 @@ packages:
       path: "."
       ref: jidoujisho
       resolved-ref: "450750544f09582cf18728f31988e38d2e0716ce"
-      url: "https://github.com/lrorpilla/material_floating_search_bar"
+      url: "https://github.com/arianneorpilla/material_floating_search_bar"
     source: git
     version: "0.3.7"
   mecab_dart:
@@ -1182,7 +1182,7 @@ packages:
       path: "."
       ref: "290ee1097d67cafc50f3aba1ba5bba01e758d877"
       resolved-ref: "290ee1097d67cafc50f3aba1ba5bba01e758d877"
-      url: "https://github.com/lrorpilla/nowplaying"
+      url: "https://github.com/arianneorpilla/nowplaying"
     source: git
     version: "2.0.6"
   octo_image:
@@ -1439,7 +1439,7 @@ packages:
       path: "."
       ref: "3854d07f8f4e9d5a78589639b18b5d454ddf54a0"
       resolved-ref: "3854d07f8f4e9d5a78589639b18b5d454ddf54a0"
-      url: "https://github.com/lrorpilla/receive_intent"
+      url: "https://github.com/arianneorpilla/receive_intent"
     source: git
     version: "0.2.3"
   record_mp3:
@@ -1488,7 +1488,7 @@ packages:
       path: "."
       ref: cb723f87c9ac575aa735b40016c0ffb3242d921e
       resolved-ref: cb723f87c9ac575aa735b40016c0ffb3242d921e
-      url: "https://github.com/lrorpilla/RubyText"
+      url: "https://github.com/arianneorpilla/RubyText"
     source: git
     version: "3.0.1"
   rxdart:
@@ -1638,7 +1638,7 @@ packages:
       path: "."
       ref: master
       resolved-ref: b6a1387abaafd36e94e9290806a00a53ca89683f
-      url: "https://github.com/lrorpilla/spaces"
+      url: "https://github.com/arianneorpilla/spaces"
     source: git
     version: "0.5.0"
   sqflite:
@@ -1703,7 +1703,7 @@ packages:
       path: "."
       ref: "36562dcda59c67c170f6e0a10ad5f775eb3341e3"
       resolved-ref: "36562dcda59c67c170f6e0a10ad5f775eb3341e3"
-      url: "https://github.com/lrorpilla/subtitle"
+      url: "https://github.com/arianneorpilla/subtitle"
     source: git
     version: "0.1.0-beta.2"
   synchronized:
@@ -1872,7 +1872,7 @@ packages:
       path: "."
       ref: c366bb1ae24f6fad4f5c7e3a1efad5f2b8122e58
       resolved-ref: c366bb1ae24f6fad4f5c7e3a1efad5f2b8122e58
-      url: "https://github.com/lrorpilla/ve_dart"
+      url: "https://github.com/arianneorpilla/ve_dart"
     source: git
     version: "0.2.1"
   vector_graphics:
