@@ -2,12 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:async_zip/async_zip.dart';
-import 'package:beautiful_soup_dart/beautiful_soup.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:isar/isar.dart';
-import 'package:list_counter/list_counter.dart';
 import 'package:path/path.dart' as path;
 import 'package:recase/recase.dart';
 import 'package:yuuna/dictionary.dart';
@@ -56,32 +54,95 @@ class YomichanFormat extends DictionaryFormat {
 
   @override
   String getCustomDefinitionText(String meaning) {
-    final node =
-        StructuredContent.processContent(jsonDecode(meaning))?.toNode();
-    if (node == null) {
-      return '';
-    }
+    final mainBuffer = StringBuffer();
+    final currentLineBuffer = StringBuffer();
+    int indentationLevel = 0;
 
+    final node = StructuredContent.processContent(jsonDecode(meaning));
     final document = dom.Document.html('');
     document.body?.append(node);
-    for (final e in document.querySelectorAll('li')) {
-      final css = e.bs4.findParent('ul')?.attributes['style'] ?? '';
-      final text = e.text;
-      final name = css
-              .split(';')
-              .firstWhere((e) => e.contains('list-style-type'))
-              .split(':')
-              .lastOrNull ??
-          'square';
 
-      final counterStyle = CounterStyleRegistry.lookup(name);
-      final counter = counterStyle.generateMarkerContent(0);
-      e.text = '$counter $text';
+    /// Remove tables and attributions
+    document.querySelectorAll('div > a, rt').forEach((e) => e.remove());
+
+    String getIndentation() {
+      return '  ' * indentationLevel;
     }
-    document.querySelectorAll('table').map((e) => e.remove());
-    final html = document.body?.innerHtml ?? '';
 
-    return BeautifulSoup(html).getText(separator: '\n');
+    void flushBuffer() {
+      if (currentLineBuffer.isNotEmpty) {
+        mainBuffer.writeln('${getIndentation()}${currentLineBuffer.toString().trim()}');
+        currentLineBuffer.clear();
+      }
+    }
+
+    /// Attempt at making plaintext as close to structured HTML as possible
+    /// 1. Handle lists and list items with proper indentation and bullets
+    /// 2. Process ruby tags without breaking lines to keep Japanese text
+    ///    together
+    /// 3. Accumulate text nodes in the current line buffer
+    /// 4. Recursively process child nodes
+    /// 5. Flush the buffer at the end of block-level elements, except within
+    ///    ruby tags
+    /// -  Note: It flushes prematurely upon encountering highlighted span tags
+    ///    within ruby tags, but it shouldn't be too big of a problem since
+    ///    highlighted span tags are rare.
+    void processNode(dom.Node node, {bool inRuby = false}) {
+      if (node is dom.Element) {
+        if (node.localName == 'ul' || node.localName == 'ol') {
+          /// Start a new line for lists to maintain structure
+          flushBuffer();
+          indentationLevel++;
+          for (var child in node.children) {
+            processNode(child);
+          }
+          indentationLevel--;
+        } else if (node.localName == 'li') {
+          /// Format list items with proper indentation and bullets
+          flushBuffer();
+          currentLineBuffer.write(getIndentation());
+          currentLineBuffer.write(indentationLevel > 1 ? '- ' : '• ');
+          for (var child in node.nodes) {
+            processNode(child);
+          }
+          flushBuffer();
+        } else if (node.localName == 'ruby') {
+          /// Process ruby tags without breaking the line to keep Japanese text together
+          for (var child in node.nodes) {
+            processNode(child, inRuby: true);
+          }
+        } else {
+          /// Recursively process other elements
+          for (var child in node.nodes) {
+            processNode(child, inRuby: inRuby);
+          }
+        }
+      } else if (node is dom.Text) {
+        /// Add non-empty text to the current line
+        String text = node.text.trim();
+        if (text.isNotEmpty) {
+          currentLineBuffer.write(text);
+        }
+      }
+
+      /// End the current line after block-level elements, but not within ruby tags
+      /// This keeps inline elements together while separating block-level content
+      if (!inRuby && node.parent != null &&
+          node == node.parent!.nodes.last &&
+          node.parent!.localName != 'ul' &&
+          node.parent!.localName != 'li' &&
+          node.parent!.localName != 'ruby') {
+        flushBuffer();
+      }
+    }
+
+    /// Process the entire body to generate the full definition text
+    for (var child in document.body!.nodes) {
+      processNode(child);
+    }
+
+    /// Trim any extra whitespace from the final output
+    return mainBuffer.toString().trim();
   }
 
   /// Recursively get HTML for a structured content definition.
@@ -269,10 +330,12 @@ void prepareEntriesYomichanFormat({
         isar.dictionaryHeadings.putSync(heading);
 
         n++;
-        params.send(t.import_write_entry(
-          count: n,
-          total: total,
-        ));
+        if (n % 1000 == 0) {
+          params.send(t.import_write_entry(
+            count: n,
+            total: total,
+          ));
+        }
       }
     } else if (filename.startsWith('kanji_bank')) {
       List<dynamic> items = jsonDecode(file.readAsStringSync());
@@ -341,10 +404,12 @@ void prepareEntriesYomichanFormat({
           isar.dictionaryHeadings.putSync(heading);
 
           n++;
-          params.send(t.import_write_entry(
-            count: n,
-            total: total,
-          ));
+          if (n % 1000 == 0) {
+            params.send(t.import_write_entry(
+              count: n,
+              total: total,
+            ));
+          }
         }
       }
     }
