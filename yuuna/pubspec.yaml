@@ -1,7 +1,7 @@
 name: yuuna
 description: A full-featured immersion language learning suite for mobile.
 publish_to: 'none'
-version: 2.9.0+105
+version: 2.9.0+115
 environment:
   sdk: ">=3.0.0<4.0.0"
   flutter: "^3.13.5"
@@ -22,7 +22,7 @@ dependencies:
   change_notifier_builder: ^1.1.2
   chat_gpt_sdk: ^2.1.5
   clipboard: ^0.1.3
-  collection: ^1.17.0
+  collection:
   copy_with_extension: ^5.0.2
   crop_image: ^1.0.4
   dart_mappable: ^4.0.0-dev.1
@@ -107,7 +107,6 @@ dependencies:
     git:
       url: https://github.com/arianneorpilla/receive_intent
       ref: 3854d07f8f4e9d5a78589639b18b5d454ddf54a0
-  record_mp3: ^3.0.0
   remove_emoji: ^0.0.7
   reorderables: ^0.6.0
   restart_app: ^1.1.2
@@ -143,7 +142,7 @@ dependencies:
       ref: 40464c75e908f57f458597ef4912f5273ab89b1a
       path: wakelock
   web_socket_channel: ^2.3.0
-  youtube_explode_dart: ^2.0.1
+  youtube_explode_dart: ^2.2.3
   
 dependency_overrides:
   ffi: ^2.0.0
@@ -155,6 +154,8 @@ dependency_overrides:
       url: https://github.com/diegotori/wakelock
       ref: 40464c75e908f57f458597ef4912f5273ab89b1a
       path: wakelock_windows
+  record_mp3_plus: ^1.2.0
+  collection: ^1.17.2
 
 dev_dependencies:
   build_runner: ^2.3.3

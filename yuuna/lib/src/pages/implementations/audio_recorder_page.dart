@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:multi_value_listenable_builder/multi_value_listenable_builder.dart';
-import 'package:record_mp3/record_mp3.dart';
+import 'package:record_mp3_plus/record_mp3_plus.dart';
 import 'package:spaces/spaces.dart';
 import 'package:yuuna/i18n/strings.g.dart';
 import 'package:yuuna/pages.dart';
