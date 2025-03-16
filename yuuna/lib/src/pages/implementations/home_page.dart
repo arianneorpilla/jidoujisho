@@ -22,7 +22,6 @@ class HomePage extends BasePage {
 class _HomePageState extends BasePageState<HomePage>
     with WidgetsBindingObserver {
   late final List<Widget> mediaTypeBodies;
-  late final List<BottomNavigationBarItem> navBarItems;
 
   String get appName => appModel.packageInfo.appName;
   String get appVersion => appModel.packageInfo.version;
@@ -41,15 +40,6 @@ class _HomePageState extends BasePageState<HomePage>
     /// cannot be used here, [ref.read] is used instead, via [appModelNoUpdate].
     mediaTypeBodies = List.unmodifiable(
         appModelNoUpdate.mediaTypes.values.map((mediaType) => mediaType.home));
-    navBarItems = List.unmodifiable(
-      appModelNoUpdate.mediaTypes.values.map(
-        (mediaType) => BottomNavigationBarItem(
-          activeIcon: Icon(mediaType.icon),
-          icon: Icon(mediaType.outlinedIcon),
-          label: t[mediaType.uniqueKey],
-        ),
-      ),
-    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       appModel.populateDefaultMapping(appModel.targetLanguage);
@@ -125,6 +115,16 @@ class _HomePageState extends BasePageState<HomePage>
   }
 
   Widget? buildBottomNavigationBar() {
+    List<BottomNavigationBarItem> navBarItems = List.unmodifiable(
+      appModelNoUpdate.mediaTypes.values.map(
+          (mediaType) => BottomNavigationBarItem(
+            activeIcon: Icon(mediaType.icon),
+            icon: Icon(mediaType.outlinedIcon),
+            label: t[mediaType.uniqueKey],
+          ),
+        ),
+      );
+
     return BottomNavigationBar(
       onTap: switchTab,
       currentIndex: currentHomeTabIndex,
