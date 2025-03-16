@@ -5,5 +5,6 @@ class JidoujishoLocalisations {
   /// native would understand them.
   static Map<String, String> localeNames = {
     'en-US': 'English',
+    'es-MX': 'Español'
   };
 }

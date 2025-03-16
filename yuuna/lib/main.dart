@@ -387,8 +387,8 @@ class _JidoujishoAppState extends ConsumerState<JidoujishoApp>
   ThemeMode get themeMode =>
       appModel.isDarkMode ? ThemeMode.dark : ThemeMode.light;
 
-  /// The current locale, dependent on the active target language.
-  Locale get locale => appModel.targetLanguage.locale;
+  /// The current locale, dependent on the configured app locale.
+  Locale get locale => appModel.appLocale;
 }
 
 /// Used to override certain strings.
@@ -404,12 +404,12 @@ class JidoujishoLocalizationsDelegate
   const JidoujishoLocalizationsDelegate();
   @override
   bool isSupported(Locale locale) {
-    return locale == const Locale('en', 'US');
+    return ['en', 'es'].contains(locale.languageCode);
   }
 
   @override
   Future<JidoujishoLocalizations> load(Locale locale) {
-    assert(locale == const Locale('en', 'US'), 'Locale must be supported.');
+    assert(['en', 'es'].contains(locale.languageCode), 'Locale must be supported.');
     return SynchronousFuture<JidoujishoLocalizations>(
         JidoujishoLocalizations());
   }
