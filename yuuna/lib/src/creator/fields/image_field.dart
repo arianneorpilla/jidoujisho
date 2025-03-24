@@ -16,9 +16,8 @@ class ImageField extends ImageExportField {
   ImageField._privateConstructor()
       : super(
           uniqueKey: key,
-          label: 'Image',
-          description: 'Visual supplement. Text field can be used to enter'
-              ' search terms for image sources.',
+          label: t.image_field,
+          description: t.image_field_description,
           icon: Icons.image,
         );
 

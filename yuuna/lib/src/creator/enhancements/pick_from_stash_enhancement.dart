@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// An enhancement used to view and manage the Stash.
 class OpenStashEnhancement extends Enhancement {
@@ -9,8 +10,8 @@ class OpenStashEnhancement extends Enhancement {
   OpenStashEnhancement({required super.field})
       : super(
           uniqueKey: key,
-          label: 'Open Stash',
-          description: 'View and manage previously stashed text.',
+          label: t.open_stash_enhancement,
+          description: t.open_stash_enhancement_description,
           icon: Icons.collections_bookmark,
         );
 

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// An enhancement that is useful for copying the headword term.
 class CopyToClipboardAction extends QuickAction {
@@ -10,9 +11,8 @@ class CopyToClipboardAction extends QuickAction {
   CopyToClipboardAction()
       : super(
           uniqueKey: key,
-          label: 'Copy To Clipboard',
-          description:
-              'Copy the headword of a dictionary entry to the clipboard.',
+          label: t.copy_to_clipboard,
+          description: t.copy_to_clipboard_description,
           icon: Icons.copy,
         );
 

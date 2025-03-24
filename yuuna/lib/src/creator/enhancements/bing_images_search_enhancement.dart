@@ -12,6 +12,7 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:html/dom.dart' as dom;
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// An enhancement used effectively as a shortcut for clearing the contents
 /// of a [CreatorModel] pertaining to a certain field.
@@ -20,9 +21,8 @@ class BingImagesSearchEnhancement extends ImageEnhancement {
   BingImagesSearchEnhancement()
       : super(
           uniqueKey: key,
-          label: 'Bing Images Search',
-          description:
-              'Search Bing for images with the current image query or the word.',
+          label: t.bing_images_search_enhancement,
+          description: t.bing_images_search_enhancement_description,
           icon: Icons.image_search,
           field: ImageField.instance,
         );

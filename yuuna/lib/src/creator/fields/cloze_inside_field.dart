@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// Highlighted text in a sentence.
 class ClozeInsideField extends Field {
@@ -10,8 +11,8 @@ class ClozeInsideField extends Field {
   ClozeInsideField._privateConstructor()
       : super(
           uniqueKey: key,
-          label: 'Cloze Inside',
-          description: 'Highlighted text in a sentence.',
+          label: t.cloze_inside_field,
+          description: t.cloze_inside_field_description,
           icon: Icons.dehaze,
         );
 

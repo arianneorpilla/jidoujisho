@@ -74,9 +74,8 @@ class ImmersionKitEnhancement extends Enhancement {
   ImmersionKitEnhancement()
       : super(
           uniqueKey: key,
-          label: 'ImmersionKit',
-          description:
-              'Get example sentences complete with an image and audio.',
+          label: t.immersion_kit_enhancement,
+          description: t.immersion_kit_enhancement_description,
           icon: Icons.movie,
           field: TermField.instance,
         );

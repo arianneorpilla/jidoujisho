@@ -8,6 +8,7 @@ import 'package:network_to_file_image/network_to_file_image.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// An enhancement that can be used to take a picture to set a new image.
 class CameraEnhancement extends ImageEnhancement {
@@ -15,8 +16,8 @@ class CameraEnhancement extends ImageEnhancement {
   CameraEnhancement()
       : super(
           uniqueKey: key,
-          label: 'Camera',
-          description: 'Take a new photo to use as the new image.',
+          label: t.camera,
+          description: t.camera_enhancement_description,
           icon: Icons.camera_alt,
           field: ImageField.instance,
         );

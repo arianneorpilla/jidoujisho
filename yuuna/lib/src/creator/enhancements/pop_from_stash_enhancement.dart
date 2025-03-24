@@ -11,8 +11,8 @@ class PopFromStashEnhancement extends Enhancement {
   PopFromStashEnhancement({required super.field})
       : super(
           uniqueKey: key,
-          label: 'Pop From Stash',
-          description: 'Quickly pop the latest item in the Stash.',
+          label: t.pop_from_stash_enhancement,
+          description: t.pop_from_stash_enhancement_description,
           icon: Icons.bookmark_remove,
         );
 

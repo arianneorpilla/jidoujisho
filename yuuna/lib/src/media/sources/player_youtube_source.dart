@@ -62,8 +62,8 @@ class PlayerYoutubeSource extends PlayerMediaSource {
   PlayerYoutubeSource._privateConstructor()
       : super(
           uniqueKey: 'player_youtube',
-          sourceName: 'YouTube',
-          description: 'Search and watch videos from YouTube.',
+          sourceName: t.player_youtube,
+          description: t.player_youtube_description,
           icon: Icons.smart_display,
           implementsSearch: true,
           implementsHistory: true,

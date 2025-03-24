@@ -47,8 +47,8 @@ class MassifExampleSentencesEnhancement extends Enhancement {
   MassifExampleSentencesEnhancement()
       : super(
           uniqueKey: key,
-          label: 'Massif Example Sentences',
-          description: 'Get curated example sentences via Massif.',
+          label: t.massif_example_sentences_enhancement,
+          description: t.massif_example_sentences_enhancement_description,
           icon: Icons.article,
           field: TermField.instance,
         );

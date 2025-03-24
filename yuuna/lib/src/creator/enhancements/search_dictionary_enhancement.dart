@@ -12,8 +12,8 @@ class SearchDictionaryEnhancement extends Enhancement {
   SearchDictionaryEnhancement()
       : super(
           uniqueKey: key,
-          label: 'Search Dictionary',
-          description: 'Search the dictionary with the content of a field.',
+          label: t.search_dictionary_enhancement,
+          description: t.search_dictionary_enhancement_description,
           icon: Icons.search,
           field: TermField.instance,
         );

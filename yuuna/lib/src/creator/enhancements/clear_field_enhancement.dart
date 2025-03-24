@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// An enhancement used effectively as a shortcut for clearing the contents
 /// of a [CreatorModel] pertaining to a certain field.
@@ -10,8 +11,8 @@ class ClearFieldEnhancement extends Enhancement {
   ClearFieldEnhancement({required super.field})
       : super(
           uniqueKey: key,
-          label: 'Clear Field',
-          description: 'Quickly empty the content of a field.',
+          label: t.clear_field_enhancement,
+          description: t.clear_field_enhancement_description,
           icon: Icons.clear,
         );
 

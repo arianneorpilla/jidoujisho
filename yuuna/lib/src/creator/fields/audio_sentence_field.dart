@@ -16,10 +16,8 @@ class AudioSentenceField extends AudioExportField {
   AudioSentenceField._privateConstructor()
       : super(
           uniqueKey: key,
-          label: 'Sentence Audio',
-          description:
-              'Audio pertaining to the sentence. Text field can be used'
-              ' to enter search terms for audio sources.',
+          label: t.audio_sentence_field,
+          description: t.audio_sentence_field_description,
           icon: Icons.queue_music,
         );
 

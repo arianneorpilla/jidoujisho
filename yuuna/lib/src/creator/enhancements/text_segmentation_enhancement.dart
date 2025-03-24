@@ -11,8 +11,8 @@ class TextSegmentationEnhancement extends Enhancement {
   TextSegmentationEnhancement({required super.field})
       : super(
           uniqueKey: key,
-          label: 'Text Segmentation',
-          description: 'Search or select a new term from segmented text.',
+          label: t.text_segmentation,
+          description: t.text_segmentation_enhancement_description,
           icon: Icons.account_tree,
         );
 

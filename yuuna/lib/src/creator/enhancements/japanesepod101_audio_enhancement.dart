@@ -7,6 +7,7 @@ import 'package:kana_kit/kana_kit.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// An enhancement for fetching audio from JapanesePod101.
 class JapanesePod101AudioEnhancement extends AudioEnhancement {
@@ -14,9 +15,8 @@ class JapanesePod101AudioEnhancement extends AudioEnhancement {
   JapanesePod101AudioEnhancement()
       : super(
           uniqueKey: key,
-          label: 'JapanesePod101 Audio',
-          description:
-              'Search for matching word pronunciations from JapanesePod101.',
+          label: t.jpd101_audio_enhancement,
+          description: t.jpd101_audio_enhancement_description,
           icon: Icons.spatial_audio_off_outlined,
           field: AudioField.instance,
         );

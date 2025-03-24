@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// An enhancement that calls the native share API for sharing word details.
 class ShareAction extends QuickAction {
@@ -11,8 +12,8 @@ class ShareAction extends QuickAction {
   ShareAction()
       : super(
           uniqueKey: key,
-          label: 'Share',
-          description: 'Share the details of a dictionary term.',
+          label: t.share,
+          description: t.share_description,
           icon: Icons.share,
         );
 

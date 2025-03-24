@@ -24,9 +24,8 @@ class ReaderMokuroSource extends ReaderMediaSource {
   ReaderMokuroSource._privateConstructor()
       : super(
           uniqueKey: 'reader_mokuro',
-          sourceName: 'Mokuro',
-          description:
-              'Read manga volumes pre-processed as a single HTML file via Mokuro.',
+          sourceName: t.reader_mokuro,
+          description: t.reader_mokuro_description,
           icon: Icons.dashboard_outlined,
           implementsSearch: false,
           implementsHistory: true,

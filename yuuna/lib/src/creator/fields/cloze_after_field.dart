@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// Text after highlighted text in a sentence.
 class ClozeAfterField extends Field {
@@ -10,9 +11,8 @@ class ClozeAfterField extends Field {
   ClozeAfterField._privateConstructor()
       : super(
           uniqueKey: key,
-          label: 'Cloze After',
-          description: 'Text after highlighted text in a sentence. '
-              'Empty if nothing is highlighted.',
+          label: t.cloze_after_field,
+          description: t.cloze_after_field_description,
           icon: Icons.keyboard_double_arrow_right,
         );
 

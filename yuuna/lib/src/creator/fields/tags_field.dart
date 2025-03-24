@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// Organise notes in a deck with space-delimited labels.
 class TagsField extends Field {
@@ -10,8 +11,8 @@ class TagsField extends Field {
   TagsField._privateConstructor()
       : super(
           uniqueKey: key,
-          label: 'Tags',
-          description: 'Organise notes in a deck with space-delimited labels.',
+          label: t.tags_field,
+          description: t.tags_field_description,
           icon: Icons.sell,
         );
 

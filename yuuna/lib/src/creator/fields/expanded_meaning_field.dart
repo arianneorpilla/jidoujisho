@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// Used to return a formatted text from multiple dictionary entries from
 /// expanded dictionaries only.
@@ -11,9 +12,8 @@ class ExpandedMeaningField extends Field {
   ExpandedMeaningField._privateConstructor()
       : super(
             uniqueKey: key,
-            label: 'Expanded Meaning',
-            description: 'Dictionary definitions only from expanded'
-                ' dictionaries.',
+            label: t.expanded_meaning_field,
+            description: t.expanded_meaning_field_description,
             icon: Icons.open_in_full);
 
   /// Get the singleton instance of this field.

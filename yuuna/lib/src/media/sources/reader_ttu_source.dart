@@ -36,9 +36,8 @@ class ReaderTtuSource extends ReaderMediaSource {
   ReaderTtuSource._privateConstructor()
       : super(
           uniqueKey: 'reader_ttu',
-          sourceName: 'ッツ Ebook Reader',
-          description: 'Read EPUBs and mine sentences via an embedded web'
-              ' reader.',
+          sourceName: t.reader_ttu,
+          description: t.reader_ttu_description,
           icon: Icons.chrome_reader_mode_outlined,
           implementsSearch: false,
           implementsHistory: false,

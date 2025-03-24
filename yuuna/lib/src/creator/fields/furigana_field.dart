@@ -5,6 +5,7 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/language.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// Returns the formatted furigana HTML of a [DictionaryHeading].
 class FuriganaField extends Field {
@@ -12,8 +13,8 @@ class FuriganaField extends Field {
   FuriganaField._privateConstructor()
       : super(
           uniqueKey: key,
-          label: 'Furigana',
-          description: 'Pre-fills text to export for Furigana.',
+          label: t.furigana_field,
+          description: t.furigana_field_description,
           icon: Icons.data_array,
         );
 

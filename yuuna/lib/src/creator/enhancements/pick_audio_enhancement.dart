@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// An enhancement that can be used to select an audio file.
 class PickAudioEnhancement extends AudioEnhancement {
@@ -14,8 +15,8 @@ class PickAudioEnhancement extends AudioEnhancement {
   PickAudioEnhancement({required super.field})
       : super(
           uniqueKey: key,
-          label: 'Pick Audio',
-          description: 'Pick an audio file to use with an external picker.',
+          label: t.pick_audio_enhancement,
+          description: t.pick_audio_enhancement_description,
           icon: Icons.upload_file,
         );
 

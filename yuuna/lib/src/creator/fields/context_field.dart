@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// Returns information about the current context in human-readable format
 class ContextField extends Field {
@@ -10,8 +11,8 @@ class ContextField extends Field {
   ContextField._privateConstructor()
       : super(
           uniqueKey: key,
-          label: 'Context',
-          description: 'Name of current source media.',
+          label: t.context_field,
+          description: t.context_field_description,
           icon: Icons.perm_media,
         );
 

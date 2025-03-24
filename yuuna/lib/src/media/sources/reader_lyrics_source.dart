@@ -34,10 +34,8 @@ class ReaderLyricsSource extends ReaderMediaSource {
   ReaderLyricsSource._privateConstructor()
       : super(
           uniqueKey: 'reader_lyrics',
-          sourceName: 'Lyrics',
-          description:
-              'Allows fetching and highlighting lyrics of current played media '
-              'fetched from Google and Uta-Net.',
+          sourceName: t.reader_lyrics,
+          description: t.reader_lyrics_description,
           icon: Icons.queue_music,
           implementsSearch: false,
           implementsHistory: false,

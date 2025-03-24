@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// Returns the word or phrase particular to a selected headword.
 class TermField extends Field {
@@ -10,8 +11,8 @@ class TermField extends Field {
   TermField._privateConstructor()
       : super(
           uniqueKey: key,
-          label: 'Term',
-          description: 'Dictionary headword or phrase.',
+          label: t.term_field,
+          description: t.term_field_description,
           icon: Icons.speaker_notes_outlined,
         );
 

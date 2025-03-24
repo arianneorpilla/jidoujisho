@@ -14,8 +14,8 @@ class TatoebaExampleSentencesEnhancement extends Enhancement {
   TatoebaExampleSentencesEnhancement()
       : super(
           uniqueKey: key,
-          label: 'Tatoeba Example Sentences',
-          description: 'Pick example phrases and sentences from Tatoeba.',
+          label: t.tatoeba_example_sentences_enhancement,
+          description: t.tatoeba_example_sentences_enhancement_description,
           icon: Icons.article_outlined,
           field: TermField.instance,
         );

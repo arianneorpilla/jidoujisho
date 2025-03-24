@@ -16,10 +16,8 @@ class PlayAudioAction extends QuickAction {
   PlayAudioAction()
       : super(
           uniqueKey: key,
-          label: 'Play Audio',
-          description:
-              'Attempts to play audio based on the Audio enhancements. The auto'
-              ' is the top priority.',
+          label: t.play_audio,
+          description: t.play_audio_description,
           icon: Icons.play_circle,
         );
 

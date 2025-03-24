@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// An enhancement used as a shortcut for adding text items to the Stash.
 class AddToStashAction extends QuickAction {
@@ -10,9 +11,8 @@ class AddToStashAction extends QuickAction {
   AddToStashAction()
       : super(
           uniqueKey: key,
-          label: 'Add To Stash',
-          description:
-              'Quickly save the headword of a dictionary entry to the Stash.',
+          label: t.add_to_stash,
+          description: t.add_to_stash_description,
           icon: Icons.bookmark_add,
         );
 

@@ -4,6 +4,7 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/models.dart';
 import 'package:yuuna/dictionary.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// An enhancement used effectively as a shortcut for exporting a card.
 class InstantExportAction extends QuickAction {
@@ -11,9 +12,8 @@ class InstantExportAction extends QuickAction {
   InstantExportAction()
       : super(
           uniqueKey: key,
-          label: 'Instant Export',
-          description:
-              'Export a card with the selected dictionary entry parameters.',
+          label: t.instant_export,
+          description: t.instant_export_description,
           icon: Icons.send,
           showInSingleDictionary: true,
         );

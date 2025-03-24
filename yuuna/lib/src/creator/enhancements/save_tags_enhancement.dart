@@ -11,8 +11,8 @@ class SaveTagsEnhancement extends Enhancement {
   SaveTagsEnhancement()
       : super(
           uniqueKey: key,
-          label: 'Save Tags',
-          description: 'Persist the current text in the Tags field.',
+          label: t.save_tags_enhancement,
+          description: t.save_tags_enhancement_description,
           icon: Icons.save,
           field: TagsField.instance,
         );

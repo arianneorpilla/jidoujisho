@@ -22,8 +22,8 @@ class PlayerLocalMediaSource extends PlayerMediaSource {
   PlayerLocalMediaSource._privateConstructor()
       : super(
           uniqueKey: 'player_local_media',
-          sourceName: 'Local Media',
-          description: 'Play videos sourced from local device storage.',
+          sourceName: t.player_local_media,
+          description: t.player_local_media_description,
           icon: Icons.storage,
           implementsSearch: false,
           implementsHistory: true,

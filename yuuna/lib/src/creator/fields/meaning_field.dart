@@ -4,6 +4,7 @@ import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/models.dart';
 import 'package:collection/collection.dart';
+import 'package:yuuna/i18n/strings.g.dart';
 
 /// Used to return a formatted text from multiple dictionary entries.
 class MeaningField extends Field {
@@ -11,8 +12,8 @@ class MeaningField extends Field {
   MeaningField._privateConstructor()
       : super(
           uniqueKey: key,
-          label: 'Meaning',
-          description: 'All dictionary definitions of a term.',
+          label: t.meaning_field,
+          description: t.meaning_field_description,
           icon: Icons.translate_rounded,
         );
 

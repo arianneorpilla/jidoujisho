@@ -11,8 +11,8 @@ class SentencePickerEnhancement extends Enhancement {
   SentencePickerEnhancement({required super.field})
       : super(
           uniqueKey: key,
-          label: 'Sentence Picker',
-          description: 'Pick sentences delimited by punctuation and spacing.',
+          label: t.sentence_picker,
+          description: t.sentence_picker_enhancement_description,
           icon: Icons.colorize,
         );
 

@@ -14,9 +14,8 @@ class ReaderBrowserSource extends ReaderMediaSource with ChangeNotifier {
   ReaderBrowserSource._privateConstructor()
       : super(
           uniqueKey: 'reader_browser',
-          sourceName: 'Browser',
-          description:
-              'Navigate websites with a browser which allows searching and mining selected text.',
+          sourceName: t.reader_browser,
+          description: t.reader_browser_description,
           icon: Icons.language,
           implementsSearch: false,
           implementsHistory: false,
