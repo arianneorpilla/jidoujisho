@@ -1,1 +1,0 @@
-import{j as a}from"./singletons-6176161c.js";a.disable_scroll_handling;const r=a.goto;a.invalidate;a.invalidateAll;a.preload_data;a.preload_code;a.before_navigate;const n=a.after_navigate;function i(e){const o="ッツ Ebook Reader";return e?`${e} | ${o}`:o}export{n as a,i as f,r as g};
