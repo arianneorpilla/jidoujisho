@@ -188,18 +188,9 @@ flutter:
     - assets/ttu-ebook-reader/_app/immutable/
     - assets/ttu-ebook-reader/_app/immutable/assets/
     - assets/ttu-ebook-reader/_app/immutable/chunks/
-    - assets/ttu-ebook-reader/_app/immutable/components/
-    - assets/ttu-ebook-reader/_app/immutable/components/pages/
-    - assets/ttu-ebook-reader/_app/immutable/components/pages/auth/
-    - assets/ttu-ebook-reader/_app/immutable/components/pages/b/
-    - assets/ttu-ebook-reader/_app/immutable/components/pages/manage/
-    - assets/ttu-ebook-reader/_app/immutable/components/pages/settings/
-    - assets/ttu-ebook-reader/auth/
-    - assets/ttu-ebook-reader/b/
-    - assets/ttu-ebook-reader/fonts/
+    - assets/ttu-ebook-reader/_app/immutable/entry/
+    - assets/ttu-ebook-reader/_app/immutable/nodes/
     - assets/ttu-ebook-reader/icons/
-    - assets/ttu-ebook-reader/manage/
-    - assets/ttu-ebook-reader/settings/
 
   fonts:
     - family: NotoSansJP

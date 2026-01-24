@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="writing-horizontal-tb h-full w-full" lang="en">
+<html class="writing-horizontal-tb h-full w-full" lang="ja">
   <head>
     <meta charset="utf-8" />
     <meta
@@ -23,29 +23,37 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#37474f" />
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#37474f" />
-    <meta http-equiv="content-security-policy" content="">
-		<link rel="modulepreload" href="/_app/immutable/start-31285994.js">
-		<link rel="modulepreload" href="/_app/immutable/chunks/index-be8ea2fc.js">
-		<link rel="modulepreload" href="/_app/immutable/chunks/singletons-6176161c.js">
-		<script>
-			if ('serviceWorker' in navigator) {
-				addEventListener('load', function () {
-					navigator.serviceWorker.register('/service-worker.js');
-				});
-			}
-		</script>
+    
+		<link rel="modulepreload" href="/_app/immutable/entry/start.CHDq2nI-.js">
+		<link rel="modulepreload" href="/_app/immutable/chunks/FiwP8YIn.js">
+		<link rel="modulepreload" href="/_app/immutable/chunks/C6jw9GLa.js">
+		<link rel="modulepreload" href="/_app/immutable/entry/app.TqubV9-W.js">
+		<link rel="modulepreload" href="/_app/immutable/chunks/IHki7fMi.js">
   </head>
   <body class="h-full w-full break-words font-sans">
     <div class="h-full w-full">
-		<script type="module" data-sveltekit-hydrate="45h">
-			import { start } from "/_app/immutable/start-31285994.js";
+			<script>
+				{
+					__sveltekit_1t9r5wz = {
+						base: ""
+					};
 
-			start({
-				env: {},
-				paths: {"base":"","assets":""},
-				target: document.querySelector('[data-sveltekit-hydrate="45h"]').parentNode,
-				version: "1682741589948"
-			});
-		</script></div>
+					const element = document.currentScript.parentElement;
+
+					Promise.all([
+						import("/_app/immutable/entry/start.CHDq2nI-.js"),
+						import("/_app/immutable/entry/app.TqubV9-W.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element);
+					});
+
+					if ('serviceWorker' in navigator) {
+						addEventListener('load', function () {
+							navigator.serviceWorker.register('/service-worker.js');
+						});
+					}
+				}
+			</script>
+		</div>
   </body>
 </html>
