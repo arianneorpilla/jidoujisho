@@ -10,6 +10,7 @@ import 'package:isar/isar.dart';
 import 'package:list_counter/list_counter.dart';
 import 'package:path/path.dart' as path;
 import 'package:recase/recase.dart';
+import 'package:collection/collection.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/utils.dart';
 
@@ -69,8 +70,9 @@ class YomichanFormat extends DictionaryFormat {
       final text = e.text;
       final name = css
               .split(';')
-              .firstWhere((e) => e.contains('list-style-type'))
-              .split(':')
+              .where((e) => e.contains('list-style-type'))
+              .firstOrNull
+              ?.split(':')
               .lastOrNull ??
           'square';
 

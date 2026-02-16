@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:spaces/spaces.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/media.dart';
 import 'package:yuuna/pages.dart';
@@ -351,7 +351,7 @@ class _MokuroCatalogBrowsePageState
             controller: controller,
           );
           if (item != null) {
-            await Wakelock.enable();
+            await WakelockPlus.enable();
             await SystemChrome.setEnabledSystemUIMode(
                 SystemUiMode.immersiveSticky);
             appModel.setCurrentMediaItem(item);
