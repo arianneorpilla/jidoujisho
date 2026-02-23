@@ -35,7 +35,7 @@ class MeaningField extends Field {
     Map<String, List<DictionaryEntry>> entriesByDictionaryName =
         groupBy<DictionaryEntry, String>(
       entries,
-      (entry) => entry.dictionary.value!.name,
+      (entry) => entry.dictionary.value?.name ?? 'Unknown',
     );
 
     entriesByDictionaryName.forEach((dictionaryName, singleDictionaryEntries) {
@@ -49,6 +49,9 @@ class MeaningField extends Field {
       }
 
       for (DictionaryEntry entry in singleDictionaryEntries) {
+        if (entry.dictionary.value == null) {
+          continue;
+        }
         DictionaryFormat dictionaryFormat =
             appModel.getDictionaryFormat(entry.dictionary.value!);
 
@@ -105,16 +108,26 @@ class MeaningField extends Field {
         dictionaries.map((e) => MapEntry(e.name, e.order)));
 
     List<DictionaryEntry> entries = heading.entries
-        .where(
-            (entry) => !dictionaryNamesByHidden[entry.dictionary.value!.name]!)
+        .where((entry) {
+          final dict = entry.dictionary.value;
+          if (dict == null) {
+            return false;
+          }
+          return !(dictionaryNamesByHidden[dict.name] ?? true);
+        })
         .toList();
     if (dictionaryName != null) {
-      entries = [
-        ...entries.where((e) => dictionaryName == e.dictionary.value!.name)
-      ];
+      entries = entries.where((e) => dictionaryName == e.dictionary.value?.name).toList();
     }
-    entries.sort((a, b) => dictionaryNamesByOrder[a.dictionary.value!.name]!
-        .compareTo(dictionaryNamesByOrder[b.dictionary.value!.name]!));
+    entries.sort((a, b) {
+      final orderA = dictionaryNamesByOrder[a.dictionary.value?.name] ?? 0;
+      final orderB = dictionaryNamesByOrder[b.dictionary.value?.name] ?? 0;
+      return orderA.compareTo(orderB);
+    });
+
+    if (entries.isEmpty) {
+      return null;
+    }
 
     return flattenMeanings(
       appModel: appModel,

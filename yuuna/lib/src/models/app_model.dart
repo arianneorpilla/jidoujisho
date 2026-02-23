@@ -31,7 +31,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:remove_emoji/remove_emoji.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:subtitle/subtitle.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/dictionary.dart';
 import 'package:yuuna/language.dart';
@@ -2471,7 +2471,7 @@ class AppModel with ChangeNotifier {
     _overrideDictionaryColor = null;
     _overrideDictionaryTheme = null;
 
-    await Wakelock.enable();
+    await WakelockPlus.enable();
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
     if (item != null && mediaSource.implementsHistory) {
@@ -2513,7 +2513,7 @@ class AppModel with ChangeNotifier {
     _overrideDictionaryTheme = null;
     blockCreatorInitialMedia = false;
     isProcessingEmbeddedSubtitles = false;
-    await Wakelock.disable();
+    await WakelockPlus.disable();
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     await mediaSource.onSourceExit(
       appModel: this,
@@ -3183,7 +3183,8 @@ class AppModel with ChangeNotifier {
       directories.add(lastPickedDirectory);
     }
 
-    List<String> paths = await ExternalPath.getExternalStorageDirectories();
+    List<String> paths =
+        await ExternalPath.getExternalStorageDirectories() ?? [];
     for (String path in paths) {
       Directory directory = Directory(path);
       if (!directories.contains(directory)) {

@@ -12,7 +12,7 @@ import 'package:receive_intent/receive_intent.dart' as intents;
 import 'package:stack_trace/stack_trace.dart';
 import 'package:spaces/spaces.dart';
 import 'package:uri_to_file/uri_to_file.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:yuuna/creator.dart';
 import 'package:yuuna/media.dart';
@@ -54,7 +54,7 @@ void main() {
 
     /// Ensure the top and bottom bars are shown at launch and wake prevention
     /// is disabled if not reverted from entering a media source.
-    Wakelock.disable();
+    WakelockPlus.disable();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
