@@ -464,7 +464,7 @@ class AppModel with ChangeNotifier {
           color: Colors.white,
           shape: RoundedRectangleBorder(),
         ),
-        dialogTheme: const DialogThemeData(
+        dialogTheme: const DialogTheme(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(),
         ),
@@ -546,7 +546,7 @@ class AppModel with ChangeNotifier {
           color: Color.fromARGB(255, 30, 30, 30),
           shape: RoundedRectangleBorder(),
         ),
-        dialogTheme: const DialogThemeData(
+        dialogTheme: const DialogTheme(
           backgroundColor: Color.fromARGB(255, 30, 30, 30),
           shape: RoundedRectangleBorder(),
         ),
