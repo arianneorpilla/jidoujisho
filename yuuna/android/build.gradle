@@ -1,21 +1,4 @@
-buildscript {
-    ext.kotlin_version = '1.8.22'
-    repositories {
-        google()
-        mavenCentral()
-        maven { url "https://jitpack.io" }
-        maven { url 'https://maven.aliyun.com/repository/public' }
-        maven { url 'https://maven.aliyun.com/repository/central' }
-        maven { url 'https://maven.aliyun.com/repository/google' }
-        maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
-        maven { url 'https://maven.aliyun.com/repository/apache-snapshots' }
-    }
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.1.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
 
 allprojects {
     repositories {
@@ -27,6 +10,24 @@ allprojects {
         maven { url 'https://maven.aliyun.com/repository/google' }
         maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
         maven { url 'https://maven.aliyun.com/repository/apache-snapshots' }
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            // Force AndroidX versions compatible with AGP 8.2.1
+            force 'androidx.browser:browser:1.7.0'
+            force 'androidx.activity:activity:1.8.2'
+            force 'androidx.core:core-ktx:1.13.1'
+            force 'androidx.core:core:1.13.1'
+
+            // Force Kotlin stdlib/coroutines compatible with Kotlin 2.1.0 controller
+            force "org.jetbrains.kotlin:kotlin-stdlib:2.1.0"
+            force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.1.0"
+            force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0"
+            force "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0"
+            force "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.9.0"
+            force "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0"
+        }
     }
 }
 
@@ -43,5 +44,34 @@ tasks.register("clean", Delete) {
 }
 
 ext {
+    kotlin_version = '2.1.0'
     flutterFFmpegPackage = "full-gpl-lts"
+}
+
+subprojects {
+    def configureAndroid = {
+        if (project.plugins.hasPlugin("com.android.library")) {
+            project.android {
+                 compileSdkVersion 36
+                 ndkVersion "27.0.12077973"
+                 compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17
+                }
+            }
+        }
+        if (project.plugins.hasPlugin("kotlin-android")) {
+            project.android {
+                kotlinOptions {
+                    jvmTarget = "17"
+                }
+            }
+        }
+    }
+
+    if (project.state.executed) {
+        configureAndroid()
+    } else {
+        project.afterEvaluate(configureAndroid)
+    }
 }
