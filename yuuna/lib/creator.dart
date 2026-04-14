@@ -28,6 +28,7 @@ export 'src/creator/enhancements/pop_from_stash_enhancement.dart';
 export 'src/creator/enhancements/crop_image_enhancement.dart';
 export 'src/creator/enhancements/pick_image_enhancement.dart';
 export 'src/creator/enhancements/camera_enhancement.dart';
+export 'src/creator/enhancements/cambai_audio_enhancement.dart';
 export 'src/creator/enhancements/forvo_audio_enhancement.dart';
 export 'src/creator/enhancements/immersion_kit_enhancement.dart';
 export 'src/creator/enhancements/pick_audio_enhancement.dart';

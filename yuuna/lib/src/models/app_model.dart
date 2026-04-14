@@ -843,6 +843,7 @@ class AppModel with ChangeNotifier {
         ClearFieldEnhancement(field: AudioField.instance),
         JapanesePod101AudioEnhancement(),
         ForvoAudioEnhancement(),
+        CambAiAudioEnhancement(),
         PickAudioEnhancement(field: AudioField.instance),
         AudioRecorderEnhancement(field: AudioField.instance),
       ],

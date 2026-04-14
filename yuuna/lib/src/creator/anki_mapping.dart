@@ -106,8 +106,9 @@ class AnkiMapping {
         0: ClearFieldEnhancement.key,
         1: JapanesePod101AudioEnhancement.key,
         2: ForvoAudioEnhancement.key,
-        3: PickAudioEnhancement.key,
-        4: AudioRecorderEnhancement.key,
+        3: CambAiAudioEnhancement.key,
+        4: PickAudioEnhancement.key,
+        5: AudioRecorderEnhancement.key,
       },
       AudioSentenceField.key: {
         0: ClearFieldEnhancement.key,
@@ -156,8 +157,9 @@ class AnkiMapping {
         -1: ForvoAudioEnhancement.key,
         0: ClearFieldEnhancement.key,
         1: ForvoAudioEnhancement.key,
-        2: PickAudioEnhancement.key,
-        3: AudioRecorderEnhancement.key,
+        2: CambAiAudioEnhancement.key,
+        3: PickAudioEnhancement.key,
+        4: AudioRecorderEnhancement.key,
       },
       AudioSentenceField.key: {
         0: ClearFieldEnhancement.key,
